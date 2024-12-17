@@ -1,6 +1,7 @@
 #Python
 *.idea
 /env
+*/__pycache__/
 
 #PyCharm
 /.idea/*
