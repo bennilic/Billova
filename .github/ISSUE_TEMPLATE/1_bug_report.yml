@@ -1,5 +1,5 @@
 name: Bug Report
-about: File a bug report for the application.
+description: File a bug report for the application.
 title: "[Bug]: "
 labels: ["bug"]
 projects: ["Billova"]
