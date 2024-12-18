@@ -34,7 +34,7 @@ body:
     validations:
       required: true
   - type: additional_info
-    id: additional_info
+    id: additionalinfo
     attributes:
       label: info
       description: Add any extra details, context, or resources (e.g., links, references) needed to complete the task.
