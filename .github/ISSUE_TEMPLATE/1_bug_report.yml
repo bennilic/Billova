@@ -49,11 +49,3 @@ body:
       render: shell
     validations:
       required: false
-  - type: checkboxes
-    id: terms
-    attributes:
-      label: Agreement
-      description: By submitting this issue, you agree to follow our [Code of Conduct](https://example.com). 
-      options:
-        - label: I agree to follow this project's Code of Conduct
-          required: true
