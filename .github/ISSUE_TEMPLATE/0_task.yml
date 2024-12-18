@@ -33,8 +33,8 @@ body:
       placeholder: What are the outputs or outcomes?
     validations:
       required: true
-  - type: additional_info
-    id: additionalinfo
+  - type: textarea
+    id: additional_info
     attributes:
       label: info
       description: Add any extra details, context, or resources (e.g., links, references) needed to complete the task.
