@@ -1,0 +1,40 @@
+name: Task
+description: Create a new task for the project.
+title: "[TASK]: "
+labels: ["task"]
+projects: ["Billova"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to define a task for our project.
+  - type: textarea
+    id: description
+    attributes:
+      label: Task Description
+      description: Provide a clear and concise description of the task to be completed.
+      placeholder: What is the task?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Complete
+      description: List the steps required to complete the task.
+      placeholder: 1. Step 1\n2. Step 2\n3. Step 3
+    validations:
+      required: false
+  - type: textarea
+    id: deliverables
+    attributes:
+      label: Expected Deliverables
+      description: Describe what should be delivered or achieved by completing this task.
+      placeholder: What are the outputs or outcomes?
+    validations:
+      required: true
+  - type: additional_info
+    id: additional_info
+    attributes:
+      label: info
+      description: Add any extra details, context, or resources (e.g., links, references) needed to complete the task.
