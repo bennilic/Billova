@@ -1,4 +1,4 @@
-name: Task
+name: Task From
 description: Create a new task for the project.
 title: "[TASK]: "
 labels: ["task"]
