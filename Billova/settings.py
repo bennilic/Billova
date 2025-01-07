@@ -54,7 +54,7 @@ ROOT_URLCONF = 'Billova.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
+        'DIRS': [BASE_DIR / 'Billova/templates/Billova']
         ,
         'APP_DIRS': True,
         'OPTIONS': {
