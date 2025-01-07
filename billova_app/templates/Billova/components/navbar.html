@@ -1,9 +1,19 @@
+{% comment %}
+user
+    Account overview
+    Account settings
+
+Expenses
+    Categories
+
+Authentication (only if user is not logged in){% endcomment %}
+
 <aside class="aside" id="sidenav-lg">
     <nav class="navbar navbar-expand-xl navbar-vertical">
         <div class="container-lg">
             <!-- Brand -->
-            <a class="navbar-brand fs-5 fw-bold px-xl-3 mb-xl-4" href="./index.html">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="fs-4 text-secondary me-1 duo-icon duo-icon-box-2" data-duoicon="box-2"><path fill="currentColor" d="m20.765 7.982.022.19.007.194v7.268a2.5 2.5 0 0 1-1.099 2.07l-.15.095-6.295 3.634-.124.067-.126.06v-8.99l7.765-4.588Z" class="duoicon-secondary-layer" opacity=".3"></path><path fill="currentColor" d="m13.25 2.567 6.294 3.634c.05.03.1.06.148.092L12 10.838 4.308 6.293a2.81 2.81 0 0 1 .148-.092l6.294-3.634a2.498 2.498 0 0 1 2.5 0Z" class="duoicon-primary-layer"></path><path fill="currentColor" d="M3.235 7.982 11 12.571v8.988a2.339 2.339 0 0 1-.25-.126l-6.294-3.634a2.502 2.502 0 0 1-1.25-2.165V8.366c0-.13.01-.258.03-.384h-.001Z" class="duoicon-secondary-layer" opacity=".3"></path></svg> Dashbrd
+            <a class="navbar-brand fs-5 fw-bold px-xl-3 mb-xl-4" href="{% url 'home' %}">
+                <i class="bi bi-house me-1"></i> Home
             </a>
 
             <!-- User -->
@@ -43,168 +53,45 @@
 
                 <!-- Nav -->
                 <nav class="navbar-nav nav-pills mb-7">
+                    <!-- User nav item-->
                     <div class="nav-item">
-                        <a class="nav-link active" href="#" data-bs-toggle="collapse" data-bs-target="#dashboards" role="button" aria-expanded="false" aria-controls="dashboards">
-                            <span class="material-symbols-outlined me-3">space_dashboard</span> Dashboards
+                        <a class="nav-link active" href="#" data-bs-toggle="collapse" data-bs-target="#user" role="button" aria-expanded="false" aria-controls="user">
+                            <i class="bi bi-person me-1"></i> User
                         </a>
-                        <div class="collapse show" id="dashboards">
+                        <div class="collapse show" id="user">
                             <nav class="nav nav-pills">
-                                <a class="nav-link active" href="./index.html">Default</a>
-                                <a class="nav-link " href="./dashboards/crypto.html">Crypto</a>
-                                <a class="nav-link " href="./dashboards/saas.html">SaaS</a>
+                                <a class="nav-link active" href="#">Account Overview</a>
+                                <a class="nav-link " href="#">Account Settings</a>
                             </nav>
                         </div>
                     </div>
+
+                    <!-- Expenses nav item-->
                     <div class="nav-item">
-                        <a class="nav-link " href="#" data-bs-toggle="collapse" data-bs-target="#customers" role="button" aria-expanded="false" aria-controls="customers">
-                            <span class="material-symbols-outlined me-3">group</span> Customers
+                        <a class="nav-link " href="#" data-bs-toggle="collapse" data-bs-target="#expenses" role="button" aria-expanded="false" aria-controls="expenses">
+                            <i class="bi bi-cash me-1"></i> Expenses
                         </a>
-                        <div class="collapse " id="customers">
+                        <div class="collapse " id="expenses">
                             <nav class="nav nav-pills">
-                                <a class="nav-link " href="./customers/customers.html">Customers</a>
-                                <a class="nav-link " href="./customers/customer.html">Customer details</a>
-                                <a class="nav-link " href="./customers/customer-new.html">New customer</a>
+                                <a class="nav-link " href="#">Categories</a>
                             </nav>
                         </div>
                     </div>
+
+                    <!-- Authentication -->
                     <div class="nav-item">
-                        <a class="nav-link " href="#" data-bs-toggle="collapse" data-bs-target="#projects" role="button" aria-expanded="false" aria-controls="projects">
-                            <span class="material-symbols-outlined me-3">list_alt</span> Projects
-                        </a>
-                        <div class="collapse " id="projects">
-                            <nav class="nav nav-pills">
-                                <a class="nav-link " href="./projects/projects.html">Projects</a>
-                                <a class="nav-link " href="./projects/project.html">Project overview</a>
-                                <a class="nav-link " href="./projects/project-new.html">New project</a>
-                            </nav>
-                        </div>
-                    </div>
-                    <div class="nav-item">
-                        <a class="nav-link " href="#" data-bs-toggle="collapse" data-bs-target="#account" role="button" aria-expanded="false" aria-controls="account">
-                            <span class="material-symbols-outlined me-3">person</span> Account
-                        </a>
-                        <div class="collapse " id="account">
-                            <nav class="nav nav-pills">
-                                <a class="nav-link " href="./account/account.html">Account overview</a>
-                                <a class="nav-link " href="./account/account-settings.html">Account settings</a>
-                            </nav>
-                        </div>
-                    </div>
-                    <div class="nav-item">
-                        <a class="nav-link " href="#" data-bs-toggle="collapse" data-bs-target="#orders" role="button" aria-expanded="false" aria-controls="orders">
-                            <span class="material-symbols-outlined me-3">shopping_cart</span> Orders
-                        </a>
-                        <div class="collapse " id="orders">
-                            <nav class="nav nav-pills">
-                                <a class="nav-link " href="./orders/orders.html">Orders</a>
-                                <a class="nav-link " href="./orders/invoice.html">Invoice</a>
-                                <a class="nav-link " href="./orders/pricing.html">Pricing</a>
-                            </nav>
-                        </div>
-                    </div>
-                    <div class="nav-item">
-                        <a class="nav-link " href="#" data-bs-toggle="collapse" data-bs-target="#posts" role="button" aria-expanded="false" aria-controls="posts">
-                            <span class="material-symbols-outlined me-3">text_fields</span> Posts
-                        </a>
-                        <div class="collapse " id="posts">
-                            <nav class="nav nav-pills">
-                                <a class="nav-link " href="./posts/categories.html">Categories</a>
-                                <a class="nav-link " href="./posts/posts.html">Posts</a>
-                                <a class="nav-link " href="./posts/post-new.html">New post</a>
-                            </nav>
-                        </div>
-                    </div>
-                    <div class="nav-item">
-                        <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#authentication" role="button" aria-expanded="false" aria-controls="authentication">
-                            <span class="material-symbols-outlined me-3">login</span> Authentication
+                        <a class="nav-link " href="#" data-bs-toggle="collapse" data-bs-target="#authentication" role="button" aria-expanded="false" aria-controls="authentication">
+                            <i class="bi bi-check-circle me-1"></i> Authentication
                         </a>
                         <div class="collapse" id="authentication">
                             <nav class="nav nav-pills">
-                                <a class="nav-link" href="./auth/sign-in.html">Sign in</a>
-                                <a class="nav-link" href="./auth/sign-up.html">Sign up</a>
-                                <a class="nav-link" href="./auth/password-reset.html">Password reset</a>
-                                <a class="nav-link" href="./auth/error.html">Error</a>
+                                <a class="nav-link " href="#">Sign in</a>
+                                <a class="nav-link " href="#">Sign up</a>
+                                <a class="nav-link " href="#">Password reset</a>
                             </nav>
                         </div>
                     </div>
                 </nav>
-
-                <!-- Heading -->
-                <h3 class="fs-base px-3 mb-4">Documentation</h3>
-
-                <!-- Nav -->
-                <nav class="navbar-nav nav-pills mb-xl-7">
-                    <div class="nav-item">
-                        <a class="nav-link " href="./docs/getting-started.html">
-                            <span class="material-symbols-outlined me-3">sticky_note_2</span> Getting started
-                        </a>
-                    </div>
-                    <div class="nav-item">
-                        <a class="nav-link " href="./docs/components.html">
-                            <span class="material-symbols-outlined me-3">deployed_code</span> Components
-                        </a>
-                    </div>
-                    <div class="nav-item">
-                        <a class="nav-link " href="./docs/changelog.html">
-                            <span class="material-symbols-outlined me-3">list_alt</span> Changelog
-                            <span class="badge text-bg-primary ms-auto">1.0.4</span>
-                        </a>
-                    </div>
-                </nav>
-
-                <!-- Divider -->
-                <hr class="my-4 d-xl-none">
-
-                <!-- Nav -->
-                <nav class="navbar-nav nav-pills d-xl-none mb-7">
-                    <div class="nav-item dropdown">
-                        <a class="nav-link" href="#" role="button" data-bs-toggle="dropdown" data-bs-settings-switcher="" aria-expanded="false">
-                            <span class="material-symbols-outlined"> settings </span> <span class="d-xl-none ms-3">Settings</span>
-                        </a>
-                        <div class="dropdown-menu">
-                            <!-- Color mode -->
-                            <h6 class="dropdown-header">Color mode</h6>
-                            <a class="dropdown-item d-flex active" data-bs-theme-value="light" href="#" role="button" aria-pressed="true">
-                                <span class="material-symbols-outlined me-2"> light_mode </span> Light
-                            </a>
-                            <a class="dropdown-item d-flex" data-bs-theme-value="dark" href="#" role="button" aria-pressed="false"> <span class="material-symbols-outlined me-2"> dark_mode </span> Dark </a>
-                            <a class="dropdown-item d-flex" data-bs-theme-value="auto" href="#" role="button" aria-pressed="false"> <span class="material-symbols-outlined me-2"> contrast </span> Auto </a>
-
-                            <!-- Divider -->
-                            <hr class="dropdown-divider">
-
-                            <!-- Navigation position -->
-                            <h6 class="dropdown-header">Navigation position</h6>
-                            <a class="dropdown-item d-flex active" data-bs-navigation-position-value="sidenav" href="#" role="button" aria-pressed="true">
-                                <span class="material-symbols-outlined me-2"> thumbnail_bar </span> Sidenav
-                            </a>
-                            <a class="dropdown-item d-flex" data-bs-navigation-position-value="topnav" href="#" role="button" aria-pressed="false">
-                                <span class="material-symbols-outlined me-2"> toolbar </span> Topnav
-                            </a>
-                        </div>
-                    </div>
-                    <div class="nav-item">
-                        <a class="nav-link" href="https://themes.getbootstrap.com/product/dashbrd/" target="_blank">
-                            <span class="material-symbols-outlined me-3">local_mall</span> Go to product page
-                        </a>
-                    </div>
-                    <div class="nav-item">
-                        <a class="nav-link" href="mailto:yevgenysim+simpleqode@gmail.com">
-                            <span class="material-symbols-outlined me-3">alternate_email</span> Contact us
-                        </a>
-                    </div>
-                </nav>
-
-                <!-- Card -->
-                <div class="card mt-auto">
-                    <div class="card-body">
-                        <!-- Heading -->
-                        <h6>Need help?</h6>
-
-                        <!-- Text -->
-                        <p class="text-body-secondary mb-0">Feel free to reach out to us should you have any questions or suggestions.</p>
-                    </div>
-                </div>
             </div>
         </div>
     </nav>
