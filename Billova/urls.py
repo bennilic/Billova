@@ -15,13 +15,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-from .views import *
-
-from .views.homepage import Home_page_view
+from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('home', Home_page_view.as_view(), name='home'),
-    path('', Home_page_view.as_view(), name='index')
+    path("", include("billova_app.urls")),
 ]
