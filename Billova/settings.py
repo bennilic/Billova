@@ -123,3 +123,17 @@ STATIC_URL = "billova_app/static/"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+'''
+for task #10
+Login and Signup
+'''
+
+# Use the default authentication model
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+# Login redirection after successful login
+LOGIN_REDIRECT_URL = '/'  # Change to your desired redirect URL
+LOGOUT_REDIRECT_URL = '/'  # Optional logout redirect
