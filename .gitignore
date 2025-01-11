@@ -34,3 +34,7 @@ replay_pid*
 #IntelliJ
 /.idea/*
 
+# pip venv
+.env/
+.venv/
+
