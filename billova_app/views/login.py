@@ -1,5 +1,7 @@
-from django.views.generic import TemplateView
+# views.py
 from django.contrib.auth.views import LoginView
-# Custom template for login
-class LoginView(TemplateView):
-    template_name = "login.html"
+
+class CustomLoginView(LoginView):
+    template_name = 'login.html'
+    redirect_authenticated_user = True
+    next_page = '/'  # Redirect after successful login
