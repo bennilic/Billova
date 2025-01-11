@@ -1,30 +1,75 @@
-<nav class="sidebar">
-    <ul class="nav flex-column">
-        <!-- Other menu items -->
-        <li class="nav-item">
-            <span class="nav-link">User</span>
-            <ul class="sub-menu">
-                <li><a href="{% url 'account_overview' %}">Account Overview</a></li>
-                <li><a href="{% url 'account_settings' %}">Account Settings</a></li>
-            </ul>
-        </li>
-        <li class="nav-item">
-            <span class="nav-link">Expenses</span>
-            <ul class="sub-menu">
-                <li><a href="{% url 'categories' %}">Categories</a></li>
-            </ul>
-        </li>
-        <li class="nav-item">
-            <span class="nav-link">Authentication</span>
-            <ul class="sub-menu">
-                {% if user.is_authenticated %}
-                    <li><a href="{% url 'logout' %}">Logout</a></li>
-                {% else %}
-                    <li><a href="{% url 'login' %}">Login</a></li>
-                    <li><a href="{% url 'signup' %}">Sign Up</a></li>
-                {% endif %}
-                <li><a href="{% url 'password_reset' %}">Password Reset</a></li>
-            </ul>
-        </li>
-    </ul>
-</nav>
+<aside class="aside" id="sidenav-lg">
+    <nav class="navbar navbar-expand-xl navbar-vertical">
+        <div class="container-lg">
+            <!-- Brand -->
+            <a class="navbar-brand fs-5 fw-bold px-xl-3 mb-xl-4" href="{% url 'home' %}">
+                <i class="bi bi-house me-1"></i> Home
+            </a>
+
+            <!-- Collapse -->
+            <div class="collapse navbar-collapse" id="sidenavLargeCollapse">
+                <!-- Nav -->
+                <nav class="navbar-nav nav-pills mb-7">
+                    <!-- User nav item-->
+                    <div class="nav-item">
+                        <a class="nav-link active" href="#" data-bs-toggle="collapse" data-bs-target="#user" role="button" aria-expanded="false" aria-controls="user">
+                            <i class="bi bi-person me-1"></i> User
+                        </a>
+                        <div class="collapse show" id="user">
+                            <nav class="nav nav-pills">
+                                <a class="nav-link active" href="{% url 'account_overview' %}">Account Overview</a>
+                                <a class="nav-link" href="{% url 'account_settings' %}">Account Settings</a>
+                            </nav>
+                        </div>
+                    </div>
+
+                    <!-- Expenses nav item-->
+                    <div class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#expenses" role="button" aria-expanded="false" aria-controls="expenses">
+                            <i class="bi bi-cash me-1"></i> Expenses
+                        </a>
+                        <div class="collapse" id="expenses">
+                            <nav class="nav nav-pills">
+                                <a class="nav-link" href="{% url 'categories' %}">Categories</a>
+                            </nav>
+                        </div>
+                    </div>
+
+                    <!-- Authentication -->
+                    <div class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#authentication" role="button" aria-expanded="false" aria-controls="authentication">
+                            <i class="bi bi-check-circle me-1"></i> Authentication
+                        </a>
+                        <div class="collapse" id="authentication">
+                            <nav class="nav nav-pills">
+                                {% if user.is_authenticated %}
+                                    <!-- Show Logout -->
+                                    <form method="post" action="{% url 'logout' %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-outline-danger w-100">
+                                            <i class="bi bi-box-arrow-left me-1"></i> Logout
+                                        </button>
+                                        <a class="btn btn-outline-secondary w-100" href="{% url 'password_reset' %}">
+                                        <i class="bi bi-key me-1"></i> Password Reset
+                                        </a>
+                                    </form>
+                                {% else %}
+                                    <!-- Show Login, Signup, and Password Reset -->
+                                    <a class="btn btn-outline-primary w-100 mb-2" href="{% url 'login' %}">
+                                        <i class="bi bi-box-arrow-in-right me-1"></i> Login
+                                    </a>
+                                    <a class="btn btn-outline-success w-100 mb-2" href="{% url 'signup' %}">
+                                        <i class="bi bi-person-plus me-1"></i> Signup
+                                    </a>
+                                    <a class="btn btn-outline-secondary w-100" href="{% url 'password_reset' %}">
+                                        <i class="bi bi-key me-1"></i> Password Reset
+                                    </a>
+                                {% endif %}
+                            </nav>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </nav>
+</aside>
