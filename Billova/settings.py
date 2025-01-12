@@ -139,3 +139,6 @@ AUTHENTICATION_BACKENDS = [
 # Login redirection after successful login
 LOGIN_REDIRECT_URL = '/'  # Change to your desired redirect URL
 LOGOUT_REDIRECT_URL = '/'  # Optional logout redirect
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

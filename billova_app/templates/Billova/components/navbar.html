@@ -6,8 +6,11 @@
                 <i class="bi bi-house me-1"></i> Home
             </a>
 
+
             <!-- Toggle Button -->
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidenavLargeCollapse" aria-controls="sidenavLargeCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#sidenavLargeCollapse" aria-controls="sidenavLargeCollapse" aria-expanded="false"
+                    aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
@@ -18,7 +21,8 @@
                     {% if user.is_authenticated %}
                         <!-- User nav item-->
                         <div class="nav-item">
-                            <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#user" role="button" aria-expanded="false" aria-controls="user">
+                            <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#user" role="button"
+                               aria-expanded="false" aria-controls="user">
                                 <i class="bi bi-person me-1"></i> User
                             </a>
                             <div class="collapse" id="user">
@@ -31,7 +35,8 @@
 
                         <!-- Expenses nav item-->
                         <div class="nav-item">
-                            <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#expenses" role="button" aria-expanded="false" aria-controls="expenses">
+                            <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#expenses"
+                               role="button" aria-expanded="false" aria-controls="expenses">
                                 <i class="bi bi-cash me-1"></i> Expenses
                             </a>
                             <div class="collapse" id="expenses">
@@ -44,7 +49,8 @@
 
                     <!-- Authentication -->
                     <div class="nav-item">
-                        <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#authentication" role="button" aria-expanded="false" aria-controls="authentication">
+                        <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#authentication"
+                           role="button" aria-expanded="false" aria-controls="authentication">
                             <i class="bi bi-check-circle me-1"></i> Authentication
                         </a>
                         <div class="collapse" id="authentication">
@@ -73,6 +79,38 @@
                                 {% endif %}
                             </nav>
                         </div>
+                    </div>
+                    <div>
+                        <!-- User Information -->
+                        <ul class="navbar-nav ms-auto">
+                            {% if user.is_authenticated %}
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                                       data-bs-toggle="dropdown" aria-expanded="false">
+                                        Logged in as <strong>{{ user.username }}</strong>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                        <li><a class="dropdown-item" href="{% url 'account_overview' %}">Account
+                                            Overview</a></li>
+                                        <li><a class="dropdown-item" href="{% url 'account_settings' %}">Account
+                                            Settings</a></li>
+                                        <li>
+                                            <form method="post" action="{% url 'logout' %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="dropdown-item">Logout</button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </li>
+                            {% else %}
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url 'login' %}">Login</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{% url 'signup' %}">Signup</a>
+                                </li>
+                            {% endif %}
+                        </ul>
                     </div>
                 </nav>
             </div>

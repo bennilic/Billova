@@ -1,10 +1,45 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Account Overview</title>
-</head>
-<body>
-    <h1>Account Overview</h1>
-    <p>Welcome to your account overview page!</p>
-</body>
-</html>
+{% extends "Billova/layout.html" %}
+
+{% block title %}Account Overview{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="text-center mb-4">Account Overview</h1>
+    <p class="text-center text-muted mb-4">Update your account details below:</p>
+
+    <form method="post" enctype="multipart/form-data" class="settings-form">
+        {% csrf_token %}
+
+        <!-- Name -->
+        <div class="mb-4">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" name="name" id="name" class="form-control" value="{{ user.profile.name }}" placeholder="Enter your name" required>
+        </div>
+
+        <!-- Email -->
+        <div class="mb-4">
+            <label for="email" class="form-label">Email Address</label>
+            <input type="email" name="email" id="email" class="form-control" value="{{ user.email }}" placeholder="Enter your email address" required>
+        </div>
+
+        <!-- Password -->
+        <div class="mb-4">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" name="password" id="password" class="form-control" placeholder="Enter a new password (optional)">
+        </div>
+
+        <!-- Profile Picture -->
+        <div class="mb-4">
+            <label for="profile_picture" class="form-label">Profile Picture</label>
+            <input type="file" name="profile_picture" id="profile_picture" class="form-control">
+            {% if user.profile.profile_picture %}
+                <div class="mt-2">
+                    <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture" class="img-thumbnail" style="max-width: 150px;">
+                </div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Save Changes</button>
+    </form>
+</div>
+{% endblock %}
