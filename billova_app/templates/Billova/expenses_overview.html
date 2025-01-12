@@ -17,7 +17,6 @@
             <button class="btn btn-secondary create-expenseEntry-btn" data-bs-target="#createExpenseEntryModal" data-bs-toggle="modal">Create Entry</button>
         </div>
 
-
         <div class="dataTable-container table-responsive">
             <table id="expensesTable" class="table table-striped table-bordered">
                 <thead>
@@ -27,7 +26,7 @@
                     <th>Note</th>
                     <th>Issuer</th>
                     <th>Category</th>
-                    <th class="text-center">Category</th>
+                    <th class="text-center">Actions</th>
                 </tr>
                 </thead>
                 <tbody class="uiExpensesTblBody">
@@ -46,6 +45,9 @@
         </div>
 
     </div>
+
+    {% include './components/create_expense_entry.html' %}
+
 {% endblock %}
 
 {% block script %}
