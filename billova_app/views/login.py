@@ -20,6 +20,7 @@ class EmailOrUsernameModelBackend(ModelBackend):
                 return user
         return None
 
+
 class CustomLoginForm(forms.Form):
     username = forms.CharField(label="Email or Username", max_length=254)
     password = forms.CharField(label="Password", widget=forms.PasswordInput)

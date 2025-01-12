@@ -1,9 +1,8 @@
+from django import forms
+from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import login
 from django.views import View
-from django import forms
 
 
 class SignupForm(forms.Form):
@@ -11,6 +10,8 @@ class SignupForm(forms.Form):
     email = forms.EmailField(max_length=254, required=True)
     password1 = forms.CharField(widget=forms.PasswordInput, required=True)
     password2 = forms.CharField(widget=forms.PasswordInput, required=True)
+
+
 class SignupView(View):
     def get(self, request):
         form = SignupForm()

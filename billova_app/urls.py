@@ -5,8 +5,8 @@ from django.urls import path
 from .views import homepage, settings, signup
 from .views.account import AccountOverviewView
 from .views.account import AccountSettingsView
-from .views.login import CustomLoginView
 from .views.categories import CategoriesView
+from .views.login import CustomLoginView
 from .views.password_reset import PwResetView
 
 urlpatterns = [

@@ -1,9 +1,10 @@
-from django.views.generic import TemplateView
-from django.shortcuts import redirect
-from django.contrib import messages
-from django.conf import settings
-
 import os
+
+from django.contrib import messages
+from django.shortcuts import redirect
+from django.views.generic import TemplateView
+
+
 class AccountOverviewView(TemplateView):
     template_name = 'Billova/account_overview.html'
 
@@ -39,5 +40,7 @@ class AccountOverviewView(TemplateView):
 
         messages.success(request, "Account details updated successfully!")
         return redirect('account_overview')
+
+
 class AccountSettingsView(TemplateView):
-        template_name = 'Billova/account_settings.html'
+    template_name = 'Billova/account_settings.html'
