@@ -3,20 +3,21 @@ from django.utils import timezone
 
 
 class Expense(models.Model):
-    dateTime = models.DateTimeField(default=timezone.now)
+    invoice_date_time = models.DateTimeField(default=timezone.now)
     price = models.DecimalField(max_digits=14, decimal_places=2) # 1 Billion with 2 decimal places
     note = models.TextField(blank=True)
     invoice_issuer = models.TextField(blank=True)
-    receipt_as_text = models.TextField(blank=True)
+    invoice_as_text = models.TextField(blank=True)
     category = models.ForeignKey('Category', related_name='expenses', on_delete=models.CASCADE)
     owner = models.ForeignKey('auth.User', related_name='expenses', on_delete=models.CASCADE)
 
     class Meta:
-        ordering = ['dateTime']
+        ordering = ['invoice_date_time']
 
 
 class Category(models.Model):
     name = models.CharField(max_length=255)
+    # TODO should the user_settings field be moved as category field to the user_settings?
     user_setting = models.ForeignKey('Category', related_name='categories', on_delete=models.CASCADE)
     owner = models.ForeignKey('auth.User', related_name='categories', on_delete=models.CASCADE)
 
