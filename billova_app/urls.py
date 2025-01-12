@@ -12,6 +12,7 @@ router.register(r'user_settings', api_views.UserSettingsViewSet, basename='user_
 
 urlpatterns = [
     path('api/v1/', include(router.urls)),
+    path('api/auth/', include('rest_framework.urls')),
 ]
 
 urlpatterns += [
