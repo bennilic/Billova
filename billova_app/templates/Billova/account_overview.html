@@ -1,45 +1,55 @@
 {% extends "Billova/layout.html" %}
 
+{% load static %}
+
 {% block title %}Account Overview{% endblock %}
 
 {% block content %}
 <div class="container py-5">
     <h1 class="text-center mb-4">Account Overview</h1>
-    <p class="text-center text-muted mb-4">Update your account details below:</p>
+    <div class="text-center">
+        <!-- Profile Picture -->
+        <div class="mb-4">
+            {% if user.profile.profile_picture %}
+                <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture" class="img-thumbnail rounded-circle" style="max-width: 150px;">
+            {% else %}
+                <img src="{% static 'images/default-profile.png' %}" alt="Default Profile Picture" class="img-thumbnail rounded-circle" style="max-width: 150px;">
+            {% endif %}
+        </div>
+    </div>
 
-    <form method="post" enctype="multipart/form-data" class="settings-form">
-        {% csrf_token %}
-
+    <div class="mx-auto" style="max-width: 500px;">
         <!-- Name -->
         <div class="mb-4">
-            <label for="name" class="form-label">Name</label>
-            <input type="text" name="name" id="name" class="form-control" value="{{ user.profile.name }}" placeholder="Enter your name" required>
+            <label class="form-label">Name</label>
+            <p class="form-control-plaintext">{{ user.profile.name }}</p>
         </div>
 
         <!-- Email -->
         <div class="mb-4">
-            <label for="email" class="form-label">Email Address</label>
-            <input type="email" name="email" id="email" class="form-control" value="{{ user.email }}" placeholder="Enter your email address" required>
+            <label class="form-label">Email Address</label>
+            <p class="form-control-plaintext">{{ user.email }}</p>
         </div>
 
-        <!-- Password -->
+        <!-- Currency -->
         <div class="mb-4">
-            <label for="password" class="form-label">Password</label>
-            <input type="password" name="password" id="password" class="form-control" placeholder="Enter a new password (optional)">
+            <label class="form-label">Preferred Currency</label>
+            <p class="form-control-plaintext">{{ user.profile.currency }}</p>
         </div>
 
-        <!-- Profile Picture -->
+        <!-- Language -->
         <div class="mb-4">
-            <label for="profile_picture" class="form-label">Profile Picture</label>
-            <input type="file" name="profile_picture" id="profile_picture" class="form-control">
-            {% if user.profile.profile_picture %}
-                <div class="mt-2">
-                    <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture" class="img-thumbnail" style="max-width: 150px;">
-                </div>
-            {% endif %}
+            <label class="form-label">Preferred Language</label>
+            <p class="form-control-plaintext">
+                {% if user.profile.language == "en" %}English{% elif user.profile.language == "de" %}German{% elif user.profile.language == "fr" %}French{% elif user.profile.language == "es" %}Spanish{% else %}{{ user.profile.language }}{% endif %}
+            </p>
         </div>
 
-        <button type="submit" class="btn btn-primary w-100">Save Changes</button>
-    </form>
+        <!-- Timezone -->
+        <div class="mb-4">
+            <label class="form-label">Timezone</label>
+            <p class="form-control-plaintext">{{ user.profile.timezone }}</p>
+        </div>
+    </div>
 </div>
 {% endblock %}

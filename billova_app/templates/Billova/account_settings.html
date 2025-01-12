@@ -1,11 +1,13 @@
 {% extends "Billova/layout.html" %}
 
-{% block title %}Account Overview{% endblock %}
+{% load static %}
+
+{% block title %}Account Settings{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <h1 class="text-center mb-4">Account Overview</h1>
-    <p class="text-center text-muted mb-4">Customize your account settings below:</p>
+<div class="container d-flex align-items-center vh-100">
+
+    <h1 class="text-center mb-4">Account Settings </h1>
 
     <form method="post" class="settings-form">
         {% csrf_token %}

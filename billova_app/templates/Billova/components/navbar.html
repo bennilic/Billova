@@ -3,7 +3,7 @@
         <div class="container-lg">
             <!-- Brand -->
             <a class="navbar-brand fs-5 fw-bold px-xl-3 mb-xl-4" href="{% url 'home' %}">
-                <i class="bi bi-house me-1"></i> Home
+                <i class="bi bi-house me-1"></i> Billova
             </a>
 
 
@@ -23,7 +23,8 @@
                         <div class="nav-item">
                             <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#user" role="button"
                                aria-expanded="false" aria-controls="user">
-                                <i class="bi bi-person me-1"></i> User
+                                <i class="bi bi-person me-1"></i> User: Logged in as &nbsp;
+                                <strong>{{ user.username }}</strong>
                             </a>
                             <div class="collapse" id="user">
                                 <nav class="nav nav-pills">
@@ -55,14 +56,16 @@
                         </a>
                         <div class="collapse" id="authentication">
                             <nav class="nav nav-pills">
+
                                 {% if user.is_authenticated %}
-                                    <!-- Show Logout -->
-                                    <form method="post" action="{% url 'logout' %}">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-outline-danger w-100">
-                                            <i class="bi bi-box-arrow-left me-1"></i> Logout
-                                        </button>
-                                    </form>
+                                <!-- Show Logout -->
+                                <form method="post" action="{% url 'logout' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-danger w-100">
+                                        <i class="bi bi-box-arrow-left me-1"></i> Logout
+                                    </button>
+                                </form>
+
                                 {% else %}
                                     <!-- Show Login, Signup, and Password Reset -->
                                     <a class="btn btn-outline-primary w-100 mb-2" href="{% url 'login' %}">
@@ -72,7 +75,7 @@
                                         <i class="bi bi-person-plus me-1"></i> Signup
                                     </a>
                                     <!-- Reset Password functionality is not implemented yet
-                                     <a class="btn btn-outline-secondary w-100" href="{% url 'password_reset' %}">
+                                    <a class="btn btn-outline-secondary w-100" href="{% url 'password_reset' %}">
                                         <i class="bi bi-key me-1"></i> Password Reset
                                     </a>!
                                     -->
@@ -80,38 +83,7 @@
                             </nav>
                         </div>
                     </div>
-                    <div>
-                        <!-- User Information -->
-                        <ul class="navbar-nav ms-auto">
-                            {% if user.is_authenticated %}
-                                <li class="nav-item dropdown">
-                                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                                       data-bs-toggle="dropdown" aria-expanded="false">
-                                        Logged in as <strong>{{ user.username }}</strong>
-                                    </a>
-                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                        <li><a class="dropdown-item" href="{% url 'account_overview' %}">Account
-                                            Overview</a></li>
-                                        <li><a class="dropdown-item" href="{% url 'account_settings' %}">Account
-                                            Settings</a></li>
-                                        <li>
-                                            <form method="post" action="{% url 'logout' %}">
-                                                {% csrf_token %}
-                                                <button type="submit" class="dropdown-item">Logout</button>
-                                            </form>
-                                        </li>
-                                    </ul>
-                                </li>
-                            {% else %}
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{% url 'login' %}">Login</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{% url 'signup' %}">Signup</a>
-                                </li>
-                            {% endif %}
-                        </ul>
-                    </div>
+
                 </nav>
             </div>
         </div>
