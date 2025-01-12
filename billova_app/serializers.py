@@ -14,16 +14,14 @@ class ExpenseSerializer(serializers.HyperlinkedModelSerializer):
 
 class CategorySerializer(serializers.HyperlinkedModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
-    user_setting = serializers.HyperlinkedRelatedField(view_name='user_settings', read_only=True)
 
     class Meta:
         model = Category
-        fields = ['url', 'id', 'name', 'user_setting', 'owner']
+        fields = ['url', 'id', 'name', 'owner']
 
 
 class UserSettingsSerializer(serializers.HyperlinkedModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
-    # TODO add HyperlinkedRelatedField for categories here instead of the categories serializer?
 
     class Meta:
         model = UserSettings

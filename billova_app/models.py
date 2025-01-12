@@ -17,8 +17,6 @@ class Expense(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=255)
-    # TODO should the user_settings field be moved as category field to the user_settings?
-    user_setting = models.ForeignKey('Category', related_name='categories', on_delete=models.CASCADE)
     owner = models.ForeignKey('auth.User', related_name='categories', on_delete=models.CASCADE)
 
     class Meta:

@@ -8,7 +8,7 @@ from .views import homepage, settings, login, signup
 router = DefaultRouter()
 router.register(r'expenses', api_views.ExpenseViewSet, basename='expense')
 router.register(r'categories', api_views.CategoryViewSet, basename='category')
-router.register(r'user_settings', api_views.UserSettingsViewSet, basename='user_settings')
+router.register(r'usersettings', api_views.UserSettingsViewSet, basename='usersettings')
 
 urlpatterns = [
     path('api/v1/', include(router.urls)),
