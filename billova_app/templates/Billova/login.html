@@ -1,35 +1,38 @@
 {% extends "Billova/layout.html" %}
+{% load widget_tweaks %}
 
 {% block title %}Login{% endblock %}
 
 {% block content %}
-<div class="container d-flex align-items-center vh-100">
-    <div class="row justify-content-center w-100">
-        <div class="col-md-6 col-lg-4">
-            <h1 class="text-center mb-4">Login</h1>
-            <form method="post">
-                {% csrf_token %}
-                <div class="form-group mb-3">
-                    <label for="username" class="form-label">Username</label>
-                    <input type="text" name="username" id="username" class="form-control" placeholder="Enter your username" required>
-                </div>
-                <div class="form-group mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" name="password" id="password" class="form-control" placeholder="Enter your password" required>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="bi bi-box-arrow-in-right me-1"></i> Login
-                </button>
-            </form>
-            <p class="text-center mt-3">
-                Don’t have an account? <a href="{% url 'signup' %}" class="text-primary">Sign up</a>
-            </p>
-            <!-- Password Reset functionality is not implemented yet
+    <div class="container d-flex align-items-center vh-100">
+        <div class="row justify-content-center w-100">
+            <div class="col-md-6 col-lg-4">
+                <h1 class="text-center mb-4">Login</h1>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group mb-3">
+                        <label for="username" class="form-label">Username | E-Mail </label>
+                        {{ form.username | add_class:"form-control" }}
+                        {{ form.username.errors }}
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        {{ form.password | add_class:"form-control" }}
+                        {{ form.password.errors }}
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Login
+                    </button>
+                </form>
+                <p class="text-center mt-3">
+                    Don’t have an account? <a href="{% url 'signup' %}" class="text-primary">Sign up</a>
+                </p>
+                <!-- Password Reset functionality is not implemented yet
             <p class="text-center mt-1">
                 <a href="{% url 'password_reset' %}" class="text-muted">Forgot your password?</a>
             </p>
             -->
+            </div>
         </div>
     </div>
-</div>
 {% endblock %}

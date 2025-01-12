@@ -134,6 +134,7 @@ Login and Signup
 # Use the default authentication model
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
+    'billova_app.views.login.EmailOrUsernameModelBackend',
 ]
 
 # Login redirection after successful login
