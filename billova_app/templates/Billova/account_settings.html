@@ -5,59 +5,63 @@
 {% block title %}Account Settings{% endblock %}
 
 {% block content %}
-<div class="container d-flex align-items-center vh-100">
+    <div class="container d-flex align-items-center vh-100">
+        <div class="row justify-content-center w-100">
+            <div class="col-md-6 col-lg-4">
 
-    <h1 class="text-center mb-4">Account Settings </h1>
+                <h1 class="text-center mb-4">Account Settings </h1>
 
-    <form method="post" class="settings-form">
-        {% csrf_token %}
+                <form method="post" class="settings-form">
+                    {% csrf_token %}
 
-        <!-- Language Settings -->
-        <div class="mb-4">
-            <label for="language" class="form-label">Language</label>
-            <select name="language" id="language" class="form-select" required>
-                <option value="en" selected>English</option>
-                <option value="de">German</option>
-                <option value="fr">French</option>
-                <option value="ro">Romanian</option>
-            </select>
+                    <!-- Language Settings -->
+                    <div class="mb-4">
+                        <label for="language" class="form-label">Language</label>
+                        <select name="language" id="language" class="form-select" required>
+                            <option value="en" selected>English</option>
+                            <option value="de">German</option>
+                            <option value="fr">French</option>
+                            <option value="ro">Romanian</option>
+                        </select>
+                    </div>
+
+                    <!-- Currency Settings -->
+                    <div class="mb-4">
+                        <label for="currency" class="form-label">Currency</label>
+                        <select name="currency" id="currency" class="form-select" required>
+                            <option value="USD" selected>US Dollar (USD)</option>
+                            <option value="EUR">Euro (EUR)</option>
+                            <option value="GBP">British Pound (GBP)</option>
+                            <option value="RON">Romanian Leu (RON)</option>
+                        </select>
+                    </div>
+
+                    <!-- Timezone Settings -->
+                    <div class="mb-4">
+                        <label for="timezone" class="form-label">Timezone</label>
+                        <select name="timezone" id="timezone" class="form-select" required>
+                            <option value="UTC" selected>UTC</option>
+                            <option value="Europe/Vienna">Vienna (Europe/Vienna)</option>
+                            <option value="Europe/Berlin">Berlin (Europe/Berlin)</option>
+                            <option value="America/New_York">New York (America/New_York)</option>
+                            <option value="Asia/Tokyo">Tokyo (Asia/Tokyo)</option>
+                        </select>
+                    </div>
+
+                    <!-- Numeric Format Settings -->
+                    <div class="mb-4">
+                        <label for="numeric_format" class="form-label">Numeric Format</label>
+                        <select name="numeric_format" id="numeric_format" class="form-select" required>
+                            <option value="us" selected>US Format (1,234.56)</option>
+                            <option value="de">German Format (1.234,56)</option>
+                            <option value="fr">French Format (1 234,56)</option>
+                            <option value="ro">Romanian Format (1.234,56)</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Save Settings</button>
+                </form>
+            </div>
         </div>
-
-        <!-- Currency Settings -->
-        <div class="mb-4">
-            <label for="currency" class="form-label">Currency</label>
-            <select name="currency" id="currency" class="form-select" required>
-                <option value="USD" selected>US Dollar (USD)</option>
-                <option value="EUR">Euro (EUR)</option>
-                <option value="GBP">British Pound (GBP)</option>
-                <option value="RON">Romanian Leu (RON)</option>
-            </select>
-        </div>
-
-        <!-- Timezone Settings -->
-        <div class="mb-4">
-            <label for="timezone" class="form-label">Timezone</label>
-            <select name="timezone" id="timezone" class="form-select" required>
-                <option value="UTC" selected>UTC</option>
-                <option value="Europe/Vienna">Vienna (Europe/Vienna)</option>
-                <option value="Europe/Berlin">Berlin (Europe/Berlin)</option>
-                <option value="America/New_York">New York (America/New_York)</option>
-                <option value="Asia/Tokyo">Tokyo (Asia/Tokyo)</option>
-            </select>
-        </div>
-
-        <!-- Numeric Format Settings -->
-        <div class="mb-4">
-            <label for="numeric_format" class="form-label">Numeric Format</label>
-            <select name="numeric_format" id="numeric_format" class="form-select" required>
-                <option value="us" selected>US Format (1,234.56)</option>
-                <option value="de">German Format (1.234,56)</option>
-                <option value="fr">French Format (1 234,56)</option>
-                <option value="ro">Romanian Format (1.234,56)</option>
-            </select>
-        </div>
-
-        <button type="submit" class="btn btn-primary w-100">Save Settings</button>
-    </form>
-</div>
+    </div>
 {% endblock %}

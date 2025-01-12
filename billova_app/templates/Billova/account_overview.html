@@ -1,55 +1,68 @@
 {% extends "Billova/layout.html" %}
-
 {% load static %}
 
 {% block title %}Account Overview{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <h1 class="text-center mb-4">Account Overview</h1>
-    <div class="text-center">
-        <!-- Profile Picture -->
-        <div class="mb-4">
-            {% if user.profile.profile_picture %}
-                <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture" class="img-thumbnail rounded-circle" style="max-width: 150px;">
-            {% else %}
-                <img src="{% static 'images/default-profile.png' %}" alt="Default Profile Picture" class="img-thumbnail rounded-circle" style="max-width: 150px;">
-            {% endif %}
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h1 class="text-center mb-4">Account Overview</h1>
+
+                        <!-- Profile Picture -->
+                        <div class="text-center mb-4">
+                            {% if user.profile.profile_picture %}
+                                <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture"
+                                     class="img-thumbnail rounded-circle" style="max-width: 150px;">
+                            {% else %}
+                                <img src="{% static 'images/default-profile.png' %}" alt="Default Profile Picture"
+                                     class="img-thumbnail rounded-circle" style="max-width: 150px;">
+                            {% endif %}
+                        </div>
+
+                        <!-- User Details -->
+                        <ul class="list-group list-group-flush">
+                            <!-- Name -->
+                            <li class="list-group-item">
+                                <strong>Name:</strong>
+                                <span class="float-end">{{ user.profile.name }}</span>
+                            </li>
+
+                            <!-- Email -->
+                            <li class="list-group-item">
+                                <strong>Email Address:</strong>
+                                <span class="float-end">{{ user.email }}</span>
+                            </li>
+
+                            <!-- Currency -->
+                            <li class="list-group-item">
+                                <strong>Preferred Currency:</strong>
+                                <span class="float-end">{{ user.profile.currency }}</span>
+                            </li>
+
+                            <!-- Language -->
+                            <li class="list-group-item">
+                                <strong>Preferred Language:</strong>
+                                <span class="float-end">
+                                {% if user.profile.language == "en" %}English{% elif user.profile.language == "de" %}
+                                    German{% elif user.profile.language == "fr" %}
+                                    French{% elif user.profile.language == "es" %}Spanish{% else %}
+                                    {{ user.profile.language }}
+                                {% endif %}
+                            </span>
+                            </li>
+
+                            <!-- Timezone -->
+                            <li class="list-group-item">
+                                <strong>Timezone:</strong>
+                                <span class="float-end">{{ user.profile.timezone }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
-    <div class="mx-auto" style="max-width: 500px;">
-        <!-- Name -->
-        <div class="mb-4">
-            <label class="form-label">Name</label>
-            <p class="form-control-plaintext">{{ user.profile.name }}</p>
-        </div>
-
-        <!-- Email -->
-        <div class="mb-4">
-            <label class="form-label">Email Address</label>
-            <p class="form-control-plaintext">{{ user.email }}</p>
-        </div>
-
-        <!-- Currency -->
-        <div class="mb-4">
-            <label class="form-label">Preferred Currency</label>
-            <p class="form-control-plaintext">{{ user.profile.currency }}</p>
-        </div>
-
-        <!-- Language -->
-        <div class="mb-4">
-            <label class="form-label">Preferred Language</label>
-            <p class="form-control-plaintext">
-                {% if user.profile.language == "en" %}English{% elif user.profile.language == "de" %}German{% elif user.profile.language == "fr" %}French{% elif user.profile.language == "es" %}Spanish{% else %}{{ user.profile.language }}{% endif %}
-            </p>
-        </div>
-
-        <!-- Timezone -->
-        <div class="mb-4">
-            <label class="form-label">Timezone</label>
-            <p class="form-control-plaintext">{{ user.profile.timezone }}</p>
-        </div>
-    </div>
-</div>
 {% endblock %}
