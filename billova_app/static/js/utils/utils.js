@@ -25,3 +25,42 @@ export function closeModal(modalSelector) {
         modalInstance.hide();
     }
 }
+
+const DATA_TABLE_DEFAULT_OPTIONS = {
+    sortable: true,
+    searchable: true,
+    fixedHeight: true,
+    perPage: 10,
+    perPageSelect: [5, 10, 15, 20]
+};
+
+/**
+ * Function used to initialize a table using Vanilla Datatables.
+ * @param tableSelector - table selector (id or class)
+ * @param options - options to be used for the table. This is a default param.
+ * If not passed, DATA_TABLE_DEFAULT_OPTIONS will be used.
+ */
+export function initializeVanillaDataTable(tableSelector, options = DATA_TABLE_DEFAULT_OPTIONS) {
+    let table = document.querySelector(tableSelector);
+
+    if (!table || typeof DataTable === 'undefined') {
+        console.error('Table element or DataTable library not found.');
+        return;
+    }
+
+    new DataTable(table, options);
+
+    // Wait for the DataTable to render its DOM
+    setTimeout(() => {
+        // Add custom classes to specific elements
+        const searchInput = document.querySelector('.dataTable-input');
+        if (searchInput) {
+            searchInput.classList.add('form-control');
+        }
+
+        const perPageSelect = document.querySelector('.dataTable-dropdown select');
+        if (perPageSelect) {
+            perPageSelect.classList.add('form-select');
+        }
+    }, 0);
+}
