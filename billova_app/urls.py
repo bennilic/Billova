@@ -2,13 +2,13 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from billova_app import views
+from billova_app import api_views
 from .views import homepage, settings, login, signup
 
 router = DefaultRouter()
-router.register(r'expenses', views.Expense, basename='expense')
-router.register(r'categories', views.Category, basename='category')
-router.register(r'user_settings', views.UserSettings, basename='user_settings')
+router.register(r'expenses', api_views.ExpenseViewSet, basename='expense')
+router.register(r'categories', api_views.CategoryViewSet, basename='category')
+router.register(r'user_settings', api_views.UserSettingsViewSet, basename='user_settings')
 
 urlpatterns = [
     path('api/v1/', include(router.urls)),

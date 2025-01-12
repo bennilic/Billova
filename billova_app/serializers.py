@@ -5,7 +5,7 @@ from billova_app.models import Expense, UserSettings, Category
 
 class ExpenseSerializer(serializers.HyperlinkedModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
-    category = serializers.HyperlinkedRelatedField(read_only=True)
+    category = serializers.HyperlinkedRelatedField(view_name='categories', read_only=True)
 
     class Meta:
         model = Expense
@@ -14,7 +14,7 @@ class ExpenseSerializer(serializers.HyperlinkedModelSerializer):
 
 class CategorySerializer(serializers.HyperlinkedModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
-    user_setting = serializers.HyperlinkedRelatedField(read_only=True)
+    user_setting = serializers.HyperlinkedRelatedField(view_name='user_settings', read_only=True)
 
     class Meta:
         model = Category
