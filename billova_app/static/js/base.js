@@ -1,1 +1,2 @@
 // TODO add logic when a page is loaded to make the nav item active of the specific page by removing the active class on the other nav-items and add it on the selected one
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

@@ -4,6 +4,27 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        {% if form.errors %}
+            <div class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <ul class="mb-0">
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                    <li><strong>{{ field }}</strong>: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Login Form -->
     <div class="container d-flex align-items-center vh-100">
         <div class="row justify-content-center w-100">
             <div class="col-md-6 col-lg-4">
@@ -27,12 +48,22 @@
                 <p class="text-center mt-3">
                     Don’t have an account? <a href="{% url 'signup' %}" class="text-primary">Sign up</a>
                 </p>
-                <!-- Password Reset functionality is not implemented yet
-            <p class="text-center mt-1">
-                <a href="{% url 'password_reset' %}" class="text-muted">Forgot your password?</a>
-            </p>
-            -->
+                <!-- Password Reset functionality is not implemented yet -->
+                <p class="text-center mt-1">
+                    <a href="{% url 'password_reset' %}" class="text-muted">Forgot your password?</a>
+                </p>
             </div>
         </div>
     </div>
+
+    <!-- Toast Script -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const toastElement = document.querySelector('.toast');
+            if (toastElement) {
+                const toast = new bootstrap.Toast(toastElement);
+                toast.show();
+            }
+        });
+    </script>
 {% endblock %}
