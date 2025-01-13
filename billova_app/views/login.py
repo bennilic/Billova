@@ -2,10 +2,28 @@ import logging
 
 from django import forms
 from django.contrib.auth import authenticate
+from django.contrib.auth import get_user_model
+from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.views import LoginView
 
 # Set up logging
 logger = logging.getLogger(__name__)
+User = get_user_model()
+
+
+class EmailOrUsernameModelBackend(ModelBackend):
+    def authenticate(self, request, username=None, password=None, **kwargs):
+        if username is None:
+            username = kwargs.get(User.USERNAME_FIELD)
+        try:
+            # Check if the username matches either email or username
+            user = User.objects.get(email=username) if '@' in username else User.objects.get(username=username)
+        except User.DoesNotExist:
+            return None
+        else:
+            if user.check_password(password) and self.user_can_authenticate(user):
+                return user
+        return None
 
 
 class CustomLoginForm(forms.Form):

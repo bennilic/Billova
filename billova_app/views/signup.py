@@ -13,6 +13,9 @@ User = get_user_model()
 logger = logging.getLogger(__name__)
 
 
+
+
+
 class SignupForm(forms.Form):
     username = forms.CharField(max_length=150, required=True)
     email = forms.EmailField(max_length=254, required=True)
