@@ -10,7 +10,6 @@ from .views.logout import CustomLogoutView
 from .views.password_reset import PwResetView
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path('', homepage.HomePageView.as_view(), name='index'),
     path('home', homepage.HomePageView.as_view(), name='home'),
     path('index', homepage.HomePageView.as_view(), name='index'),
