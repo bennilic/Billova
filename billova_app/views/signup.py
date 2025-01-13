@@ -1,19 +1,15 @@
 import logging
 
 from django import forms
-from django.contrib.auth import get_user_model
+from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.views import View
 
-User = get_user_model()
 
 # Set up logging
 logger = logging.getLogger(__name__)
-
-
-
 
 
 class SignupForm(forms.Form):
@@ -58,6 +54,7 @@ class SignupView(View):
                 )
                 user.save()
                 logger.info("New user created successfully: %s", user.username)
+                messages.success(self.request, f"You have successfully signed up ${user.username} !")
 
                 # Specify the backend explicitly
                 backend = 'django.contrib.auth.backends.ModelBackend'

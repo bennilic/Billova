@@ -1,5 +1,4 @@
 from django.contrib import admin
-from django.contrib.auth import views as auth_views
 from django.urls import path
 
 from .views import homepage, settings, signup
@@ -7,6 +6,7 @@ from .views.account import AccountOverviewView
 from .views.account import AccountSettingsView
 from .views.categories import CategoriesView
 from .views.login import CustomLoginView
+from .views.logout import CustomLogoutView
 from .views.password_reset import PwResetView
 
 urlpatterns = [
@@ -20,7 +20,7 @@ urlpatterns = [
     path('categories/', CategoriesView.as_view(), name='categories'),
     path('settings', settings.SettingsView.as_view(), name='settings'),
     path('login/', CustomLoginView.as_view(), name='login'),  # Logout page
-    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('logout/', CustomLogoutView.as_view(), name='logout'),
     path('password_reset/', PwResetView.as_view(), name='password_reset'),
     path('sigup', signup.SignupView.as_view(), name='signup'),
 
