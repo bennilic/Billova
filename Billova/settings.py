@@ -165,6 +165,8 @@ MESSAGE_TAGS = {
 Logging Implementation
 """
 
+LOG_LEVEL = 'DEBUG'
+
 # Define the BASE_DIR if not already defined
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -189,31 +191,31 @@ LOGGING = {
     },
     'handlers': {
         'django_file': {
-            'level': 'DEBUG',
+            'level': LOG_LEVEL,
             'class': 'logging.FileHandler',
             'filename': LOGS_DIR / 'django.log',
             'formatter': 'verbose',
         },
         'billova_file': {
-            'level': 'DEBUG',
+            'level': LOG_LEVEL,
             'class': 'logging.FileHandler',
             'filename': LOGS_DIR / 'billova.log',
             'formatter': 'verbose',
         },
         'billova_app_file': {
-            'level': 'DEBUG',
+            'level': LOG_LEVEL,
             'class': 'logging.FileHandler',
             'filename': LOGS_DIR / 'billova_app.log',
             'formatter': 'verbose',
         },
         'database_file': {
-            'level': 'DEBUG',
+            'level': LOG_LEVEL,
             'class': 'logging.FileHandler',
             'filename': LOGS_DIR / 'database.log',
             'formatter': 'verbose',
         },
         'console': {
-            'level': 'DEBUG',
+            'level': LOG_LEVEL,
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
         },
@@ -226,17 +228,17 @@ LOGGING = {
         },
         'Billova': {
             'handlers': ['billova_file', 'console'],
-            'level': 'DEBUG',
+            'level': LOG_LEVEL,
             'propagate': False,
         },
         'billova_app': {
             'handlers': ['billova_app_file', 'console'],
-            'level': 'DEBUG',
+            'level': LOG_LEVEL,
             'propagate': False,
         },
         'django.db.backends': {
             'handlers': ['database_file', 'console'],
-            'level': 'DEBUG',
+            'level': LOG_LEVEL,
             'propagate': False,
         },
     },

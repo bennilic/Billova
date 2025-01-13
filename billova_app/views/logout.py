@@ -14,18 +14,19 @@ class CustomLogoutView(LogoutView):
     next_page = reverse_lazy('home')  # Redirect to home page after logout
 
     def dispatch(self, request, *args, **kwargs):
+        username = request.user.username
         try:
             # Log the user logout attempt
-            logger.info(f"User '{request.user.username}' is logging out.")
+            logger.info(f"User '{username}' is logging out.")
 
             # Add a success message
-            messages.success(request, f"You have successfully logged out, {request.user.username}!")
+            messages.success(request, f"You have successfully logged out, {username}!")
 
             # Proceed with the standard logout process
             response = super().dispatch(request, *args, **kwargs)
 
             # Confirm successful logout in the logs
-            logger.info(f"User '{request.user.username}' successfully logged out.")
+            logger.info(f"User '{username}' successfully logged out.")
             return response
 
         except Exception as e:
