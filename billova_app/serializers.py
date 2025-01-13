@@ -28,6 +28,20 @@ class ExpenseSerializer(serializers.HyperlinkedModelSerializer):
             expense.categories.add(category)
         return expense
 
+    def update(self, expense, validated_data):
+        categories_data = validated_data.pop('categories')
+        expense.invoice_date_time = validated_data.get('invoice_date_time', expense.invoice_date_time)
+        expense.price = validated_data.get('price', expense.price)
+        expense.note = validated_data.get('note', expense.note)
+        expense.invoice_issuer = validated_data.get('invoice_issuer', expense.invoice_issuer)
+        expense.invoice_as_text = validated_data.get('invoice_as_text', expense.invoice_as_text)
+        expense.save()
+        expense.categories.clear()
+        for category_data in categories_data:
+            category = Category.objects.get(owner=expense.owner, **category_data)
+            expense.categories.add(category)
+        return expense
+
 
 class UserSettingsSerializer(serializers.HyperlinkedModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
