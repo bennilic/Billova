@@ -30,16 +30,33 @@
                 </tr>
                 </thead>
                 <tbody class="uiExpensesTblBody">
-                <tr>
-                    <td>01.01.2025</td>
-                    <td>15.5$</td>
-                    <td>This is dummy data</td>
-                    <td>Hofer</td>
-                    <td>Hofer</td>
-                    <td class="text-center">
-                        <button class="btn btn-sm btn-danger delete-expense-btn" data-id="toReplaceWithId" data-bs-target="#deleteExpenseEntryModal" data-bs-toggle="modal">Delete</button>
-                    </td>
-                </tr>
+                {% for expense in expenses %}
+                    <tr>
+                        <td>{{ expense.invoice_date_time|date:"d.m.Y" }}</td>
+                        <td>{{ expense.price }}$</td>
+                        <td>{{ expense.note }}</td>
+                        <td>{{ expense.invoice_issuer }}</td>
+                        <td>
+                            {% if expense.category %}
+                                {{ expense.category.name }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-danger delete-expense-btn"
+                                    data-id="{{ expense.id }}"
+                                    data-bs-target="#deleteExpenseEntryModal"
+                                    data-bs-toggle="modal">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">No expenses found.</td>
+                    </tr>
+                {% endfor %}
                 </tbody>
             </table>
         </div>
