@@ -54,7 +54,7 @@ class SignupView(View):
                 )
                 user.save()
                 logger.info("New user created successfully: %s", user.username)
-                messages.success(self.request, f"You have successfully signed up ${user.username} !")
+                messages.success(self.request, f"You have successfully signed up, {user.username}")
 
                 # Specify the backend explicitly
                 backend = 'django.contrib.auth.backends.ModelBackend'

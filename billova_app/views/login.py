@@ -77,5 +77,5 @@ class CustomLoginView(LoginView):
         logger.info("Login successful for user: %s", form.get_user())
 
         # Add a success message
-        messages.success(self.request, "You have successfully logged in!")
+        messages.success(self.request, f"You have successfully logged in, {form.get_user()}")
         return super().form_valid(form)
