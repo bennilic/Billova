@@ -19,7 +19,7 @@ const SELECTORS = {
 };
 
 const DATA = {
-    bootstrapFormValidated: 'was-validated'
+    bootstrapFormValidated: 'was-validated' // used by bootstrap to style invalid forms
 };
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -47,7 +47,7 @@ function saveExpense(e) {
         return;
     }
 
-    // JSON sent to the backend API
+    // JSON sent to the API
     const expenseData = {
         invoice_date_time: document.querySelector(SELECTORS.createFormFields.expenseDate).value,
         price: document.querySelector(SELECTORS.createFormFields.expenseValue).value,
@@ -73,6 +73,7 @@ function saveExpense(e) {
         .then(data => {
             Utils.showNotificationMessage('Expense added successfully', "success");
 
+            // wait 1 second before reloading the page in order to show a success message to the user
             setTimeout(function () {
                 location.reload(); // Reload page to fetch updated expenses TODO maybe update the table instead of reloading the page
             }, 1000);
@@ -128,7 +129,7 @@ function deleteExpense(e) {
         })
         .catch(error => {
             console.error(error);
-            alert("An error occurred while trying to delete the expense.");
+            Utils.showNotificationMessage('An error occurred while trying to delete the expense.', "error");
         });
 }
 
