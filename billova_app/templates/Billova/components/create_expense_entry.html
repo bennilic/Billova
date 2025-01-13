@@ -1,4 +1,4 @@
-<div class="modal fade" id="createExpenseEntryModal" tabindex="-1" aria-labelledby="createExpenseEntryLabel" aria-hidden="true" data-bs-backdrop="static">
+<div class="modal fade" id="createExpenseEntryModal" tabindex="-1" aria-labelledby="createExpenseEntryLabel" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
@@ -6,7 +6,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="expenseEntryForm" class="needs-validation" method="post" action="{% url 'expensesOverview' %}" novalidate>
+                <form id="expenseEntryForm" class="needs-validation" method="post" novalidate>
                     {% csrf_token %}
 
                     <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
