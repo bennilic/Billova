@@ -1,4 +1,6 @@
-from rest_framework import serializers
+from django.contrib.auth.models import User
+from rest_framework import serializers, status
+from rest_framework.response import Response
 
 from billova_app.models import Expense, UserSettings, Category
 
@@ -10,10 +12,21 @@ class CategorySerializer(serializers.HyperlinkedModelSerializer):
         model = Category
         fields = ['url', 'id', 'name', 'owner']
 
+    def create(self, validated_data):
+        global_user = User.objects.get(username='global')
+        user = validated_data.pop('owner', None)
+        try:
+            Category.objects.get(owner=global_user, **validated_data)
+        except Category.DoesNotExist:
+            try:
+                Category.objects.get(owner=user, **validated_data)
+            except Category.DoesNotExist:
+                return Category.objects.create(owner=user, **validated_data)
+        return Response({'detail': 'Category already exists.'}, status=status.HTTP_400_BAD_REQUEST)
 
 class ExpenseSerializer(serializers.HyperlinkedModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
-    categories = CategorySerializer(many=True)
+    categories = CategorySerializer(many=True, read_only=False)
 
     class Meta:
         model = Expense
@@ -23,24 +36,32 @@ class ExpenseSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         categories_data = validated_data.pop('categories')
         expense = Expense.objects.create(**validated_data)
+        global_user = User.objects.get(username='global')
         for category_data in categories_data:
-            category = Category.objects.get(owner=expense.owner, **category_data)
+            try:
+                category = Category.objects.get(owner=expense.owner, **category_data)
+            except Category.DoesNotExist:
+                category = Category.objects.get(owner=global_user, **category_data)
             expense.categories.add(category)
         return expense
 
-    def update(self, expense, validated_data):
+    def update(self, instance, validated_data):
         categories_data = validated_data.pop('categories')
-        expense.invoice_date_time = validated_data.get('invoice_date_time', expense.invoice_date_time)
-        expense.price = validated_data.get('price', expense.price)
-        expense.note = validated_data.get('note', expense.note)
-        expense.invoice_issuer = validated_data.get('invoice_issuer', expense.invoice_issuer)
-        expense.invoice_as_text = validated_data.get('invoice_as_text', expense.invoice_as_text)
-        expense.save()
-        expense.categories.clear()
+        instance.invoice_date_time = validated_data.get('invoice_date_time', instance.invoice_date_time)
+        instance.price = validated_data.get('price', instance.price)
+        instance.note = validated_data.get('note', instance.note)
+        instance.invoice_issuer = validated_data.get('invoice_issuer', instance.invoice_issuer)
+        instance.invoice_as_text = validated_data.get('invoice_as_text', instance.invoice_as_text)
+        instance.save()
+        instance.categories.clear()
+        global_user = User.objects.get(username='global')
         for category_data in categories_data:
-            category = Category.objects.get(owner=expense.owner, **category_data)
-            expense.categories.add(category)
-        return expense
+            try:
+                category = Category.objects.get(owner=instance.owner, **category_data)
+            except Category.DoesNotExist:
+                category = Category.objects.get(owner=global_user, **category_data)
+            instance.categories.add(category)
+        return instance
 
 
 class UserSettingsSerializer(serializers.HyperlinkedModelSerializer):

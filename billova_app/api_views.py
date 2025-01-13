@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from rest_framework import viewsets, permissions
 
 from billova_app.models import Expense, Category, UserSettings
@@ -29,6 +30,10 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+    def get_queryset(self):
+        global_user = User.objects.get(username='global')
+        return Category.objects.filter(owner__in=[self.request.user, global_user])
 
 
 class UserSettingsViewSet(viewsets.ModelViewSet):
