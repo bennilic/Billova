@@ -17,7 +17,7 @@ class CustomLogoutView(LogoutView):
         username = request.user.username
         try:
             # Log the user logout attempt
-            logger.info(f"User '{username}' is logging out.")
+            logger.debug(f"User '{username}' is logging out.")
 
             # Add a success message
             messages.success(request, f"You have successfully logged out, {username}!")
