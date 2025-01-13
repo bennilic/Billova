@@ -58,6 +58,9 @@ class CustomLoginForm(forms.Form):
         return self.user
 
 
+from django.contrib import messages
+
+
 class CustomLoginView(LoginView):
     template_name = 'login.html'
     authentication_form = CustomLoginForm
@@ -72,4 +75,7 @@ class CustomLoginView(LoginView):
     def form_valid(self, form):
         """Log successful login attempts."""
         logger.info("Login successful for user: %s", form.get_user())
+
+        # Add a success message
+        messages.success(self.request, "You have successfully logged in!")
         return super().form_valid(form)
