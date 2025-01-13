@@ -4,7 +4,10 @@ import * as Utils from './utils/utils.js';
 const SELECTORS = {
     expenseTable: '#expensesTable',
     saveExpenseButton: '#saveExpenseEntryButton',
+    deleteExpenseButton: '.delete-expense-btn',
+    confirmDeleteExpenseButton: '.confirm-delete-expense-btn',
     createExpenseForm: '#expenseEntryForm',
+    deleteExpenseForm: '#deleteExpenseForm',
     csrfToken: "[name=csrfmiddlewaretoken]",
     createFormFields: {
         expenseCategory: '#expenseCategory',
@@ -25,9 +28,14 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function setupDomEvents() {
-    let saveExpenseButton = document.querySelector(SELECTORS.saveExpenseButton);
+    const saveExpenseButton = document.querySelector(SELECTORS.saveExpenseButton);
     if (saveExpenseButton) {
         saveExpenseButton.addEventListener('click', saveExpense);
+    }
+
+    const deleteExpenseButton = document.querySelector(SELECTORS.deleteExpenseButton);
+    if (deleteExpenseButton) {
+        deleteExpenseButton.addEventListener('click', onDeleteExpenseButtonClick);
     }
 }
 
@@ -63,8 +71,7 @@ function saveExpense(e) {
             return response.json();
         })
         .then(data => {
-            console.log('Expense created:', data);
-            Utils.showNotificationMessage('Expense successfully created', "success");
+            Utils.showNotificationMessage('Expense added successfully', "success");
 
             setTimeout(function () {
                 location.reload(); // Reload page to fetch updated expenses TODO maybe update the table instead of reloading the page
@@ -73,15 +80,67 @@ function saveExpense(e) {
         })
         .catch(error => {
             console.error('Error creating expense:', error);
-            Utils.showNotificationMessage('Error creating Expense entry', "error");
+            Utils.showNotificationMessage('Unable to create the expense. Please ensure all fields are filled out correctly.', "error");
         });
 }
 
+function onDeleteExpenseButtonClick(e) {
+    const confirmDeleteExpenseButton = document.querySelector(SELECTORS.confirmDeleteExpenseButton);
+    if (!confirmDeleteExpenseButton) {
+        return;
+    }
+
+    // the id of the expense is set as data attribute on the confirm button. When the button is clicked,
+    // we will then use the value in the data attribute for the REST Delete method
+    confirmDeleteExpenseButton.dataset.expenseId = e.currentTarget.dataset.expenseId;
+    confirmDeleteExpenseButton.addEventListener('click', deleteExpense);
+}
+
+function deleteExpense(e) {
+    const toDeleteExpenseId = e.currentTarget.dataset.expenseId;
+    if (!toDeleteExpenseId || isNaN(parseInt(toDeleteExpenseId))) {
+        return;
+    }
+
+    const deleteForm = document.querySelector(SELECTORS.deleteExpenseForm);
+    if (!deleteForm) {
+        return;
+    }
+
+    fetch(`/api/v1/expenses/${toDeleteExpenseId}/`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfTokenFromForm(deleteForm)
+        },
+    })
+        .then(response => {
+            if (response.ok) {
+                Utils.showNotificationMessage('Expense deleted successfully', "success");
+
+                setTimeout(function () {
+                    location.reload(); // Reload page to fetch updated expenses TODO maybe update the table instead of reloading the page
+                }, 1000);
+
+            } else {
+                throw new Error(`Failed to delete expense: ${response.status}`);
+            }
+        })
+        .catch(error => {
+            console.error(error);
+            alert("An error occurred while trying to delete the expense.");
+        });
+}
 
 function getCsrfTokenFromForm(form) {
+    if (!form) {
+        return '';
+    }
+
     let token = form.querySelector(SELECTORS.csrfToken);
     if (token) {
         return token.value;
     }
+
     return '';
 }
