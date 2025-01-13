@@ -21,7 +21,12 @@
 <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3">
     {% if messages %}
         {% for message in messages %}
-            <div class="toast align-items-center text-bg-success border-0" role="alert"
+            <div class="toast
+            align-items-center
+            text-bg-{{ message.tags }}
+            bg-{{ message.tags|default:"info" }}
+            border-0"
+                 role="alert"
                  aria-live="assertive" aria-atomic="true">
                 <div class="d-flex">
                     <div class="toast-body">
