@@ -6,11 +6,3 @@ document.addEventListener("DOMContentLoaded", function () {
         toast.show();
     });
 });
-
-document.addEventListener("DOMContentLoaded", function () {
-    // Initialize Bootstrap dropdowns
-    const dropdownElements = document.querySelectorAll('.dropdown-toggle');
-    dropdownElements.forEach(function (dropdown) {
-        new bootstrap.Dropdown(dropdown);
-    });
-});
