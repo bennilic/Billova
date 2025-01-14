@@ -10,7 +10,7 @@ const SELECTORS = {
     deleteExpenseForm: '#deleteExpenseForm',
     csrfToken: "[name=csrfmiddlewaretoken]",
     createFormFields: {
-        expenseCategory: '#expenseCategory',
+        expenseCategories: '#expenseCategories',
         expenseValue: '#expenseValue',
         expenseDate: '#expenseDate',
         expenseIssuer: '#expenseIssuer',
@@ -49,6 +49,7 @@ function saveExpense(e) {
 
     // JSON sent to the API
     const expenseData = {
+        categories: document.querySelector(SELECTORS.createFormFields.expenseCategories).value,
         invoice_date_time: document.querySelector(SELECTORS.createFormFields.expenseDate).value,
         price: document.querySelector(SELECTORS.createFormFields.expenseValue).value,
         note: document.querySelector(SELECTORS.createFormFields.expenseNote).value,
