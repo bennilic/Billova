@@ -12,15 +12,37 @@
           type="text/css">
     <link rel="stylesheet" href="{% static 'css/libs.bundle.css' %}">
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
-
-
     {% block style %}
     {% endblock %}
 
     {% block head_script %}
     {% endblock %}
 </head>
+
 <body class="d-flex flex-column h-100">
+
+<div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="toast
+            align-items-center
+            text-bg-{{ message.tags }}
+            bg-{{ message.tags|default:"info" }}
+            border-0"
+                 role="alert"
+                 aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        {{ message }}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                            data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
 <header>
     {% block header %}
         
@@ -43,6 +65,8 @@
 <script src="{% static 'js/base.js' %}"></script>
 
 {% block script %}
+    # Purpose: These scripts are conditionally included only when a child template overrides the block
 {% endblock %}
 </body>
+
 </html>

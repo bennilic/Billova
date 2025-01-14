@@ -1,9 +1,14 @@
-# views.py
+import logging
+
 from django import forms
 from django.contrib.auth import authenticate
+from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
-from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
+
+# Set up logging
+logger = logging.getLogger(__name__)
+User = get_user_model()
 
 
 class EmailOrUsernameModelBackend(ModelBackend):
@@ -35,14 +40,25 @@ class CustomLoginForm(forms.Form):
         username = cleaned_data.get('username')
         password = cleaned_data.get('password')
 
+        logger.info("Attempting login for username/email: %s", username)
+
         # Authenticate user
         self.user = authenticate(self.request, username=username, password=password)
         if not self.user:
+            logger.error("Invalid login credentials for username/email: %s", username)
             raise forms.ValidationError("Invalid login credentials")
+        if not self.user.is_active:
+            logger.error("Inactive account for username/email: %s", username)
+            raise forms.ValidationError("This account is inactive")
+
+        logger.info("Successful login for username/email: %s", username)
         return cleaned_data
 
     def get_user(self):
         return self.user
+
+
+from django.contrib import messages
 
 
 class CustomLoginView(LoginView):
@@ -50,3 +66,16 @@ class CustomLoginView(LoginView):
     authentication_form = CustomLoginForm
     redirect_authenticated_user = True
     next_page = '/'  # Redirect after successful login
+
+    def form_invalid(self, form):
+        """Log errors when login fails."""
+        logger.warning("Login failed for username/email: %s", form.cleaned_data.get('username', 'Unknown'))
+        return super().form_invalid(form)
+
+    def form_valid(self, form):
+        """Log successful login attempts."""
+        logger.info("Login successful for user: %s", form.get_user())
+
+        # Add a success message
+        messages.success(self.request, f"You have successfully logged in, {form.get_user()}")
+        return super().form_valid(form)
