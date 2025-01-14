@@ -15,7 +15,9 @@
                         <label for="expenseCategory" class="form-label">Category</label>
                         <select class="form-select" id="expenseCategory" name="expenseCategory" required>
                             <option value="">Select category...</option>
-                            <option value="Dummy-Option">Dummy-Option</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
                         </select>
                     </div>
 
