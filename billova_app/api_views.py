@@ -17,6 +17,10 @@ class ExpenseViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
+    def get_queryset(self):
+        # Limit expenses to those belonging to the logged-in user
+        return self.queryset.filter(owner=self.request.user)
+
 
 class CategoryViewSet(viewsets.ModelViewSet):
     """
