@@ -8,7 +8,6 @@ class Expense(models.Model):
     note = models.TextField(blank=True)
     invoice_issuer = models.TextField(blank=True)
     invoice_as_text = models.TextField(blank=True)
-    # category = models.ForeignKey('Category', related_name='expenses', on_delete=models.CASCADE)
     owner = models.ForeignKey('auth.User', related_name='expenses', on_delete=models.CASCADE)
 
     class Meta:
@@ -17,11 +16,12 @@ class Expense(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=255)
+    expenses = models.ManyToManyField('Expense', related_name='categories')
     owner = models.ForeignKey('auth.User', related_name='categories', on_delete=models.CASCADE)
 
     class Meta:
         ordering = ['name']
-
+        # TODO make primary key (name, owner)
 
 class UserSettings(models.Model):
     # https://en.wikipedia.org/wiki/ISO_4217 - 3 letter currency code
