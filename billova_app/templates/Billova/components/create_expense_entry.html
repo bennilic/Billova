@@ -1,0 +1,50 @@
+<div class="modal fade" id="createExpenseEntryModal" tabindex="-1" aria-labelledby="createExpenseEntryLabel" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createExpenseEntryLabel">Create Entry</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="expenseEntryForm" class="needs-validation" method="post" novalidate>
+                    {% csrf_token %}
+
+                    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+                    <div class="mb-3">
+                        <label for="expenseCategory" class="form-label">Category</label>
+                        <select class="form-select" id="expenseCategory" name="expenseCategory" required>
+                            <option value="">Select category...</option>
+                            <option value="Dummy-Option">Dummy-Option</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="expenseValue" class="form-label">Value</label>
+                        <input type="number" id="expenseValue" class="form-control" name="expenseValue" step="any" required/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="expenseDate" class="form-label">Date</label>
+                        <input type="date" id="expenseDate" class="form-control" name="expenseDate" min="2000-01-01" required/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="expenseIssuer" class="form-label">Issuer</label>
+                        <input type="text" id="expenseIssuer" class="form-control" name="expenseIssuer" required/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="expenseNote" class="form-label">Note</label>
+                        <input type="text" id="expenseNote" class="form-control" name="expenseNote" />
+                    </div>
+                </form>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary save-expenseEntry-button" id="saveExpenseEntryButton">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
