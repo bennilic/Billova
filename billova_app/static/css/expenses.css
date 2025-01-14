@@ -1,0 +1,8 @@
+.expenses__title {
+    display: flex;
+    justify-content: space-between;
+}
+
+.dataTable-dropdown label {
+    display: ruby-text;
+}
