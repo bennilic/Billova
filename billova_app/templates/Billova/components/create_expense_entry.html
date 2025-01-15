@@ -14,10 +14,10 @@
 
                     <div class="mb-3">
                         <label for="expenseCategories" class="form-label">Category</label>
-                        <select class="form-select" id="expenseCategories" name="expenseCategories" required>
+                        <select class="form-select" id="expenseCategories" name="expenseCategories" multiple required>
                             <option value="">Select category...</option>
                             {% for category in categories %}
-                                <option value="{{ category.id }}">{{ category.name }}</option>
+                                <option value="{{ category.name }}">{{ category.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
