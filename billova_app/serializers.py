@@ -10,7 +10,7 @@ class CategorySerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Category
-        fields = ['url', 'id', 'name', 'owner', 'is_system_default']
+        fields = ['url', 'id', 'name', 'owner']
 
     def create(self, validated_data):
         global_user = User.objects.get(username='global')

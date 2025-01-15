@@ -18,7 +18,6 @@ class Category(models.Model):
     name = models.CharField(max_length=255)
     expenses = models.ManyToManyField('Expense', related_name='categories')
     owner = models.ForeignKey('auth.User', related_name='categories', on_delete=models.CASCADE)
-    is_system_default = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['name']
