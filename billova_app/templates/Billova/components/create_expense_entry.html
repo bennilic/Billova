@@ -17,7 +17,7 @@
                         <select class="form-select" id="expenseCategories" name="expenseCategories" required>
                             <option value="">Select category...</option>
                             {% for category in expense.categories %}
-                                <option value="{{ category.name }}">{{ category.name }}</option>
+                                <option value="{{ category.id }}">{{ category.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
