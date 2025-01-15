@@ -16,7 +16,7 @@
                         <label for="expenseCategories" class="form-label">Category</label>
                         <select class="form-select" id="expenseCategories" name="expenseCategories" required>
                             <option value="">Select category...</option>
-                            {% for category in expense.categories %}
+                            {% for category in categories %}
                                 <option value="{{ category.id }}">{{ category.name }}</option>
                             {% endfor %}
                         </select>
