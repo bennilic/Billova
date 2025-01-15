@@ -33,9 +33,12 @@ function setupDomEvents() {
         saveExpenseButton.addEventListener('click', saveExpense);
     }
 
-    const deleteExpenseButton = document.querySelector(SELECTORS.deleteExpenseButton);
-    if (deleteExpenseButton) {
-        deleteExpenseButton.addEventListener('click', onDeleteExpenseButtonClick);
+    const deleteExpenseButtons = document.querySelectorAll(SELECTORS.deleteExpenseButton);
+
+    if (deleteExpenseButtons) {
+        deleteExpenseButtons.forEach(button => {
+            button.addEventListener('click', onDeleteExpenseButtonClick);
+        });
     }
 }
 
