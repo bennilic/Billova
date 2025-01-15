@@ -1,13 +1,17 @@
 import * as Utils from './utils/utils.js';
+import {ButtonBuilder, ElementBuilder} from "./builder/builder.js";
 
 
 const SELECTORS = {
     expenseTable: '#expensesTable',
+    expenseTableBody: '.uiExpensesTblBody',
     saveExpenseButton: '#saveExpenseEntryButton',
     deleteExpenseButton: '.delete-expense-btn',
     confirmDeleteExpenseButton: '.confirm-delete-expense-btn',
     createExpenseForm: '#expenseEntryForm',
     deleteExpenseForm: '#deleteExpenseForm',
+    deleteExpenseEntryModal: '#deleteExpenseEntryModal',
+    createExpenseModal: '#createExpenseEntryModal',
     csrfToken: "[name=csrfmiddlewaretoken]",
     createFormFields: {
         expenseCategory: '#expenseCategory',
@@ -19,12 +23,12 @@ const SELECTORS = {
 };
 
 const DATA = {
-    bootstrapFormValidated: 'was-validated' // used by bootstrap to style invalid forms
+    bootstrapFormValidated: 'was-validated', // used by bootstrap to style invalid forms
+    vanillaDataTableInstance: undefined
 };
 
 document.addEventListener('DOMContentLoaded', function () {
-    Utils.initializeVanillaDataTable(SELECTORS.expenseTable);
-    setupDomEvents();
+    populateExpensesTable();
 });
 
 function setupDomEvents() {
@@ -33,9 +37,12 @@ function setupDomEvents() {
         saveExpenseButton.addEventListener('click', saveExpense);
     }
 
-    const deleteExpenseButton = document.querySelector(SELECTORS.deleteExpenseButton);
-    if (deleteExpenseButton) {
-        deleteExpenseButton.addEventListener('click', onDeleteExpenseButtonClick);
+    const deleteExpenseButtons = document.querySelectorAll(SELECTORS.deleteExpenseButton);
+
+    if (deleteExpenseButtons) {
+        deleteExpenseButtons.forEach(button => {
+            button.addEventListener('click', onDeleteExpenseButtonClick);
+        });
     }
 }
 
@@ -65,18 +72,19 @@ function saveExpense(e) {
     })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Failed to create expense');
+                throw new Error('Failed to create expense ' + response.statusText);
             }
 
             return response.json();
         })
         .then(data => {
+
+            Utils.closeModal(SELECTORS.createExpenseModal);
             Utils.showNotificationMessage('Expense added successfully', "success");
 
-            // wait 1 second before reloading the page in order to show a success message to the user
-            setTimeout(function () {
-                location.reload(); // Reload page to fetch updated expenses TODO maybe update the table instead of reloading the page
-            }, 1000);
+            addExpenseToTable(data);
+            reinitializeVanillaDataTable();
+            setupDomEvents();
 
         })
         .catch(error => {
@@ -99,12 +107,16 @@ function onDeleteExpenseButtonClick(e) {
 
 function deleteExpense(e) {
     const toDeleteExpenseId = e.currentTarget.dataset.expenseId;
+    const errorMessage = 'An error occurred while trying to delete the expense.';
+
     if (!toDeleteExpenseId || isNaN(parseInt(toDeleteExpenseId))) {
+        Utils.showNotificationMessage(errorMessage, "error");
         return;
     }
 
     const deleteForm = document.querySelector(SELECTORS.deleteExpenseForm);
     if (!deleteForm) {
+        Utils.showNotificationMessage(errorMessage, "error");
         return;
     }
 
@@ -116,21 +128,115 @@ function deleteExpense(e) {
         },
     })
         .then(response => {
-            if (response.ok) {
-                Utils.showNotificationMessage('Expense deleted successfully', "success");
-
-                setTimeout(function () {
-                    location.reload(); // Reload page to fetch updated expenses TODO maybe update the table instead of reloading the page
-                }, 1000);
-
-            } else {
-                throw new Error(`Failed to delete expense: ${response.status}`);
+            if (!response.ok) {
+                throw new Error(`Failed to delete expense: ${response.statusText}`);
             }
+
+            removeExpenseTableEntry(toDeleteExpenseId);
+            reinitializeVanillaDataTable();
+
+            Utils.closeModal(SELECTORS.deleteExpenseEntryModal);
+            Utils.showNotificationMessage('Expense deleted successfully', "success");
+
         })
         .catch(error => {
             console.error(error);
-            Utils.showNotificationMessage('An error occurred while trying to delete the expense.', "error");
+            Utils.showNotificationMessage(errorMessage, "error");
         });
+}
+
+function populateExpensesTable() {
+    fetch('/api/v1/expenses/', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Cache-Control': 'max-age=3600' // Cache for 1 hour
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.json();
+        })
+
+        .then(data => {
+            if (!data.results) {
+                throw new Error("Error fetching expenses");
+            }
+
+            addListExpensesToTable(data.results);
+            reinitializeVanillaDataTable();
+            setupDomEvents();
+
+        })
+        .catch(error => {
+            console.error(error.message);
+            Utils.showNotificationMessage('We were unable to load your expense list. Please try again later.', "error");
+        });
+}
+
+function addListExpensesToTable(expenses) {
+    const expensesTable = document.querySelector(SELECTORS.expenseTable);
+    if (!expensesTable) {
+        showNoExpenseFoundInTable(expensesTable);
+        throw new Error("No expenses table found");
+    }
+
+    if (!expenses) {
+        showNoExpenseFoundInTable(expensesTable);
+        throw new Error("List with expenses not provided");
+    }
+
+    if (!expenses.length) {
+        showNoExpenseFoundInTable(expensesTable);
+        return;
+    }
+
+    expenses.forEach(expense => {
+        addExpenseToTable(expense);
+    });
+}
+
+function addExpenseToTable(expense, table=document.querySelector(SELECTORS.expenseTable)) {
+    const tableBody = table.querySelector(SELECTORS.expenseTableBody);
+    if (!tableBody) {
+        return;
+    }
+
+    const deleteButton = new ButtonBuilder("button")
+        .class("btn btn-sm btn-danger delete-expense-btn")
+        .with("data-bs-toggle", "modal")
+        .with("data-bs-target", SELECTORS.deleteExpenseEntryModal)
+        .with("data-expense-id", expense.id)
+        .text("Delete");
+
+    const categories = expense.categories; // TODO implement after beni's changes are merged
+
+    let tableRow = new ElementBuilder("tr")
+        .attr({
+            'data-expense-id' : expense.id
+        })
+        .append(new ElementBuilder("td").class("tableDataExpenseDate").text(Utils.stringToFormattedDate(expense.invoice_date_time)))
+        .append(new ElementBuilder("td").class("tableDataExpensePrice").text(expense.price))
+        .append(new ElementBuilder("td").class("tableDataExpenseNote").text(expense.note))
+        .append(new ElementBuilder("td").class("tableDataExpenseIssuer").text(expense.invoice_issuer))
+        .append(new ElementBuilder("td").class("tableDataExpenseDate").text(expense.categories))
+        .append(new ElementBuilder("td").class("tableDataAction text-center").append(deleteButton));
+
+    tableBody.append(tableRow.element);
+}
+
+function showNoExpenseFoundInTable(table = document.querySelector(SELECTORS.expenseTable)) {
+    const tableBody = table.querySelector(SELECTORS.expenseTableBody);
+    if (!tableBody) {
+        return;
+    }
+
+    let tableRow = new ElementBuilder("tr")
+        .append(new ElementBuilder("td").class("text-center").text("No expenses found."));
+
+    tableBody.append(tableRow.element);
 }
 
 function getCsrfTokenFromForm(form) {
@@ -144,4 +250,21 @@ function getCsrfTokenFromForm(form) {
     }
 
     return '';
+}
+
+function removeExpenseTableEntry(expenseId) {
+    const toRemoveTableRow = document.querySelector(`tr[data-expense-id="${expenseId}"]`);
+    if (toRemoveTableRow) {
+        toRemoveTableRow.remove();
+    }
+}
+
+function reinitializeVanillaDataTable() {
+    if (DATA.vanillaDataTableInstance) {
+        // first destroy it
+        DATA.vanillaDataTableInstance.destroy();
+    }
+
+    // then initialize it
+    DATA.vanillaDataTableInstance = Utils.initializeVanillaDataTable(SELECTORS.expenseTable);
 }

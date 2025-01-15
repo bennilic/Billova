@@ -48,7 +48,7 @@ export function initializeVanillaDataTable(tableSelector, options = DATA_TABLE_D
         return;
     }
 
-    new DataTable(table, options);
+    const newTable = new DataTable(table, options);
 
     // Wait for the DataTable to render its DOM
     setTimeout(() => {
@@ -63,4 +63,15 @@ export function initializeVanillaDataTable(tableSelector, options = DATA_TABLE_D
             perPageSelect.classList.add('form-select');
         }
     }, 0);
+
+    return newTable;
+}
+
+export function stringToFormattedDate(dateString, locale='de-DE') {
+    return new Date(dateString)
+        .toLocaleDateString(locale, {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
 }
