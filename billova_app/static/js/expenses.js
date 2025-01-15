@@ -23,7 +23,7 @@ const DATA = {
 };
 
 document.addEventListener('DOMContentLoaded', function () {
-    Utils.initializeVanillaDataTable(SELECTORS.expenseTable);
+    Utils.initializeDataTable(SELECTORS.expenseTable);
     setupDomEvents();
 });
 

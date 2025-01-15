@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block style %}
-    <link href="https://unpkg.com/vanilla-datatables@latest/dist/vanilla-dataTables.min.css" rel="stylesheet" type="text/css">
+    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="{% static 'css/expenses.css' %}">
 {% endblock %}
 
@@ -70,5 +70,5 @@
 
 {% block script %}
     <script type="module" src="{% static 'js/expenses.js' %}"></script>
-    <script src="https://unpkg.com/vanilla-datatables@latest/dist/vanilla-dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" type="text/javascript"></script>
 {% endblock %}

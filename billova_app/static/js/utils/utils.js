@@ -31,34 +31,58 @@ const DATA_TABLE_DEFAULT_OPTIONS = {
     searchable: true,
     fixedHeight: true,
     perPage: 10,
-    perPageSelect: [5, 10, 15, 20]
+    perPageSelect: [5, 10, 15, 20],
+    tableRender: (_data, table, type) => {
+        if (type === "print") {
+            return table
+        }
+        const tHead = table.childNodes[0]
+        const filterHeaders = {
+            nodeName: "TR",
+            childNodes: tHead.childNodes[0].childNodes.map(
+                (_th, index) => ({nodeName: "TH",
+                    childNodes: [
+                        {
+                            nodeName: "INPUT",
+                            attributes: {
+                                class: "datatable-input form-control",
+                                type: "search",
+                                "data-columns": `[${index}]`
+                            }
+                        }
+                    ]})
+            )
+        }
+        tHead.childNodes.push(filterHeaders)
+        return table
+    }
 };
 
 /**
- * Function used to initialize a table using Vanilla Datatables.
+ * Function used to initialize a table using simple-datatables.
  * @param tableSelector - table selector (id or class)
  * @param options - options to be used for the table. This is a default param.
  * If not passed, DATA_TABLE_DEFAULT_OPTIONS will be used.
  */
-export function initializeVanillaDataTable(tableSelector, options = DATA_TABLE_DEFAULT_OPTIONS) {
+export function initializeDataTable(tableSelector, options = DATA_TABLE_DEFAULT_OPTIONS) {
     let table = document.querySelector(tableSelector);
 
-    if (!table || typeof DataTable === 'undefined') {
+    if (!table || typeof simpleDatatables === 'undefined') {
         console.error('Table element or DataTable library not found.');
         return;
     }
 
-    new DataTable(table, options);
+    new simpleDatatables.DataTable(table, options);
 
     // Wait for the DataTable to render its DOM
     setTimeout(() => {
         // Add custom classes to specific elements
-        const searchInput = document.querySelector('.dataTable-input');
+        const searchInput = document.querySelector('.datatable-input');
         if (searchInput) {
             searchInput.classList.add('form-control');
         }
 
-        const perPageSelect = document.querySelector('.dataTable-dropdown select');
+        const perPageSelect = document.querySelector('.datatable-dropdown select');
         if (perPageSelect) {
             perPageSelect.classList.add('form-select');
         }
