@@ -2,7 +2,12 @@ import os
 
 from django.contrib import messages
 from django.shortcuts import redirect
+from django.shortcuts import render
+from django.views import View
 from django.views.generic import TemplateView
+from pytz import all_timezones
+
+from billova_app.utils.settings_utils import get_current_currencies
 
 
 class AccountOverviewView(TemplateView):
@@ -42,5 +47,10 @@ class AccountOverviewView(TemplateView):
         return redirect('account_overview')
 
 
-class AccountSettingsView(TemplateView):
-    template_name = 'Billova/account_settings.html'
+class AccountSettingsView(View):
+    def get(self, request):
+        current_currencies = get_current_currencies()
+        return render(request, 'account_settings.html', {
+            'currencies': current_currencies,
+            'timezones': all_timezones
+        })

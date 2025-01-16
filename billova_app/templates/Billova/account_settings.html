@@ -30,11 +30,9 @@
                     <div class="mb-4">
                         <label for="currency" class="form-label">Currency</label>
                         <select name="currency" id="currency" class="form-select" required>
-                            <option value="USD">US Dollar (USD)</option>
-                            <option value="EUR" selected>Euro (EUR)</option>
-                            <option value="GBP">British Pound (GBP)</option>
-                            <option value="RON">Romanian Leu (RON)</option>
-                            <option value="TRY">Turkish Lira (TRY)</option>
+                            {% for code, name in currencies.items %}
+                                <option value="{{ code }}">{{ name }} ({{ code }})</option>
+                            {% endfor %}
                         </select>
                     </div>
 

@@ -4,3 +4,4 @@ sqlparse==0.5.2
 django-widget-tweaks
 django-rest-framework
 babel
+pytz
