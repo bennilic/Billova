@@ -1,29 +1,52 @@
 {% extends "layout.html" %}
-{% load static %}
-
 {% block content %}
     <div class="container mt-5">
-        <h1 class="text-center">Account Overview</h1>
-        <div class="card mx-auto mt-4" style="max-width: 600px;">
-            <div class="card-body">
-                <!-- Profile Picture -->
-                {% if profile_picture %}
-                    <div class="text-center mb-4">
-                        <img src="{{ profile_picture }}" alt="Profile Picture" class="rounded-circle"
-                             style="width: 120px; height: 120px;">
+        <div class="row">
+            <!-- Sidebar Navigation -->
+            <div class="col-md-3">
+                <ul class="list-group">
+                    <li class="list-group-item active">General</li>
+                    <li class="list-group-item text-danger">Delete account</li>
+                </ul>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-9">
+                <!-- Header Section -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Account</h2>
+                    <div>
+                        <a href="{% url 'account_settings' %}" class="btn btn-outline-secondary me-2">Edit</a>
+                        <button class="btn btn-danger">Delete</button>
                     </div>
-                {% else %}
-                    <div class="text-center mb-4">
-                        <img src="{% static 'images/default_profile.png' %}" alt="Default Profile Picture"
-                             class="rounded-circle" style="width: 120px; height: 120px;">
-                    </div>
-                {% endif %}
+                </div>
 
                 <!-- User Information -->
-                <p><strong>Name:</strong> {{ name }}</p>
-                <p><strong>Email:</strong> {{ email }}</p>
-                <p><strong>Timezone:</strong> {{ timezone }}</p>
-                <p><strong>Currency:</strong> {{ currency }}</p>
+                <div class="card">
+                    <div class="card-body d-flex">
+                        <!-- Profile Picture -->
+                        <div class="me-4">
+                            <img src="{{ profile_picture|default:'/static/images/default_profile.png' }}"
+                                 alt="Profile Picture"
+                                 class="rounded-circle"
+                                 style="width: 100px; height: 100px;">
+                        </div>
+                        <!-- User Info -->
+                        <div>
+                            <h4>{{ user.username }}</h4>
+                            <p class="text-muted">{{ user.email }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">User Settings</h5>
+                        <p><strong>Language:</strong> English</p>
+                        <p><strong>Currency:</strong> Euro (€)</p>
+                        <p><strong>Timezone:</strong> Central European Time (CET)</p>
+                        <p><strong>Numeric Format:</strong> German Accountant Style</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
