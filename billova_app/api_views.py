@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.core.serializers import serialize
 from django.http import HttpResponseRedirect, HttpResponse
 from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
@@ -26,7 +27,11 @@ class ExpenseViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'], url_path='ocr', serializer_class=ExpenseOCRSerializer)
     def ocr(self, request):
-        return HttpResponse('OCR')
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            return HttpResponse('Valid')
+
+        return HttpResponse('Invalid')
 
 
 class CategoryViewSet(viewsets.ModelViewSet):

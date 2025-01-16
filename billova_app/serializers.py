@@ -70,6 +70,9 @@ class ExpenseOCRSerializer(serializers.Serializer):
 
     def validate(self, data):
         print(data)
+
+        # raise serializers.ValidationError("Invalid")
+
         # mime = magic.Magic(mime=True)
         # file_mime_type = mime.from_buffer(data.read())
         # data.seek(0)  # Reset file pointer to the beginning after reading
