@@ -67,11 +67,11 @@ export function initializeVanillaDataTable(tableSelector, options = DATA_TABLE_D
     return newTable;
 }
 
-export function stringToFormattedDate(dateString, locale='de-DE') {
-    return new Date(dateString)
-        .toLocaleDateString(locale, {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
+export function stringToFormattedDate(dateString) {
+    const date = new Date(dateString);
+    const day = ("0" + date.getDate()).slice(-2); // Ensure two digits for day
+    const month = ("0" + (date.getMonth() + 1)).slice(-2); // Ensure two digits for month
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
 }
