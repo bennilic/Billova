@@ -1,67 +1,29 @@
-{% extends "Billova/layout.html" %}
+{% extends "layout.html" %}
 {% load static %}
 
-{% block title %}Account Overview{% endblock %}
-
 {% block content %}
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6">
-                <div class="card shadow">
-                    <div class="card-body">
-                        <h1 class="text-center mb-4">Account Overview</h1>
-
-                        <!-- Profile Picture -->
-                        <div class="text-center mb-4">
-                            {% if user.profile.profile_picture %}
-                                <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture"
-                                     class="img-thumbnail rounded-circle" style="max-width: 150px;">
-                            {% else %}
-                                <img src="{% static 'images/default-profile.png' %}" alt="Default Profile Picture"
-                                     class="img-thumbnail rounded-circle" style="max-width: 150px;">
-                            {% endif %}
-                        </div>
-
-                        <!-- User Details -->
-                        <ul class="list-group list-group-flush">
-                            <!-- Name -->
-                            <li class="list-group-item">
-                                <strong>Name:</strong>
-                                <span class="float-end">{{ user.profile.name }}</span>
-                            </li>
-
-                            <!-- Email -->
-                            <li class="list-group-item">
-                                <strong>Email Address:</strong>
-                                <span class="float-end">{{ user.email }}</span>
-                            </li>
-
-                            <!-- Currency -->
-                            <li class="list-group-item">
-                                <strong>Preferred Currency:</strong>
-                                <span class="float-end">{{ user.profile.currency }}</span>
-                            </li>
-
-                            <!-- Language -->
-                            <li class="list-group-item">
-                                <strong>Preferred Language:</strong>
-                                <span class="float-end">
-                                {% if user.profile.language == "en" %}English{% elif user.profile.language == "de" %}
-                                    German{% elif user.profile.language == "fr" %}
-                                    French{% elif user.profile.language == "es" %}Spanish{% else %}
-                                    {{ user.profile.language }}
-                                {% endif %}
-                            </span>
-                            </li>
-
-                            <!-- Timezone -->
-                            <li class="list-group-item">
-                                <strong>Timezone:</strong>
-                                <span class="float-end">{{ user.profile.timezone }}</span>
-                            </li>
-                        </ul>
+    <div class="container mt-5">
+        <h1 class="text-center">Account Overview</h1>
+        <div class="card mx-auto mt-4" style="max-width: 600px;">
+            <div class="card-body">
+                <!-- Profile Picture -->
+                {% if profile_picture %}
+                    <div class="text-center mb-4">
+                        <img src="{{ profile_picture }}" alt="Profile Picture" class="rounded-circle"
+                             style="width: 120px; height: 120px;">
                     </div>
-                </div>
+                {% else %}
+                    <div class="text-center mb-4">
+                        <img src="{% static 'images/default_profile.png' %}" alt="Default Profile Picture"
+                             class="rounded-circle" style="width: 120px; height: 120px;">
+                    </div>
+                {% endif %}
+
+                <!-- User Information -->
+                <p><strong>Name:</strong> {{ name }}</p>
+                <p><strong>Email:</strong> {{ email }}</p>
+                <p><strong>Timezone:</strong> {{ timezone }}</p>
+                <p><strong>Currency:</strong> {{ currency }}</p>
             </div>
         </div>
     </div>
