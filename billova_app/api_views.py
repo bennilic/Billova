@@ -1,8 +1,10 @@
 from django.contrib.auth.models import User
+from django.http import HttpResponseRedirect, HttpResponse
 from rest_framework import viewsets, permissions
+from rest_framework.decorators import action
 
 from billova_app.models import Expense, Category, UserSettings
-from billova_app.serializers import ExpenseSerializer, CategorySerializer, UserSettingsSerializer
+from billova_app.serializers import ExpenseSerializer, CategorySerializer, UserSettingsSerializer, ExpenseOCRSerializer
 from billova_app.permissions import IsOwner
 
 
@@ -21,6 +23,10 @@ class ExpenseViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         # Limit expenses to those belonging to the logged-in user
         return self.queryset.filter(owner=self.request.user)
+
+    @action(detail=False, methods=['post'], url_path='ocr', serializer_class=ExpenseOCRSerializer)
+    def ocr(self, request):
+        return HttpResponse('OCR')
 
 
 class CategoryViewSet(viewsets.ModelViewSet):

@@ -1,3 +1,4 @@
+# import magic
 from django.contrib.auth.models import User
 from rest_framework import serializers, status
 from rest_framework.response import Response
@@ -62,6 +63,26 @@ class ExpenseSerializer(serializers.HyperlinkedModelSerializer):
                 category = Category.objects.get(owner=global_user, **category_data)
             instance.categories.add(category)
         return instance
+
+
+class ExpenseOCRSerializer(serializers.Serializer):
+    image = serializers.ImageField()
+
+    def validate(self, data):
+        print(data)
+        # mime = magic.Magic(mime=True)
+        # file_mime_type = mime.from_buffer(data.read())
+        # data.seek(0)  # Reset file pointer to the beginning after reading
+        #
+        # if file_mime_type != 'image/jpeg':
+        #     raise serializers.ValidationError("Only JPG files are allowed.")
+        #
+        # # Check file size (limit to 5MB)
+        # max_size = 5 * 1024 * 1024  # 5MB
+        # if data.size > max_size:
+        #     raise serializers.ValidationError("File size must be under 5MB.")
+
+        return data
 
 
 class UserSettingsSerializer(serializers.HyperlinkedModelSerializer):
