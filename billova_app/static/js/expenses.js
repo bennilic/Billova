@@ -308,7 +308,10 @@ function addExpenseToTable(expense, table = document.querySelector(SELECTORS.exp
         "Note": expense.note,
         "Issuer": expense.invoice_issuer,
         "Category": categories,
-        "Actions": `<button class="btn btn-sm btn-danger delete-expense-btn" data-bs-toggle="modal" data-bs-target="${SELECTORS.deleteExpenseEntryModal}" data-expense-id="${expense.id}">Delete</button>`
+        "Actions": `<button class="btn btn-sm btn-danger delete-expense-btn" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="${SELECTORS.deleteExpenseEntryModal}" 
+                    data-expense-id="${expense.id}">Delete</button>`
     }];
 
     // Use the DataTable's insert method to add the data
