@@ -10,7 +10,7 @@ const SELECTORS = {
     deleteExpenseForm: '#deleteExpenseForm',
     csrfToken: "[name=csrfmiddlewaretoken]",
     createFormFields: {
-        expenseCategory: '#expenseCategory',
+        expenseCategories: '#expenseCategories',
         expenseValue: '#expenseValue',
         expenseDate: '#expenseDate',
         expenseIssuer: '#expenseIssuer',
@@ -33,9 +33,12 @@ function setupDomEvents() {
         saveExpenseButton.addEventListener('click', saveExpense);
     }
 
-    const deleteExpenseButton = document.querySelector(SELECTORS.deleteExpenseButton);
-    if (deleteExpenseButton) {
-        deleteExpenseButton.addEventListener('click', onDeleteExpenseButtonClick);
+    const deleteExpenseButtons = document.querySelectorAll(SELECTORS.deleteExpenseButton);
+
+    if (deleteExpenseButtons) {
+        deleteExpenseButtons.forEach(button => {
+            button.addEventListener('click', onDeleteExpenseButtonClick);
+        });
     }
 }
 
@@ -47,12 +50,20 @@ function saveExpense(e) {
         return;
     }
 
+    const selectedCategoriesOptions
+        = createExpenseForm.querySelector(SELECTORS.createFormFields.expenseCategories).selectedOptions;
+
+    const selectedCategoriesArray = Array.from(selectedCategoriesOptions).map(({ value }) => ({
+        name: value
+    }));
+
     // JSON sent to the API
     const expenseData = {
-        invoice_date_time: document.querySelector(SELECTORS.createFormFields.expenseDate).value,
-        price: document.querySelector(SELECTORS.createFormFields.expenseValue).value,
-        note: document.querySelector(SELECTORS.createFormFields.expenseNote).value,
-        invoice_issuer: document.querySelector(SELECTORS.createFormFields.expenseIssuer).value
+        categories: selectedCategoriesArray,
+        invoice_date_time: createExpenseForm.querySelector(SELECTORS.createFormFields.expenseDate).value,
+        price: createExpenseForm.querySelector(SELECTORS.createFormFields.expenseValue).value,
+        note: createExpenseForm.querySelector(SELECTORS.createFormFields.expenseNote).value,
+        invoice_issuer: createExpenseForm.querySelector(SELECTORS.createFormFields.expenseIssuer).value
     };
 
     fetch('/api/v1/expenses/', {
