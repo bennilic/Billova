@@ -319,7 +319,14 @@ function showNoExpenseFoundInTable(table = document.querySelector(SELECTORS.expe
     }
 
     let tableRow = new ElementBuilder("tr")
-        .append(new ElementBuilder("td").class("text-center").text("No expenses found."));
+        .append(
+            new ElementBuilder("td")
+                .attr({
+                    'colspan': '6'
+                })
+                .class("text-center")
+                .text("No expenses found.")
+        );
 
     tableBody.append(tableRow.element);
 }
