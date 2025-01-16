@@ -6,7 +6,8 @@
 {% endblock %}
 
 {% block style %}
-    <link href="https://unpkg.com/vanilla-datatables@latest/dist/vanilla-dataTables.min.css" rel="stylesheet" type="text/css">
+    <link href="https://unpkg.com/vanilla-datatables@latest/dist/vanilla-dataTables.min.css" rel="stylesheet"
+          type="text/css">
     <link rel="stylesheet" href="{% static 'css/expenses.css' %}">
 {% endblock %}
 
@@ -14,7 +15,9 @@
     <div class="container px-4 py-5">
         <div class="mb-10 expenses__title">
             <h2 class="mb-4"><i class="bi bi-cash me-1"></i> Expenses</h2>
-            <button class="btn btn-secondary create-expenseEntry-btn" data-bs-target="#createExpenseEntryModal" data-bs-toggle="modal">Create Entry</button>
+            <button class="btn btn-secondary create-expenseEntry-btn" data-bs-target="#createExpenseEntryModal"
+                    data-bs-toggle="modal">Create Entry
+            </button>
         </div>
 
         <div class="dataTable-container table-responsive">
