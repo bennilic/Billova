@@ -2,9 +2,13 @@ import logging
 
 from django import forms
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView, FormView
+from django.utils.decorators import method_decorator
+from django.views.generic import TemplateView
+from django.views.generic.edit import FormView
 from pytz import all_timezones
 
 from billova_app.models import UserSettings
@@ -42,6 +46,30 @@ class UserSettingsForm(forms.ModelForm):
     class Meta:
         model = UserSettings
         fields = ['currency', 'language']
+
+
+@method_decorator(login_required, name='dispatch')
+class UpdatePersonalInfoView(FormView):
+    template_name = 'account_settings.html'
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        profile = user.profile
+
+        # Handle email
+        user.email = request.POST.get('email')
+
+        # Handle profile picture
+        profile_picture = request.FILES.get('profile_picture')
+        if profile_picture:
+            profile.profile_picture = profile_picture
+
+        # Save changes
+        user.save()
+        profile.save()
+
+        messages.success(request, "Personal information updated successfully!")
+        return redirect('account_settings')
 
 
 class AccountSettingsView(LoginRequiredMixin, FormView):
@@ -87,3 +115,23 @@ class AccountSettingsView(LoginRequiredMixin, FormView):
             'timezones': all_timezones,
         })
         return context
+
+
+@method_decorator(login_required, name='dispatch')
+class UpdateUserSettingsView(FormView):
+    template_name = 'account_settings.html'
+
+    def post(self, request, *args, **kwargs):
+        profile = request.user.profile
+
+        # Update settings
+        profile.language = request.POST.get('language')
+        profile.currency = request.POST.get('currency')
+        profile.timezone = request.POST.get('timezone')
+        profile.numeric_format = request.POST.get('numeric_format')
+
+        # Save changes
+        profile.save()
+
+        messages.success(request, "User settings updated successfully!")
+        return redirect('account_settings')

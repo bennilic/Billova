@@ -5,15 +5,12 @@ from billova_app import api_views
 from .views import homepage, settings, signup
 from .views.account import AccountOverviewView
 from .views.account import AccountSettingsView
+from .views.account import UpdateUserSettingsView
 from .views.categories import CategoriesView
+from .views.expenses import ExpensesOverview
 from .views.login import CustomLoginView
 from .views.logout import CustomLogoutView
 from .views.password_reset import PwResetView
-
-from .views.expenses import ExpensesOverview
-from billova_app import api_views
-from .views import homepage, settings, login, signup
-
 
 router = DefaultRouter()
 router.register(r'expenses', api_views.ExpenseViewSet, basename='expense')
@@ -35,6 +32,7 @@ urlpatterns = [
 
     path('account/overview/', AccountOverviewView.as_view(), name='account_overview'),
     path('account/settings/', AccountSettingsView.as_view(), name='account_settings'),
+    path('account/settings/update_user_settings/', UpdateUserSettingsView.as_view(), name='update_user_settings'),
 
     # Authentication
 
@@ -42,7 +40,6 @@ urlpatterns = [
     path('logout/', CustomLogoutView.as_view(), name='logout'),
     path('password_reset/', PwResetView.as_view(), name='password_reset'),
     path('sigup', signup.SignupView.as_view(), name='signup'),
-
 
     # other urls
     path('categories/', CategoriesView.as_view(), name='categories'),
