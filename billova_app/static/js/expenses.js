@@ -1,5 +1,5 @@
 import * as Utils from './utils/utils.js';
-import {ButtonBuilder, ElementBuilder} from "./builder/builder.js";
+import {ElementBuilder} from "./builder/builder.js";
 
 
 const SELECTORS = {
@@ -13,6 +13,7 @@ const SELECTORS = {
     deleteExpenseForm: '#deleteExpenseForm',
     deleteExpenseEntryModal: '#deleteExpenseEntryModal',
     createExpenseModal: '#createExpenseEntryModal',
+    noExpensesCard: '.no-expenses-card',
     csrfToken: "[name=csrfmiddlewaretoken]",
     createFormFields: {
         expenseCategories: '#expenseCategories',
@@ -25,7 +26,8 @@ const SELECTORS = {
 
 const DATA = {
     bootstrapFormValidated: 'was-validated', // used by bootstrap to style invalid forms
-    vanillaDataTableInstance: undefined
+    vanillaDataTableInstance: undefined,
+    categoriesListCreated: false
 };
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -40,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function () {
 function onModalCreateModalBtnOpenerClick() {
     // guard - no need to recreate the categories list if already done. This happens when the user opened the
     // modal dialog before
-    if (isCategoriesListAlreadyCreated()) {
+    if (DATA.categoriesListCreated) {
         return;
     }
 
@@ -65,6 +67,8 @@ function onModalCreateModalBtnOpenerClick() {
             }
 
             populateCategoriesSelectList(data.results);
+
+            DATA.categoriesListCreated = true;
 
         })
         .catch(error => {
@@ -162,10 +166,12 @@ function saveExpense(e) {
         .then(data => {
 
             Utils.closeModal(SELECTORS.createExpenseModal);
-            Utils.showNotificationMessage('Expense added successfully', "success");
 
             addExpenseToTable(data);
-            reinitializeVanillaDataTable();
+            toggleNoExpenseFoundInTableVisibility(false);
+
+            Utils.showNotificationMessage('Expense added successfully', "success");
+
             setupDomEvents();
 
         })
@@ -214,11 +220,15 @@ function deleteExpense(e) {
                 throw new Error(`Failed to delete expense: ${response.statusText}`);
             }
 
-            removeExpenseTableEntry(toDeleteExpenseId);
-            reinitializeVanillaDataTable();
-
             Utils.closeModal(SELECTORS.deleteExpenseEntryModal);
             Utils.showNotificationMessage('Expense deleted successfully', "success");
+
+            setTimeout(function () {
+                // we need to reload the page after delete. Reason is that the library is buggy, when
+                // there is some filter applied, and we try to use the library to remove the selected row, then
+                // an error is thrown
+                location.reload();
+            }, 1000);
 
         })
         .catch(error => {
@@ -247,8 +257,8 @@ function populateExpensesTable() {
                 throw new Error("Error fetching expenses");
             }
 
-            addListExpensesToTable(data.results);
             reinitializeVanillaDataTable();
+            addExpensesListToTable(data.results);
             setupDomEvents();
 
         })
@@ -258,20 +268,20 @@ function populateExpensesTable() {
         });
 }
 
-function addListExpensesToTable(expenses) {
+function addExpensesListToTable(expenses) {
     const expensesTable = document.querySelector(SELECTORS.expenseTable);
     if (!expensesTable) {
-        showNoExpenseFoundInTable(expensesTable);
+        toggleNoExpenseFoundInTableVisibility();
         throw new Error("No expenses table found");
     }
 
     if (!expenses) {
-        showNoExpenseFoundInTable(expensesTable);
+        toggleNoExpenseFoundInTableVisibility();
         throw new Error("List with expenses not provided");
     }
 
     if (!expenses.length) {
-        showNoExpenseFoundInTable(expensesTable);
+        toggleNoExpenseFoundInTableVisibility();
         return;
     }
 
@@ -280,55 +290,38 @@ function addListExpensesToTable(expenses) {
     });
 }
 
-function addExpenseToTable(expense, table=document.querySelector(SELECTORS.expenseTable)) {
+function addExpenseToTable(expense, table = document.querySelector(SELECTORS.expenseTable)) {
     const tableBody = table.querySelector(SELECTORS.expenseTableBody);
     if (!tableBody) {
         throw new Error('Table body not found');
     }
 
-    const deleteButton = new ButtonBuilder("button")
-        .class("btn btn-sm btn-danger delete-expense-btn")
-        .with("data-bs-toggle", "modal")
-        .with("data-bs-target", SELECTORS.deleteExpenseEntryModal)
-        .with("data-expense-id", expense.id)
-        .text("Delete");
-
+    // Prepare the data to be inserted into the DataTable
     let categories = '';
     if (expense.categories && expense.categories.length) {
         categories = expense.categories.map(category => category.name).join(', ');
     }
 
-    let tableRow = new ElementBuilder("tr")
-        .attr({
-            'data-expense-id' : expense.id
-        })
-        .append(new ElementBuilder("td").class("tableDataExpenseDate").text(Utils.stringToFormattedDate(expense.invoice_date_time)))
-        .append(new ElementBuilder("td").class("tableDataExpensePrice").text(expense.price))
-        .append(new ElementBuilder("td").class("tableDataExpenseNote").text(expense.note))
-        .append(new ElementBuilder("td").class("tableDataExpenseIssuer").text(expense.invoice_issuer))
-        .append(new ElementBuilder("td").class("tableDataExpenseDate").text(categories))
-        .append(new ElementBuilder("td").class("tableDataAction text-center").append(deleteButton));
+    const newData = [{
+        "Date": Utils.stringToFormattedDate(expense.invoice_date_time),
+        "Spent": expense.price,
+        "Note": expense.note,
+        "Issuer": expense.invoice_issuer,
+        "Category": categories,
+        "Actions": `<button class="btn btn-sm btn-danger delete-expense-btn" data-bs-toggle="modal" data-bs-target="${SELECTORS.deleteExpenseEntryModal}" data-expense-id="${expense.id}">Delete</button>`
+    }];
 
-    tableBody.append(tableRow.element);
+    // Use the DataTable's insert method to add the data
+    if (DATA.vanillaDataTableInstance) {
+        DATA.vanillaDataTableInstance.insert(newData);
+    }
 }
 
-function showNoExpenseFoundInTable(table = document.querySelector(SELECTORS.expenseTable)) {
-    const tableBody = table.querySelector(SELECTORS.expenseTableBody);
-    if (!tableBody) {
-        throw new Error('Table body not found');
+function toggleNoExpenseFoundInTableVisibility(show=true) {
+    const noExpensesCard = document.querySelector(SELECTORS.noExpensesCard);
+    if (noExpensesCard) {
+        noExpensesCard.classList.toggle('hidden', !show);
     }
-
-    let tableRow = new ElementBuilder("tr")
-        .append(
-            new ElementBuilder("td")
-                .attr({
-                    'colspan': '6'
-                })
-                .class("text-center")
-                .text("No expenses found.")
-        );
-
-    tableBody.append(tableRow.element);
 }
 
 function getCsrfTokenFromForm(form) {
@@ -344,24 +337,10 @@ function getCsrfTokenFromForm(form) {
     return '';
 }
 
-function removeExpenseTableEntry(expenseId) {
-    const toRemoveTableRow = document.querySelector(`tr[data-expense-id="${expenseId}"]`);
-    if (toRemoveTableRow) {
-        toRemoveTableRow.remove();
-    }
-}
-
 function reinitializeVanillaDataTable() {
     if (DATA.vanillaDataTableInstance) {
-        // first destroy it
-        DATA.vanillaDataTableInstance.destroy();
+        DATA.vanillaDataTableInstance.refresh();
+    } else {
+        DATA.vanillaDataTableInstance = Utils.initializeVanillaDataTable(SELECTORS.expenseTable);
     }
-
-    // then initialize it
-    DATA.vanillaDataTableInstance = Utils.initializeVanillaDataTable(SELECTORS.expenseTable);
-}
-
-function isCategoriesListAlreadyCreated() {
-    const selectList = document.querySelector('#expenseCategories');
-    return selectList && selectList.options.length > 1; // one option is always the default one ('Select a category...')
 }
