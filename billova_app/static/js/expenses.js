@@ -8,6 +8,7 @@ const SELECTORS = {
     saveExpenseButton: '#saveExpenseEntryButton',
     deleteExpenseButton: '.delete-expense-btn',
     confirmDeleteExpenseButton: '.confirm-delete-expense-btn',
+    createExpenseModalOpenerBtn: '.create-expenseEntry-btn',
     createExpenseForm: '#expenseEntryForm',
     deleteExpenseForm: '#deleteExpenseForm',
     deleteExpenseEntryModal: '#deleteExpenseEntryModal',
@@ -28,8 +29,81 @@ const DATA = {
 };
 
 document.addEventListener('DOMContentLoaded', function () {
+    const modalOpenerBtn = document.querySelector(SELECTORS.createExpenseModalOpenerBtn);
+    if (modalOpenerBtn) {
+        modalOpenerBtn.addEventListener('click', onModalCreateModalBtnOpenerClick);
+    }
+
     populateExpensesTable();
 });
+
+function onModalCreateModalBtnOpenerClick() {
+    // guard - no need to recreate the categories list if already done. This happens when the user opened the
+    // modal dialog before
+    if (isCategoriesListAlreadyCreated()) {
+        return;
+    }
+
+    fetch('/api/v1/categories/', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Cache-Control': 'max-age=3600' // Cache for 1 hour
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+
+            return response.json();
+        })
+
+        .then(data => {
+            if (!data.results) {
+                throw new Error("Error fetching categories");
+            }
+
+            populateCategoriesSelectList(data.results);
+
+        })
+        .catch(error => {
+            console.error(error.message);
+            Utils.showNotificationMessage('We were unable to load your categories list. Please try again later.', "error");
+        });
+}
+
+function populateCategoriesSelectList(categories) {
+    if (!categories) {
+        throw new Error('No categories provided');
+    }
+
+    categories.forEach(function(item, index) {
+        addCategoriesToSelectList(item);
+    });
+}
+
+function addCategoriesToSelectList(category) {
+    if (!category) {
+        throw new Error("No category provided");
+    }
+    if (!category.name) {
+        throw new Error("Name of category not found");
+    }
+
+    const selectList = document.querySelector(SELECTORS.createFormFields.expenseCategories);
+    if (!selectList) {
+        throw new Error("Categories Select List not found");
+    }
+
+    const optionBuilder = new ElementBuilder('option')
+        .attr({
+            "value": category.name
+        })
+        .text(category.name);
+
+    selectList.append(optionBuilder.element);
+}
 
 function setupDomEvents() {
     const saveExpenseButton = document.querySelector(SELECTORS.saveExpenseButton);
@@ -115,7 +189,7 @@ function onDeleteExpenseButtonClick(e) {
 
 function deleteExpense(e) {
     const toDeleteExpenseId = e.currentTarget.dataset.expenseId;
-    const errorMessage = 'An error occurred while trying to delete the expense.';
+    const errorMessage = 'An error occurred while trying to delete the expense. Please try again later.';
 
     if (!toDeleteExpenseId || isNaN(parseInt(toDeleteExpenseId))) {
         Utils.showNotificationMessage(errorMessage, "error");
@@ -209,7 +283,7 @@ function addListExpensesToTable(expenses) {
 function addExpenseToTable(expense, table=document.querySelector(SELECTORS.expenseTable)) {
     const tableBody = table.querySelector(SELECTORS.expenseTableBody);
     if (!tableBody) {
-        return;
+        throw new Error('Table body not found');
     }
 
     const deleteButton = new ButtonBuilder("button")
@@ -219,7 +293,10 @@ function addExpenseToTable(expense, table=document.querySelector(SELECTORS.expen
         .with("data-expense-id", expense.id)
         .text("Delete");
 
-    const categories = expense.categories; // TODO implement after beni's changes are merged
+    let categories = '';
+    if (expense.categories && expense.categories.length) {
+        categories = expense.categories.map(category => category.name).join(', ');
+    }
 
     let tableRow = new ElementBuilder("tr")
         .attr({
@@ -229,7 +306,7 @@ function addExpenseToTable(expense, table=document.querySelector(SELECTORS.expen
         .append(new ElementBuilder("td").class("tableDataExpensePrice").text(expense.price))
         .append(new ElementBuilder("td").class("tableDataExpenseNote").text(expense.note))
         .append(new ElementBuilder("td").class("tableDataExpenseIssuer").text(expense.invoice_issuer))
-        .append(new ElementBuilder("td").class("tableDataExpenseDate").text(expense.categories))
+        .append(new ElementBuilder("td").class("tableDataExpenseDate").text(categories))
         .append(new ElementBuilder("td").class("tableDataAction text-center").append(deleteButton));
 
     tableBody.append(tableRow.element);
@@ -238,7 +315,7 @@ function addExpenseToTable(expense, table=document.querySelector(SELECTORS.expen
 function showNoExpenseFoundInTable(table = document.querySelector(SELECTORS.expenseTable)) {
     const tableBody = table.querySelector(SELECTORS.expenseTableBody);
     if (!tableBody) {
-        return;
+        throw new Error('Table body not found');
     }
 
     let tableRow = new ElementBuilder("tr")
@@ -275,4 +352,9 @@ function reinitializeVanillaDataTable() {
 
     // then initialize it
     DATA.vanillaDataTableInstance = Utils.initializeVanillaDataTable(SELECTORS.expenseTable);
+}
+
+function isCategoriesListAlreadyCreated() {
+    const selectList = document.querySelector('#expenseCategories');
+    return selectList && selectList.options.length > 1; // one option is always the default one ('Select a category...')
 }
