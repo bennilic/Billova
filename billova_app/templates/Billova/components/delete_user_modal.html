@@ -11,7 +11,7 @@
             <!-- Modal Body -->
             <div class="modal-body">
                 <p>Are you sure you want to delete your account? This action cannot be undone.</p>
-                <form id="deleteAccountForm" method="post" action="{% url 'account_delete' %}">
+                <form id="deleteAccountForm" method="post" action="{% url 'delete_account' %}">
                     {% csrf_token %}
                     <div class="mb-3">
                         <label for="usernameConfirmation" class="form-label">Type your username to confirm:</label>
@@ -28,5 +28,3 @@
         </div>
     </div>
 </div>
-
-<script src="{% static 'js/account.js' %}"></script>

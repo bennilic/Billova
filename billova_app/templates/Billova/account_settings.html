@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load static %}
 {% block content %}
     <div class="container mt-5">
         <div class="row">
@@ -118,4 +119,8 @@
             </div>
         </div>
     </div>
+
+    {% include './components/delete_user_modal.html' %}
+    <script src="{% static 'js/account.js' %}"></script>
+
 {% endblock %}
