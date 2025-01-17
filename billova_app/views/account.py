@@ -17,10 +17,6 @@ from billova_app.utils.settings_utils import get_current_currencies
 logger = logging.getLogger(__name__)
 
 
-class AccountDeletionView(LoginRequiredMixin, TemplateView):
-    print("AccountDeletionView")
-
-
 class AccountOverviewView(LoginRequiredMixin, TemplateView):
     template_name = "account_overview.html"  # Step 1: Specify your template here
 
@@ -140,3 +136,25 @@ class UpdateUserSettingsView(FormView):
 
         messages.success(request, "User settings updated successfully!")
         return redirect('account_settings')
+
+
+class AccountDeleteForm(forms.Form):
+    username_confirmation = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={'placeholder': 'Enter your username'})
+    )
+
+
+class AccountDeletionView(LoginRequiredMixin, FormView):
+    template_name = 'components/delete_user_modal.html'
+    form_class = AccountDeleteForm
+    success_url = reverse_lazy('home')
+
+    def form_valid(self, form):
+        if self.request.user.username == form.cleaned_data['username_confirmation']:
+            self.request.user.delete()
+            messages.success(self.request, "Your account has been deleted.")
+            return super().form_valid(form)
+        else:
+            messages.error(self.request, "The username does not match.")
+            return self.form_invalid(form)

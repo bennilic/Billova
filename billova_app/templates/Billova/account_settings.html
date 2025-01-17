@@ -3,18 +3,14 @@
     <div class="container mt-5">
         <div class="row">
             <!-- Sidebar Navigation -->
-            <div class="col-md-3">
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <a href="{% url 'account_overview' %}" class="text-decoration-none">Overview</a>
-                    </li>
-                    <li class="list-group-item">
-                        <a href="{% url 'account_settings' %}" class="text-decoration-none">Settings</a>
-                    </li>
-                    <li class="list-group-item text-danger">
-                        <a href="{% url 'account_delete' %}" class="text-decoration-none text-danger">Delete Account</a>
-                    </li>
-                </ul>
+            <div class="col-12 col-lg-3">
+                <!-- Nav -->
+                <nav class="nav nav-pills position-sticky flex-column mb-8" id="accountNav" style="top: 32px">
+                    <a class="nav-link active" href="{% url 'account_overview' %}">Overview</a>
+                    <a class="nav-link" href="{% url 'account_settings' %}">Settings</a>
+                    <a href="#" class="nav-link text-danger" data-bs-toggle="modal"
+                       data-bs-target="#deleteAccountModal">Delete
+                        account</a></nav>
             </div>
 
             <!-- Main Content -->
