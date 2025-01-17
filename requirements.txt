@@ -5,3 +5,4 @@ django-widget-tweaks
 django-rest-framework
 babel
 pytz
+Pillow

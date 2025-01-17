@@ -17,6 +17,10 @@ from billova_app.utils.settings_utils import get_current_currencies
 logger = logging.getLogger(__name__)
 
 
+class AccountDeletionView(LoginRequiredMixin, TemplateView):
+    print("AccountDeletionView")
+
+
 class AccountOverviewView(LoginRequiredMixin, TemplateView):
     template_name = "account_overview.html"  # Step 1: Specify your template here
 
@@ -51,20 +55,21 @@ class UserSettingsForm(forms.ModelForm):
 @method_decorator(login_required, name='dispatch')
 class UpdatePersonalInfoView(FormView):
     template_name = 'account_settings.html'
+    success_url = '/account/settings/'  # Update to your desired redirect URL
 
     def post(self, request, *args, **kwargs):
         user = request.user
         profile = user.profile
 
-        # Handle email
+        # Update email
         user.email = request.POST.get('email')
 
-        # Handle profile picture
+        # Update profile picture
         profile_picture = request.FILES.get('profile_picture')
         if profile_picture:
             profile.profile_picture = profile_picture
 
-        # Save changes
+        # Save updates
         user.save()
         profile.save()
 

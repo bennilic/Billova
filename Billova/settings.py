@@ -170,7 +170,7 @@ MESSAGE_TAGS = {
 Logging Implementation
 """
 
-LOG_LEVEL = 'DEBUG'
+LOG_LEVEL = 'ERROR'
 
 # Define the BASE_DIR if not already defined
 BASE_DIR = Path(__file__).resolve().parent.parent

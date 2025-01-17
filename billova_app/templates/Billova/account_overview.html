@@ -5,8 +5,15 @@
             <!-- Sidebar Navigation -->
             <div class="col-md-3">
                 <ul class="list-group">
-                    <li class="list-group-item active">General</li>
-                    <li class="list-group-item text-danger">Delete account</li>
+                    <li class="list-group-item">
+                        <a href="{% url 'account_overview' %}" class="text-decoration-none">Overview</a>
+                    </li>
+                    <li class="list-group-item">
+                        <a href="{% url 'account_settings' %}" class="text-decoration-none">Settings</a>
+                    </li>
+                    <li class="list-group-item text-danger">
+                        <a href="{% url 'account_delete' %}" class="text-decoration-none text-danger">Delete Account</a>
+                    </li>
                 </ul>
             </div>
 
@@ -17,7 +24,6 @@
                     <h2>Account</h2>
                     <div>
                         <a href="{% url 'account_settings' %}" class="btn btn-outline-secondary me-2">Edit</a>
-                        <button class="btn btn-danger">Delete</button>
                     </div>
                 </div>
 

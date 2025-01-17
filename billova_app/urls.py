@@ -3,9 +3,9 @@ from rest_framework.routers import DefaultRouter
 
 from billova_app import api_views
 from .views import homepage, settings, signup
-from .views.account import AccountOverviewView
+from .views.account import AccountOverviewView, AccountDeletionView
 from .views.account import AccountSettingsView
-from .views.account import UpdateUserSettingsView
+from .views.account import UpdateUserSettingsView, UpdatePersonalInfoView
 from .views.categories import CategoriesView
 from .views.expenses import ExpensesOverview
 from .views.login import CustomLoginView
@@ -32,7 +32,9 @@ urlpatterns = [
 
     path('account/overview/', AccountOverviewView.as_view(), name='account_overview'),
     path('account/settings/', AccountSettingsView.as_view(), name='account_settings'),
+    path('account/settings/update_personal_info/', UpdatePersonalInfoView.as_view(), name='update_personal_info'),
     path('account/settings/update_user_settings/', UpdateUserSettingsView.as_view(), name='update_user_settings'),
+    path('account/delete', AccountDeletionView.as_view(), name='account_delete'),
 
     # Authentication
 

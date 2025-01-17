@@ -4,7 +4,7 @@ from django.utils import timezone
 
 class Expense(models.Model):
     invoice_date_time = models.DateTimeField(default=timezone.now)
-    price = models.DecimalField(max_digits=14, decimal_places=2) # 1 Billion with 2 decimal places
+    price = models.DecimalField(max_digits=14, decimal_places=2)  # 1 Billion with 2 decimal places
     note = models.TextField(blank=True)
     invoice_issuer = models.TextField(blank=True)
     invoice_as_text = models.TextField(blank=True)
@@ -28,4 +28,7 @@ class UserSettings(models.Model):
     currency = models.CharField(max_length=3)
     # https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes - 2 letter language code
     language = models.CharField(max_length=2)
+    timezone = models.CharField(max_length=50, default='Europe/Vienna')  # Set default timezone
+    numeric_format = models.CharField(max_length=50, blank=True, null=True)
+    profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)  # Add this field
     owner = models.OneToOneField('auth.User', related_name='user_settings', on_delete=models.CASCADE)
