@@ -151,10 +151,22 @@ class AccountDeletionView(LoginRequiredMixin, FormView):
     success_url = reverse_lazy('home')
 
     def form_valid(self, form):
-        if self.request.user.username == form.cleaned_data['username_confirmation']:
-            self.request.user.delete()
-            messages.success(self.request, "Your account has been deleted.")
-            return super().form_valid(form)
-        else:
-            messages.error(self.request, "The username does not match.")
+        try:
+            user = self.request.user
+            username_confirmation = form.cleaned_data['username_confirmation']
+
+            if user.username == username_confirmation:
+                logger.info(f"User '{user.username}' confirmed deletion.")
+                user.delete()
+                messages.success(self.request, f"{user.username} your account has been deleted.")
+                logger.info(f"User '{username_confirmation}' account successfully deleted.")
+                return super().form_valid(form)
+            else:
+                logger.warning(f"User '{user.username}' entered an incorrect username for deletion confirmation.")
+                messages.error(self.request, "The username does not match.")
+                return self.form_invalid(form)
+        except Exception as e:
+            logger.exception(
+                f"An error occurred while attempting to delete account for user '{self.request.user.username}': {e}")
+            messages.error(self.request, "An unexpected error occurred while processing your request.")
             return self.form_invalid(form)
