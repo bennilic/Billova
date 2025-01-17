@@ -1,3 +1,5 @@
+import base64
+
 from django.contrib.auth.models import User
 from django.core.serializers import serialize
 from django.http import HttpResponseRedirect, HttpResponse
@@ -5,6 +7,7 @@ from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 
 from billova_app.models import Expense, Category, UserSettings
+from billova_app.ocr.receipt import Receipt
 from billova_app.serializers import ExpenseSerializer, CategorySerializer, UserSettingsSerializer, ExpenseOCRSerializer
 from billova_app.permissions import IsOwner
 
@@ -29,6 +32,11 @@ class ExpenseViewSet(viewsets.ModelViewSet):
     def ocr(self, request):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
+            image = serializer.validated_data['image']
+
+            receipt = Receipt(image.file.getvalue())
+            receipt.analyze()
+
             return HttpResponse('Valid')
 
         return HttpResponse('Invalid')
