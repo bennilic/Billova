@@ -140,9 +140,18 @@ class UpdateUserSettingsView(FormView):
 
 class AccountDeleteForm(forms.Form):
     username_confirmation = forms.CharField(
+        label="Confirm Username",
         max_length=150,
-        widget=forms.TextInput(attrs={'placeholder': 'Enter your username'})
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+        })
     )
+
+    def __init__(self, *args, **kwargs):
+        username = kwargs.pop('username', None)  # Get the username from kwargs
+        super().__init__(*args, **kwargs)
+        if username:
+            self.fields['username_confirmation'].widget.attrs['placeholder'] = f'Enter "{username}" to confirm deletion'
 
 
 class AccountDeletionView(LoginRequiredMixin, FormView):
@@ -150,23 +159,25 @@ class AccountDeletionView(LoginRequiredMixin, FormView):
     form_class = AccountDeleteForm
     success_url = reverse_lazy('home')
 
+    def get_form_kwargs(self):
+        """Pass additional arguments to the form."""
+        kwargs = super().get_form_kwargs()
+        kwargs['username'] = self.request.user.username  # Pass the username to the form
+        return kwargs
+
     def form_valid(self, form):
+        """Handle valid form submission."""
         try:
             user = self.request.user
             username_confirmation = form.cleaned_data['username_confirmation']
 
             if user.username == username_confirmation:
-                logger.info(f"User '{user.username}' confirmed deletion.")
                 user.delete()
-                messages.success(self.request, f"{user.username} your account has been deleted.")
-                logger.info(f"User '{username_confirmation}' account successfully deleted.")
+                messages.success(self.request, f"Bye {user.username}! Your account has been deleted.")
                 return super().form_valid(form)
             else:
-                logger.warning(f"User '{user.username}' entered an incorrect username for deletion confirmation.")
                 messages.error(self.request, "The username does not match.")
                 return self.form_invalid(form)
         except Exception as e:
-            logger.exception(
-                f"An error occurred while attempting to delete account for user '{self.request.user.username}': {e}")
             messages.error(self.request, "An unexpected error occurred while processing your request.")
             return self.form_invalid(form)
