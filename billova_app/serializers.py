@@ -1,4 +1,3 @@
-# import magic
 from django.contrib.auth.models import User
 from rest_framework import serializers, status
 from rest_framework.response import Response
@@ -69,22 +68,7 @@ class ExpenseOCRSerializer(serializers.Serializer):
     image = serializers.ImageField()
 
     def validate(self, data):
-        print(data)
-
-        # raise serializers.ValidationError("Invalid")
-
-        # mime = magic.Magic(mime=True)
-        # file_mime_type = mime.from_buffer(data.read())
-        # data.seek(0)  # Reset file pointer to the beginning after reading
-        #
-        # if file_mime_type != 'image/jpeg':
-        #     raise serializers.ValidationError("Only JPG files are allowed.")
-        #
-        # # Check file size (limit to 5MB)
-        # max_size = 5 * 1024 * 1024  # 5MB
-        # if data.size > max_size:
-        #     raise serializers.ValidationError("File size must be under 5MB.")
-
+        # Can be empty. ImageField will check if the file is an image.
         return data
 
 
