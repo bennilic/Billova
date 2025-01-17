@@ -6,3 +6,8 @@
 .dataTable-dropdown label {
     display: ruby-text;
 }
+
+.uiExpensesTblBody td:last-of-type {
+    display: flex;
+    justify-content: center;
+}

@@ -48,7 +48,7 @@ export function initializeVanillaDataTable(tableSelector, options = DATA_TABLE_D
         return;
     }
 
-    new DataTable(table, options);
+    const newTable = new DataTable(table, options);
 
     // Wait for the DataTable to render its DOM
     setTimeout(() => {
@@ -63,4 +63,15 @@ export function initializeVanillaDataTable(tableSelector, options = DATA_TABLE_D
             perPageSelect.classList.add('form-select');
         }
     }, 0);
+
+    return newTable;
+}
+
+export function stringToFormattedDate(dateString) {
+    const date = new Date(dateString);
+    const day = ("0" + date.getDate()).slice(-2); // Ensure two digits for day
+    const month = ("0" + (date.getMonth() + 1)).slice(-2); // Ensure two digits for month
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
 }

@@ -16,9 +16,7 @@
                         <label for="expenseCategories" class="form-label">Category</label>
                         <select class="form-select" id="expenseCategories" name="expenseCategories" multiple required>
                             <option value="">Select category...</option>
-                            {% for category in categories %}
-                                <option value="{{ category.name }}">{{ category.name }}</option>
-                            {% endfor %}
+                            {# the list will be populated with REST API #}
                         </select>
                     </div>
 
