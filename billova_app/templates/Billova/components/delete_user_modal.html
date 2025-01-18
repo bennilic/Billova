@@ -11,13 +11,20 @@
                 <div class="modal-body">
                     <p class="text-danger">Type your username to confirm account deletion:</p>
                     <input type="text" id="usernameConfirmation" name="username_confirmation" class="form-control"
-                           placeholder="Enter your username to confirm deletion: {{ request.user.username }}" required>
+                           placeholder="Enter your username {{ user.username }}" required>
                     <small class="text-danger d-none" id="usernameError">Username does not match.</small>
                     {{ form.username_confirmation }}
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger">Delete</button>
+                <div class="modal-footer d-flex justify-content-between">
+                    <!-- Left side button -->
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+
+                    <!-- Right side button -->
+                    <button type="submit" class="btn btn-danger">
+                        Delete
+                    </button>
                 </div>
             </form>
         </div>
@@ -29,32 +36,15 @@
         const confirmDeleteForm = document.getElementById('deleteAccountForm');
         const usernameInput = document.getElementById('usernameConfirmation');
         const usernameError = document.getElementById('usernameError');
-        const currentUsername = "{{ request.user.username }}
-        ";
+        const currentUsername = "{{ request.user.username }}";
 
-        confirmDeleteForm.addEve
-        tListene('s b
-        ction(e)
-        {
-            usernameError.clas
-            (' -none');
-            if (userna eIn
-            ut.value.trim() =
-                name
-        )
-            {
-
-                ault();
-                usernameError.classLi
-                none
-                ');
-                usern
-                m
-                Error.textContent = "Wrong
-
-                ed
-                !
-                ;
-            )
-                ;
+        confirmDeleteForm.addEventListener('submit', function (e) {
+            usernameError.classList.add('d-none');
+            if (usernameInput.value.trim() !== currentUsername) {
+                e.preventDefault();
+                usernameError.classList.remove('d-none');
+                usernameError.textContent = "Wrong username entered!";
+            }
+        });
+    });
 </script>
