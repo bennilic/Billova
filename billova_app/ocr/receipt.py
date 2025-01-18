@@ -1,40 +1,61 @@
 import os
-from azure.core.credentials import AzureKeyCredential
-from azure.ai.documentintelligence import DocumentIntelligenceClient
-from azure.ai.documentintelligence.models import AnalyzeResult
-from azure.ai.documentintelligence.models import AnalyzeDocumentRequest
-from azure.core.exceptions import HttpResponseError
+from datetime import timezone
+from io import BytesIO
+
+import requests
+
+from django.contrib.auth.models import User
+from django.utils import timezone
 
 
-class Receipt(object):
+class Receipt:
     """
-        Uses Azure OCR technologies to process receipts based on images taken with a camera.
+    Uses Veryfi to extract receipt information.
 
-        Docs:
-            https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/prebuilt/receipt?view=doc-intel-4.0.0
-            https://learn.microsoft.com/en-us/azure/ai-services/document-intelligence/quickstarts/get-started-sdks-rest-api?view=doc-intel-4.0.0&preserve-view=true&pivots=programming-language-python
-            https://github.com/Azure-Samples/document-intelligence-code-samples/blob/main/schema/2024-11-30-ga/receipt.md
+    Docs:
+        https://docs.veryfi.com/api/receipts-invoices/process-a-document/
     """
 
     def __init__(self, receipt: bytes):
         """
         :param receipt: The receipt image as bytes.
-            Supported formats (full): PDF, JPEG/JPG, PNG, BMP, TIFF, HEIF
-            Supported formats (partial): DOCX, XLSX, PPTX, HTML
         """
         self.__receipt: bytes = receipt
-        self.__endpoint: str = "https://fh-projects-document-intelligence.cognitiveservices.azure.com/"
-        self.__key: str = os.getenv("AZURE_DOCUMENT_INTELLIGENCE_KEY")
+        self.__client_id = os.getenv("VERYFI_CLIENT_ID")
+        self.__username = os.getenv("VERYFI_USERNAME")
+        self.__api_key = os.getenv("VERYFI_API_KEY")
+
+        self.invoice_date_time = timezone.now()
+        self.price = None
+        self.invoice_issuer = None
+        self.invoice_as_text = None
+        self.categories = [{"name":"Generated", "owner": User.objects.get(username='global')}]
 
     def analyze(self):
-        document_intelligence_client = DocumentIntelligenceClient(
-            endpoint=self.__endpoint, credential=AzureKeyCredential(self.__key)
-        )
+        url = "https://api.veryfi.com/api/v8/partner/documents/"
 
-        poller = document_intelligence_client.begin_analyze_document(
-            "prebuilt-layout",
-            AnalyzeDocumentRequest(bytes_source=self.__receipt)
-        )
+        # File-like object for the binary receipt data
+        file_like = BytesIO(self.__receipt)
 
-        receipt = poller.result()
-        return receipt
+        # Files payload
+        files = {
+            "file": ("receipt.jpg", file_like, "image/jpeg"),  # (filename, file-like object, MIME type)
+        }
+
+        # Headers for authentication
+        headers = {
+            "CLIENT-ID": self.__client_id,
+            "AUTHORIZATION": f"apikey {self.__username}:{self.__api_key}",
+        }
+        # if response.status_code == 201:
+        # Send the request
+        response = requests.post(url, headers=headers, files=files)
+
+        data = response.json()
+        # self.invoice_date_time = data.get("created")
+        self.price = data.get("total")
+        self.invoice_issuer = data.get("vendor", {}).get("name")
+        self.invoice_as_text = data.get("ocr_text")
+
+
+        return None

@@ -37,7 +37,15 @@ class ExpenseViewSet(viewsets.ModelViewSet):
             receipt = Receipt(image.file.getvalue())
             receipt.analyze()
 
-            return HttpResponse('Valid')
+            Expense.objects.create(
+                owner=request.user,
+                invoice_date_time=receipt.invoice_date_time,
+                price=receipt.price,
+                invoice_issuer=receipt.invoice_issuer,
+                invoice_as_text=receipt.invoice_as_text,
+            )
+
+            return HttpResponse('OK')
 
         return HttpResponse('Invalid')
 
