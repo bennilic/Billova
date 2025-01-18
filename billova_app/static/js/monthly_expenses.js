@@ -1,5 +1,6 @@
 // keeps track of which "page" of the paginated API results the user is currently requesting
 import {ElementBuilder, ButtonBuilder} from "./builder/builder.js";
+import * as Utils from './utils/utils.js';
 
 let currentPage = 1;
 
@@ -7,10 +8,16 @@ let currentPage = 1;
 const FIRST_PAGE_SIZE_NUMBER = 10;
 const LOAD_MORE_PAGE_SIZE_NUMBER = 5;
 
+const SELECTORS = {
+    noExpensesCard: '.no-expenses-card',
+    showMoreButton: '#showMoreButton',
+    monthlyExpensesContainer: '#monthlyExpensesContainer'
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     loadMonthlyExpenses(currentPage, FIRST_PAGE_SIZE_NUMBER);
 
-    const showMoreButton = document.querySelector('#showMoreButton');
+    const showMoreButton = document.querySelector(SELECTORS.showMoreButton);
     if (showMoreButton) {
         showMoreButton.addEventListener('click', function () {
             currentPage++; // Increment the page number
@@ -35,10 +42,10 @@ function loadMonthlyExpenses(page, size=FIRST_PAGE_SIZE_NUMBER) {
         .then(data => {
             renderMonthlyExpenses(data.results);
 
-            // Hide the "Show More" button if fewer results are returned than requested
-            if (data.results.length < size) {
-                document.querySelector('#showMoreButton').classList.add('hidden');
-            }
+            // display the show more button if there are more expenses which can be loaded
+            let showButton = data.results.length >= size;
+            Utils.toggleElementVisibility(SELECTORS.showMoreButton, showButton);
+
         })
         .catch(error => {
             console.error('Error fetching monthly expenses:', error);
@@ -46,9 +53,16 @@ function loadMonthlyExpenses(page, size=FIRST_PAGE_SIZE_NUMBER) {
 }
 
 function renderMonthlyExpenses(expenses) {
-    const container = document.querySelector('#monthlyExpensesContainer');
+    const container = document.querySelector(SELECTORS.monthlyExpensesContainer);
     if (!container) {
         return;
+    }
+
+    // if this is the first request sent and there is no data, then we show "no expense message"
+    // needed only for the first request. The next requests are only sent when the user clicks on the
+    // button which means we already show some expenses
+    if (currentPage === 1 && !expenses.length) {
+        Utils.toggleElementVisibility(SELECTORS.noExpensesCard, true);
     }
 
     expenses.forEach(expense => {

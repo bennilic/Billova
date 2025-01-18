@@ -18,7 +18,9 @@
         <div class="card no-expenses-card mb-10 m-t-5 hidden">
             <div class="card-body text-center">
                 <h4 class="card-title">No expenses found</h4>
-                <p class="card-text">It looks like there are no expenses recorded. Please add some to see them here.</p>
+                <p class="card-text">
+                    It looks like there are no expenses recorded. Feel free to add new ones <a href="{% url 'expensesOverview' %}">here</a>.
+                </p>
             </div>
         </div>
 
@@ -26,7 +28,7 @@
             {# will be populated in js via REST #}
         </div>
         <div class="d-flex justify-content-center">
-            <button id="showMoreButton" class="btn btn-secondary mt-10">Show More</button>
+            <button id="showMoreButton" class="btn btn-secondary mt-10 hidden">Show More</button>
         </div>
 
     </div>
