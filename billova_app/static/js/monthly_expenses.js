@@ -49,15 +49,16 @@ function renderMonthlyExpenses(expenses) {
         return;
     }
 
-    let iterations = 0;
-
     expenses.forEach(expense => {
+        // Normalize the ID by replacing spaces with dashes
+        const normalizedId = `collapse-${expense.month.replace(/\s+/g, '-')}`;
+
         const monthCard = new ElementBuilder('div')
             .class('accordion-item');
 
         const accordionButton = new ButtonBuilder()
             .class("accordion-button collapsed")
-            .with("data-bs-target", `#collapse-${expense.month}`)
+            .with("data-bs-target", `#${normalizedId}`)
             .with("data-bs-toggle", "collapse")
             .text(`${expense.month}`);
 
@@ -65,19 +66,39 @@ function renderMonthlyExpenses(expenses) {
             .class('accordion-header')
             .append(accordionButton);
 
+        const categoriesLabel = new ElementBuilder('p')
+            .class('mb-1 fw-bold')
+            .text('Categories:');
+
+        const categoriesContent = new ElementBuilder('p')
+            .class('mb-5')
+            .text(expense.categories.join(', '));
+
+        const totalSpendLabel = new ElementBuilder('p')
+            .class('mb-1 fw-bold')
+            .text('Total Spend:');
+
+        const totalSpendContent = new ElementBuilder('p')
+            .class('mb-0')
+            .text(`$${expense.total_spent}`);
+
+        const accordionBody = new ElementBuilder('div')
+            .class('accordion-body mt-5')
+            .append(categoriesLabel)
+            .append(categoriesContent)
+            .append(totalSpendLabel)
+            .append(totalSpendContent);
+
         const monthBody = new ElementBuilder('div')
             .class('accordion-collapse collapse')
-            .id(`collapse-${expense.month}`)
-            .append(new ElementBuilder('div')
-                .class('accordion-body')
-                .innerHTML(`Categories: ${expense.categories.join(', ')}`)
-            );
+            .id(normalizedId)
+            .append(accordionBody);
 
+        // Combine header and body
         monthCard.append(monthHeader);
         monthCard.append(monthBody);
 
+        // Append to container
         monthCard.appendTo(container);
-
-        iterations++;
     });
 }

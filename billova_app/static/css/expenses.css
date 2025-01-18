@@ -14,6 +14,9 @@
 
 #monthlyExpensesContainer .accordion-item {
     padding: 15px;
+}
+
+#monthlyExpensesContainer .accordion-header {
     background: #f3efef69;
 }
 
