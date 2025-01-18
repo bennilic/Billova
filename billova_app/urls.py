@@ -19,6 +19,7 @@ router = DefaultRouter()
 router.register(r'expenses', api_views.ExpenseViewSet, basename='expense')
 router.register(r'categories', api_views.CategoryViewSet, basename='category')
 router.register(r'usersettings', api_views.UserSettingsViewSet, basename='usersettings')
+router.register(r'monthlyExpenses', api_views.MonthlyExpensesViewSet, basename='monthlyExpenses')
 
 urlpatterns = [
 

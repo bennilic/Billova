@@ -11,3 +11,12 @@
     display: flex;
     justify-content: center;
 }
+
+#monthlyExpensesContainer .accordion-item {
+    padding: 15px;
+    background: #f3efef69;
+}
+
+.monthly-expenses-container #showMoreButton {
+    width: 200px;
+}
