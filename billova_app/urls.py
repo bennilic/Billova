@@ -10,7 +10,7 @@ from .views.login import CustomLoginView
 from .views.logout import CustomLogoutView
 from .views.password_reset import PwResetView
 
-from .views.expenses import ExpensesOverview
+from .views.expenses import ExpensesOverview, MonthlyExpenses
 from billova_app import api_views
 from .views import homepage, settings, login, signup
 
@@ -48,6 +48,7 @@ urlpatterns = [
     path('categories/', CategoriesView.as_view(), name='categories'),
     path('settings', settings.SettingsView.as_view(), name='settings'),
 
-    path('expensesOverview', ExpensesOverview.as_view(), name='expensesOverview')
+    path('expensesOverview', ExpensesOverview.as_view(), name='expensesOverview'),
+    path('monthlyExpenses', MonthlyExpenses.as_view(), name='monthlyExpenses')
 
 ]
