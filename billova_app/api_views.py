@@ -57,6 +57,12 @@ class UserSettingsViewSet(viewsets.ModelViewSet):
 
 
 class MonthlyExpensesPagination(PageNumberPagination):
+    """
+    Custom pagination for Monthly Expenses API.
+    - Default page size: 10.
+    - Allows clients to set a custom page size using the 'page_size' query parameter.
+    - Maximum page size: 50, to prevent excessive data load.
+    """
     page_size = 10  # Default page size
     page_size_query_param = 'page_size'  # Allow clients to customize page size
     max_page_size = 50  # Limit maximum number of results per page

@@ -2,22 +2,24 @@
 import {ElementBuilder, ButtonBuilder} from "./builder/builder.js";
 
 let currentPage = 1;
+
 // number of results to fetch per page
-const pageSize = 10;
+const FIRST_PAGE_SIZE_NUMBER = 10;
+const LOAD_MORE_PAGE_SIZE_NUMBER = 5;
 
 document.addEventListener('DOMContentLoaded', function () {
-    loadMonthlyExpenses(currentPage, pageSize);
+    loadMonthlyExpenses(currentPage, FIRST_PAGE_SIZE_NUMBER);
 
     const showMoreButton = document.querySelector('#showMoreButton');
     if (showMoreButton) {
         showMoreButton.addEventListener('click', function () {
             currentPage++; // Increment the page number
-            loadMonthlyExpenses(currentPage, pageSize); // Load the next page
+            loadMonthlyExpenses(currentPage, LOAD_MORE_PAGE_SIZE_NUMBER); // Load the next page
         });
     }
 });
 
-function loadMonthlyExpenses(page, size) {
+function loadMonthlyExpenses(page, size=FIRST_PAGE_SIZE_NUMBER) {
     fetch(`/api/v1/monthlyExpenses/?page=${page}&page_size=${size}`, {
         method: 'GET',
         headers: {
