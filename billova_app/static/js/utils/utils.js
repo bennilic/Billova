@@ -75,3 +75,10 @@ export function stringToFormattedDate(dateString) {
 
     return `${day}/${month}/${year}`;
 }
+
+export function toggleElementVisibility(selector, show=true) {
+    const element = document.querySelector(selector);
+    if (element) {
+        element.classList.toggle('hidden', !show);
+    }
+}

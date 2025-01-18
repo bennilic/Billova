@@ -168,7 +168,7 @@ function saveExpense(e) {
             Utils.closeModal(SELECTORS.createExpenseModal);
 
             addExpenseToTable(data);
-            toggleNoExpenseFoundInTableVisibility(false);
+            Utils.toggleElementVisibility(SELECTORS.noExpensesCard, false);
 
             Utils.showNotificationMessage('Expense added successfully', "success");
 
@@ -264,6 +264,7 @@ async function fetchAllExpenses(url = '/api/v1/expenses/') {
             }
         });
         if (!response.ok) {
+            Utils.toggleElementVisibility(SELECTORS.noExpensesCard, true);
             throw new Error('Network response was not ok ' + response.statusText);
         }
 
@@ -278,17 +279,17 @@ async function fetchAllExpenses(url = '/api/v1/expenses/') {
 function addExpensesListToTable(expenses) {
     const expensesTable = document.querySelector(SELECTORS.expenseTable);
     if (!expensesTable) {
-        toggleNoExpenseFoundInTableVisibility();
+        Utils.toggleElementVisibility(SELECTORS.noExpensesCard, true);
         throw new Error("No expenses table found");
     }
 
     if (!expenses) {
-        toggleNoExpenseFoundInTableVisibility();
+        Utils.toggleElementVisibility(SELECTORS.noExpensesCard, true);
         throw new Error("List with expenses not provided");
     }
 
     if (!expenses.length) {
-        toggleNoExpenseFoundInTableVisibility();
+        Utils.toggleElementVisibility(SELECTORS.noExpensesCard, true);
         return;
     }
 
@@ -324,13 +325,6 @@ function addExpenseToTable(expense, table = document.querySelector(SELECTORS.exp
     // Use the DataTable's insert method to add the data
     if (DATA.vanillaDataTableInstance) {
         DATA.vanillaDataTableInstance.insert(newData);
-    }
-}
-
-function toggleNoExpenseFoundInTableVisibility(show=true) {
-    const noExpensesCard = document.querySelector(SELECTORS.noExpensesCard);
-    if (noExpensesCard) {
-        noExpensesCard.classList.toggle('hidden', !show);
     }
 }
 
