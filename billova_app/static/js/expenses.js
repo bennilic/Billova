@@ -238,34 +238,41 @@ function deleteExpense(e) {
 }
 
 function populateExpensesTable() {
-    fetch('/api/v1/expenses/', {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'Cache-Control': 'max-age=3600' // Cache for 1 hour
-        }
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok ' + response.statusText);
-            }
-            return response.json();
-        })
-
-        .then(data => {
-            if (!data.results) {
-                throw new Error("Error fetching expenses");
-            }
-
+    fetchAllExpenses()
+        .then(expenses => {
             reinitializeVanillaDataTable();
-            addExpensesListToTable(data.results);
+            addExpensesListToTable(expenses); // Pass all fetched expenses
             setupDomEvents();
-
         })
         .catch(error => {
             console.error(error.message);
             Utils.showNotificationMessage('We were unable to load your expense list. Please try again later.', "error");
         });
+}
+
+async function fetchAllExpenses(url = '/api/v1/expenses/') {
+    // We are using django pagination, this means we always get 10 results for each request.
+    // In the expense table we want to load all the data at once and initialize the table.
+    const expenses = [];
+
+    // Iterate over all the available result pages and create a new request for each of them
+    while (url) {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+            }
+        });
+        if (!response.ok) {
+            throw new Error('Network response was not ok ' + response.statusText);
+        }
+
+        const data = await response.json();
+        expenses.push(...data.results); // Add current page results
+        url = data.next; // Get the next page URL
+    }
+
+    return expenses;
 }
 
 function addExpensesListToTable(expenses) {
