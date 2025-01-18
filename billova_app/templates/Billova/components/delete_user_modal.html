@@ -11,7 +11,7 @@
                 <div class="modal-body">
                     <p class="text-danger">Type your username to confirm account deletion:</p>
                     <input type="text" id="usernameConfirmation" name="username_confirmation" class="form-control"
-                           placeholder="Enter your username " required>
+                           placeholder="Enter your username to confirm deletion: {{ request.user.username }}" required>
                     <small class="text-danger d-none" id="usernameError">Username does not match.</small>
                     {{ form.username_confirmation }}
                 </div>
@@ -32,18 +32,29 @@
         const currentUsername = "{{ request.user.username }}
         ";
 
-   confirmDeleteForm.addEve tListene ('s b
-            ction (e) {
-       usernameError.clas
+        confirmDeleteForm.addEve
+        tListene('s b
+        ction(e)
+        {
+            usernameError.clas
             (' -none');
-        if (userna eIn ut.value.trim()  =
-                name) {
+            if (userna eIn
+            ut.value.trim() =
+                name
+        )
+            {
 
                 ault();
-       usernameError.classLi
-                none');
-       usern m Error.textContent = "Wrong
+                usernameError.classLi
+                none
+                ');
+                usern
+                m
+                Error.textContent = "Wrong
 
-        ed!
-    ;);
+                ed
+                !
+                ;
+            )
+                ;
 </script>
