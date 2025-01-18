@@ -25,10 +25,10 @@ class Category(models.Model):
 
 class UserSettings(models.Model):
     # https://en.wikipedia.org/wiki/ISO_4217 - 3 letter currency code
-    currency = models.CharField(max_length=3)
+    currency = models.CharField(max_length=3, default='EUR')
     # https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes - 2 letter language code
-    language = models.CharField(max_length=2)
+    language = models.CharField(max_length=2, default='en')
     timezone = models.CharField(max_length=50, default='Europe/Vienna')  # Set default timezone
-    numeric_format = models.CharField(max_length=50, blank=True, null=True)
+    numeric_format = models.CharField(max_length=50, default='Austrian')
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)  # Add this field
     owner = models.OneToOneField('auth.User', related_name='user_settings', on_delete=models.CASCADE)

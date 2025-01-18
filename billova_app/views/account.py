@@ -18,27 +18,24 @@ logger = logging.getLogger(__name__)
 
 
 class AccountOverviewView(LoginRequiredMixin, TemplateView):
-    template_name = "account_overview.html"  # Step 1: Specify your template here
+    template_name = "account_overview.html"
 
     def get_context_data(self, **kwargs):
-        """Provide context data to the template."""
         context = super().get_context_data(**kwargs)
+        user = self.request.user
         try:
-            user = self.request.user
-            profile = getattr(user, 'profile', None)  # Fetch user profile
-            context.update({
-                'user': user,
-                'email': user.email,
-                'currency': profile.currency if profile else "USD",
-            })
-            logger.info(f"User {user.username} accessed the account overview page.")
-        except Exception as e:
-            logger.exception(f"Error while loading Account Overview for {self.request.user.username}: {e}")
-            messages.error(self.request, "An error occurred while loading your account overview.")
-            context.update({
-                'user': None,
-                'error': "Unable to load account details."
-            })
+            user_settings = UserSettings.objects.get(owner=user)
+            context['user_settings'] = user_settings
+        except UserSettings.DoesNotExist:
+            context['user_settings'] = None
+
+        # Optionally also fetch the profile
+        profile = getattr(user, 'profile', None)
+        context.update({
+            'user': user,
+            'email': user.email,
+            'currency': profile.currency if profile else "USD",
+        })
         return context
 
 

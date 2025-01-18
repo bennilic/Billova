@@ -4,9 +4,9 @@
     <div class="container mt-5">
         <div class="row">
             <!-- Sidebar Navigation -->
-            <div class="col-12 col-lg-3">
+            <div class="col-12 col-lg-2">
                 <!-- Nav -->
-                <nav class="nav nav-pills position-sticky flex-column mb-8" id="accountNav" style="top: 32px">
+                <nav class="nav nav-pills position-sticky flex-column mb-5" id="accountNav" style="top: 32px">
                     <a class="nav-link active" href="{% url 'account_overview' %}">Overview</a>
                     <a class="nav-link" href="{% url 'account_settings' %}">Settings</a>
                     <a href="#" class="nav-link text-danger" data-bs-toggle="modal"
@@ -25,7 +25,7 @@
                 </div>
 
                 <!-- User Information -->
-                <div class="card">
+                <div class="card m-5">
                     <div class="card-body d-flex">
                         <!-- Profile Picture -->
                         <div class="me-4">
@@ -41,13 +41,13 @@
                         </div>
                     </div>
                 </div>
-                <div class="card">
-                    <div class="card-body">
+                <div class="card m-5">
+                    <div class="card-body ">
                         <h5 class="card-title">User Settings</h5>
-                        <p><strong>Language:</strong> English</p>
-                        <p><strong>Currency:</strong> Euro (€)</p>
-                        <p><strong>Timezone:</strong> Central European Time (CET)</p>
-                        <p><strong>Numeric Format:</strong> German Accountant Style</p>
+                        <p>Currency: {{ user_settings.currency }}</p>
+                        <p>language: {{ user_settings.language }}</p>
+                        <p>Timezone: {{ user_settings.timezone }}</p>
+                        <p>Numeric Format: {{ user_settings.num_format }}</p>
                     </div>
                 </div>
             </div>
