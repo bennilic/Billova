@@ -60,40 +60,13 @@
                         <h5 class="card-title">User Settings</h5>
                         <form method="POST" action="{% url 'update_user_settings' %}">
                             {% csrf_token %}
-
-                            <!-- Currency Dropdown -->
-                            <div class="mb-3">
-                                <label for="currency" class="form-label">currency</label>
-                                <select id="currency" name="currency" class="form-select">
-                                    {% for currency in currency_choices %}
-                                        <option value="{{ currency }}"
-                                                {% if user_settings.currency == currency %}selected{% endif %}>
-                                            {{ currency }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-
-                            <!-- Timezone Dropdown -->
-                            <div class="mb-3">
-                                <label for="timezone" class="form-label">Timezone</label>
-                                <select id="timezone" name="timezone" class="form-select">
-                                    {% for timezone in timezone_choices %}
-                                        <option value="{{ timezone }}"
-                                                {% if user_settings.timezone == timezone %}selected{% endif %}>
-                                            {{ timezone }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-
                             <!-- Language Dropdown -->
                             <div class="mb-3">
                                 <label for="language" class="form-label">Language</label>
                                 <select id="language" name="language" class="form-select">
                                     {% for code, name in language_choices %}
                                         <option value="{{ code }}"
-                                                {% if user_settings.language == code %}selected{% endif %}>
+                                                {% if code == current_settings.language %}selected{% endif %}>
                                             {{ name }}
                                         </option>
                                     {% endfor %}
@@ -104,14 +77,43 @@
                             <div class="mb-3">
                                 <label for="numeric_format" class="form-label">Numeric Format</label>
                                 <select id="numeric_format" name="numeric_format" class="form-select">
-                                    {% for code, region in numeric_format_choices %}
+                                    {% for code, name in numeric_format_choices %}
                                         <option value="{{ code }}"
-                                                {% if user_settings.numeric_format == code %}selected{% endif %}>
-                                            {{ region }}
+                                                {% if code == current_settings.numeric_format %}selected{% endif %}>
+                                            {{ name }}
                                         </option>
                                     {% endfor %}
                                 </select>
                             </div>
+
+                            <!-- Currency Dropdown -->
+                            <div class="mb-3">
+                                <label for="currency" class="form-label">Currency</label>
+                                <select id="currency" name="currency" class="form-select">
+                                    {% for code, name in currency_choices %}
+                                        <option value="{{ code }}"
+                                                {% if code == current_settings.currency %}selected{% endif %}>
+                                            {{ name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <!-- Timezone Dropdown -->
+                            <div class="mb-3">
+                                <div class="mb-3">
+                                    <label for="timezone" class="form-label">Timezone</label>
+                                    <select id="timezone" name="timezone" class="form-select">
+                                        {% for code in timezone_choices %}
+                                            <option value="{{ code }}"
+                                                    {% if code == current_settings.timezone %}selected{% endif %}>
+                                                {{ name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
 
                             <button type="submit" class="btn btn-primary">Save</button>
                         </form>

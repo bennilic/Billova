@@ -15,6 +15,7 @@ class AccountOverviewView(LoginRequiredMixin, TemplateView):
         logger.info("Loading account overview for user: %s", self.request.user.username)
         context = super().get_context_data(**kwargs)
         user = self.request.user
+
         try:
             user_settings = UserSettings.objects.get(owner=user)
             context['user_settings'] = user_settings
@@ -23,17 +24,4 @@ class AccountOverviewView(LoginRequiredMixin, TemplateView):
             context['user_settings'] = None
             logger.warning("User settings not found for user: %s", user.username)
 
-        # Optionally also fetch the profile
-        profile = getattr(user, 'profile', None)
-        if profile:
-            logger.info("Profile found for user: %s", user.username)
-        else:
-            logger.warning("Profile not found for user: %s", user.username)
-
-        context.update({
-            'user': user,
-            'email': user.email,
-            'currency': profile.currency if profile else "USD",
-        })
-        logger.debug("Context data prepared for user: %s", user.username)
         return context

@@ -1,11 +1,9 @@
 import logging
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
-from django.utils.decorators import method_decorator
 from django.views.generic import TemplateView
 from django.views.generic.edit import FormView
 
@@ -21,59 +19,63 @@ class AccountSettingsView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Define popular timezones
+        # Fetch the user's settings or set default values
+        user_settings = get_object_or_404(UserSettings, owner=self.request.user)
+
+        # Define choices for the dropdowns
         popular_timezones = [
             "UTC", "Etc/GMT", "Europe/London", "Europe/Berlin", "Europe/Vienna",
-            "America/New_York", "Asia/Tokyo", "Asia/Dubai"
+            "America/New_York", "Asia/Tokyo", "Asia/Dubai",
         ]
-
-        # Define popular languages
         popular_languages = [
-            ("en", "English"),
-            ("de", "German"),
-            ("fr", "French"),
-            ("es", "Spanish"),
-            ("it", "Italian"),
-            ("ro", "Romanian"),
-            ("tr", "Turkish"),
+            ("en", "English"), ("de", "German"), ("fr", "French"),
+            ("es", "Spanish"), ("it", "Italian"), ("ro", "Romanian"), ("tr", "Turkish"),
         ]
-
-        # Define numeric formats
         numeric_formats = [
-            ('AT', 'Austrian'),
-            ('DE', 'German'),
-            ('CH', 'Swiss'),
-            ('US', 'American'),
-            ('UK', 'British'),
+            ("AT", "Austrian"), ("DE", "German"), ("CH", "Swiss"),
+            ("US", "American"), ("UK", "British"),
+        ]
+        popular_currencies = [
+            ("USD", "US Dollar"),
+            ("EUR", "Euro"),
+            ("GBP", "British Pound"),
+            ("JPY", "Japanese Yen"),
+            ("CHF", "Swiss Franc"),
+            ("RON", "Romanian Leu"),
+            ("TRY", "Turkish Lira"),
         ]
 
-        # Add the choices to context
+        # Add current settings and choices to the context
         context["timezone_choices"] = popular_timezones
         context["language_choices"] = popular_languages
         context["numeric_format_choices"] = numeric_formats
-        context["currency_choices"] = ["EUR", "GBP", "USD", "CHF", "JPY", "RON", "TRY"]
+        context["currency_choices"] = popular_currencies
+        context["current_settings"] = {
+            "timezone": user_settings.timezone,
+            "language": user_settings.language,
+            "numeric_format": user_settings.numeric_format,
+            "currency": user_settings.currency,
+        }
 
         return context
 
 
-@method_decorator(login_required, name='dispatch')
-class UpdateUserSettingsView(FormView):
+class UpdateUserSettingsView(LoginRequiredMixin, FormView):
     template_name = "account_settings.html"
+    form_class = UserSettingsForm
     success_url = reverse_lazy("account_settings")
 
     def post(self, request, *args, **kwargs):
         user_settings, created = UserSettings.objects.get_or_create(owner=request.user)
 
-        # Update fields
-        user_settings.timezone = request.POST.get("timezone")
-        user_settings.language = request.POST.get("language")
-        user_settings.numeric_format = request.POST.get("numeric_format")
-
-        # Save changes
+        # Update settings based on POST data
+        user_settings.timezone = request.POST.get("timezone", user_settings.timezone)
+        user_settings.language = request.POST.get("language", user_settings.language)
+        user_settings.numeric_format = request.POST.get("numeric_format", user_settings.numeric_format)
         user_settings.save()
 
-        messages.success(request, "Settings updated successfully!")
-        return redirect(self.success_url)
+        messages.success(request, "Your settings have been updated!")
+        return super().form_valid(self.get_form())
 
 
 class UpdatePersonalInfoView(LoginRequiredMixin, FormView):
