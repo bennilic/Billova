@@ -1,19 +1,13 @@
-import base64
-from time import timezone
-
 from django.contrib.auth.models import User
-from django.core.serializers import serialize
 from django.http import HttpResponseRedirect, HttpResponse
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 
 from billova_app.models import Expense, Category, UserSettings
 from billova_app.ocr.receipt import Receipt
 from billova_app.serializers import ExpenseSerializer, CategorySerializer, UserSettingsSerializer, ExpenseOCRSerializer
 from billova_app.permissions import IsOwner
-from django.utils import timezone
-from dateutil import parser
-
+from rest_framework.response import Response
 
 class ExpenseViewSet(viewsets.ModelViewSet):
     """
@@ -56,7 +50,8 @@ class ExpenseViewSet(viewsets.ModelViewSet):
             category = Category.objects.get_or_create(name="Generated", owner=global_user)[0]
             expense.categories.set([category])
 
-            return HttpResponse(expense)
+            expense_serializer = ExpenseSerializer(expense, context={'request': request})
+            return Response(expense_serializer.data, status=status.HTTP_201_CREATED)
 
         return HttpResponse('Invalid input data.')
 
