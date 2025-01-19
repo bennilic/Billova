@@ -12,12 +12,9 @@
     justify-content: center;
 }
 
-#monthlyExpensesContainer .accordion-item {
-    padding: 15px;
-}
-
 #monthlyExpensesContainer .accordion-header {
-    background: #f3efef69;
+    background: var(--bs-tertiary-bg);
+    padding: 20px;
 }
 
 .monthly-expenses-container #showMoreButton {
