@@ -3,10 +3,11 @@ import {ElementBuilder, ButtonBuilder} from "./builder/builder.js";
 import * as Utils from './utils/utils.js';
 
 let currentPage = 1;
+let totalMonthsCount = 0;
+let countOfMonthsDisplayed = 0;
 
 // number of results to fetch per page
-const FIRST_PAGE_SIZE_NUMBER = 10;
-const LOAD_MORE_PAGE_SIZE_NUMBER = 5;
+const PAGE_SIZE_NUMBER = 10;
 
 const SELECTORS = {
     noExpensesCard: '.no-expenses-card',
@@ -14,23 +15,24 @@ const SELECTORS = {
     monthlyExpensesContainer: '#monthlyExpensesContainer',
     accordionItem: '.accordion-item',
     accordionButton: '.accordion-button',
-    accordionCollapse: '.accordion-collapse'
+    accordionCollapse: '.accordion-collapse',
+    noMoreItemsLeft: '#noMoreItemsInfo'
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    loadMonthlyExpenses(currentPage, FIRST_PAGE_SIZE_NUMBER);
+    loadMonthlyExpenses(currentPage, PAGE_SIZE_NUMBER);
 
     const showMoreButton = document.querySelector(SELECTORS.showMoreButton);
     if (showMoreButton) {
         showMoreButton.addEventListener('click', function () {
             currentPage++; // Increment the page number
-            loadMonthlyExpenses(currentPage, LOAD_MORE_PAGE_SIZE_NUMBER); // Load the next page
+            loadMonthlyExpenses(currentPage); // Load the next page
         });
     }
 });
 
-function loadMonthlyExpenses(page, size=FIRST_PAGE_SIZE_NUMBER) {
-    fetch(`/api/v1/monthlyExpenses/?page=${page}&page_size=${size}`, {
+function loadMonthlyExpenses(page) {
+    fetch(`/api/v1/monthlyExpenses/?page=${page}`, {
         method: 'GET',
         headers: {
             'Accept': 'application/json',
@@ -45,16 +47,29 @@ function loadMonthlyExpenses(page, size=FIRST_PAGE_SIZE_NUMBER) {
         .then(data => {
             renderMonthlyExpenses(data.results);
 
-            if (currentPage === 1) {
+            if (isFirstApiRequest()) {
                 collapseFirstAccordionItem();
+                totalMonthsCount = data.count;
             }
 
+            // keep track how many months we already displayed in order to know when to hide the
+            // show more button
+            countOfMonthsDisplayed += data.results.length;
+
             // display the show more button if there are more expenses which can be loaded
-            let showButton = data.results.length >= size;
+            let showButton = totalMonthsCount - countOfMonthsDisplayed >= PAGE_SIZE_NUMBER;
             Utils.toggleElementVisibility(SELECTORS.showMoreButton, showButton);
+            Utils.toggleElementVisibility(SELECTORS.noMoreItemsLeft, !showButton);
 
         })
         .catch(error => {
+            Utils.toggleElementVisibility(SELECTORS.showMoreButton, false);
+
+            if (isFirstApiRequest()) {
+                Utils.toggleElementVisibility(SELECTORS.noExpensesCard, true);
+            }
+
+            Utils.showNotificationMessage('We were unable to load your monthly expenses. Please try again later.', "error");
             console.error('Error fetching monthly expenses:', error);
         });
 }
@@ -68,13 +83,18 @@ function renderMonthlyExpenses(expenses) {
     // if this is the first request sent and there is no data, then we show "no expense message"
     // needed only for the first request. The next requests are only sent when the user clicks on the
     // button which means we already show some expenses
-    if (currentPage === 1 && !expenses.length) {
+    if (isFirstApiRequest() && !expenses.length) {
         Utils.toggleElementVisibility(SELECTORS.noExpensesCard, true);
     }
 
     expenses.forEach(expense => {
         // Normalize the ID by replacing spaces with dashes
         const normalizedId = `collapse-${expense.month.replace(/\s+/g, '-')}`;
+
+        if (document.getElementById(normalizedId)) {
+            console.warn(`Skipping duplicate month: ${expense.month}`);
+            return; // Skip duplicates
+        }
 
         const monthCard = new ElementBuilder('div')
             .class('accordion-item');
@@ -140,4 +160,8 @@ function collapseFirstAccordionItem() {
     firstAccordionItem.querySelector(SELECTORS.accordionButton).classList.remove('collapsed');
     firstAccordionItem.querySelector(SELECTORS.accordionButton).classList.remove('collapsed');
     firstAccordionItem.querySelector(SELECTORS.accordionCollapse).classList.add('show');
+}
+
+function isFirstApiRequest() {
+    return currentPage === 1;
 }
