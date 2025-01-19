@@ -1,4 +1,5 @@
-<div class="modal fade" id="createExpenseEntryModal" tabindex="-1" aria-labelledby="createExpenseEntryLabel" data-bs-backdrop="static">
+<div class="modal fade" id="createExpenseEntryModal" tabindex="-1" aria-labelledby="createExpenseEntryLabel"
+     data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
@@ -12,21 +13,23 @@
                     <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
                     <div class="mb-3">
-                        <label for="expenseCategory" class="form-label">Category</label>
-                        <select class="form-select" id="expenseCategory" name="expenseCategory" required>
+                        <label for="expenseCategories" class="form-label">Category</label>
+                        <select class="form-select" id="expenseCategories" name="expenseCategories" multiple required>
                             <option value="">Select category...</option>
-                            <option value="Dummy-Option">Dummy-Option</option>
+                            {# the list will be populated with REST API #}
                         </select>
                     </div>
 
                     <div class="mb-3">
                         <label for="expenseValue" class="form-label">Value</label>
-                        <input type="number" id="expenseValue" class="form-control" name="expenseValue" step="any" required/>
+                        <input type="number" id="expenseValue" class="form-control" name="expenseValue" step="any"
+                               required/>
                     </div>
 
                     <div class="mb-3">
                         <label for="expenseDate" class="form-label">Date</label>
-                        <input type="date" id="expenseDate" class="form-control" name="expenseDate" min="2000-01-01" required/>
+                        <input type="date" id="expenseDate" class="form-control" name="expenseDate" min="2000-01-01"
+                               required/>
                     </div>
 
                     <div class="mb-3">
@@ -36,14 +39,16 @@
 
                     <div class="mb-3">
                         <label for="expenseNote" class="form-label">Note</label>
-                        <input type="text" id="expenseNote" class="form-control" name="expenseNote" />
+                        <input type="text" id="expenseNote" class="form-control" name="expenseNote"/>
                     </div>
                 </form>
             </div>
-            
+
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary save-expenseEntry-button" id="saveExpenseEntryButton">Save</button>
+                <button type="button" class="btn btn-primary save-expenseEntry-button" id="saveExpenseEntryButton">
+                    Save
+                </button>
             </div>
         </div>
     </div>

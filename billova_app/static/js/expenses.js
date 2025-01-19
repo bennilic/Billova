@@ -1,16 +1,27 @@
 import * as Utils from './utils/utils.js';
+import {ElementBuilder} from "./builder/builder.js";
 
 
 const SELECTORS = {
     expenseTable: '#expensesTable',
+    expenseTableBody: '.uiExpensesTblBody',
     saveExpenseButton: '#saveExpenseEntryButton',
     deleteExpenseButton: '.delete-expense-btn',
     confirmDeleteExpenseButton: '.confirm-delete-expense-btn',
+    createExpenseModalOpenerBtn: '.create-expenseEntry-btn',
     createExpenseForm: '#expenseEntryForm',
+    createOCRExpenseForm: '#ocrExpenseEntryForm',
+    saveOCRExpenseButton: '#saveOCRExpenseEntryButton',
+    createOCRFormFields: {
+        ocrFileUpload: '#ocrFileUpload'
+    },
     deleteExpenseForm: '#deleteExpenseForm',
+    deleteExpenseEntryModal: '#deleteExpenseEntryModal',
+    createExpenseModal: '#createExpenseEntryModal',
+    noExpensesCard: '.no-expenses-card',
     csrfToken: "[name=csrfmiddlewaretoken]",
     createFormFields: {
-        expenseCategory: '#expenseCategory',
+        expenseCategories: '#expenseCategories',
         expenseValue: '#expenseValue',
         expenseDate: '#expenseDate',
         expenseIssuer: '#expenseIssuer',
@@ -19,13 +30,89 @@ const SELECTORS = {
 };
 
 const DATA = {
-    bootstrapFormValidated: 'was-validated' // used by bootstrap to style invalid forms
+    bootstrapFormValidated: 'was-validated', // used by bootstrap to style invalid forms
+    vanillaDataTableInstance: undefined,
+    categoriesListCreated: false
 };
 
 document.addEventListener('DOMContentLoaded', function () {
-    Utils.initializeVanillaDataTable(SELECTORS.expenseTable);
-    setupDomEvents();
+    const modalOpenerBtn = document.querySelector(SELECTORS.createExpenseModalOpenerBtn);
+    if (modalOpenerBtn) {
+        modalOpenerBtn.addEventListener('click', onModalCreateModalBtnOpenerClick);
+    }
+
+    populateExpensesTable();
 });
+
+function onModalCreateModalBtnOpenerClick() {
+    // guard - no need to recreate the categories list if already done. This happens when the user opened the
+    // modal dialog before
+    if (DATA.categoriesListCreated) {
+        return;
+    }
+
+    fetch('/api/v1/categories/', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Cache-Control': 'max-age=3600' // Cache for 1 hour
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+
+            return response.json();
+        })
+
+        .then(data => {
+            if (!data.results) {
+                throw new Error("Error fetching categories");
+            }
+
+            populateCategoriesSelectList(data.results);
+
+            DATA.categoriesListCreated = true;
+
+        })
+        .catch(error => {
+            console.error(error.message);
+            Utils.showNotificationMessage('We were unable to load your categories list. Please try again later.', "error");
+        });
+}
+
+function populateCategoriesSelectList(categories) {
+    if (!categories) {
+        throw new Error('No categories provided');
+    }
+
+    categories.forEach(function(item, index) {
+        addCategoriesToSelectList(item);
+    });
+}
+
+function addCategoriesToSelectList(category) {
+    if (!category) {
+        throw new Error("No category provided");
+    }
+    if (!category.name) {
+        throw new Error("Name of category not found");
+    }
+
+    const selectList = document.querySelector(SELECTORS.createFormFields.expenseCategories);
+    if (!selectList) {
+        throw new Error("Categories Select List not found");
+    }
+
+    const optionBuilder = new ElementBuilder('option')
+        .attr({
+            "value": category.name
+        })
+        .text(category.name);
+
+    selectList.append(optionBuilder.element);
+}
 
 function setupDomEvents() {
     const saveExpenseButton = document.querySelector(SELECTORS.saveExpenseButton);
@@ -33,9 +120,17 @@ function setupDomEvents() {
         saveExpenseButton.addEventListener('click', saveExpense);
     }
 
-    const deleteExpenseButton = document.querySelector(SELECTORS.deleteExpenseButton);
-    if (deleteExpenseButton) {
-        deleteExpenseButton.addEventListener('click', onDeleteExpenseButtonClick);
+    const saveOCRExpenseButton = document.querySelector(SELECTORS.saveOCRExpenseButton);
+    if (saveOCRExpenseButton) {
+        saveOCRExpenseButton.addEventListener('click', saveOCRExpense);
+    }
+
+    const deleteExpenseButtons = document.querySelectorAll(SELECTORS.deleteExpenseButton);
+
+    if (deleteExpenseButtons) {
+        deleteExpenseButtons.forEach(button => {
+            button.addEventListener('click', onDeleteExpenseButtonClick);
+        });
     }
 }
 
@@ -47,12 +142,20 @@ function saveExpense(e) {
         return;
     }
 
+    const selectedCategoriesOptions
+        = createExpenseForm.querySelector(SELECTORS.createFormFields.expenseCategories).selectedOptions;
+
+    const selectedCategoriesArray = Array.from(selectedCategoriesOptions).map(({ value }) => ({
+        name: value
+    }));
+
     // JSON sent to the API
     const expenseData = {
-        invoice_date_time: document.querySelector(SELECTORS.createFormFields.expenseDate).value,
-        price: document.querySelector(SELECTORS.createFormFields.expenseValue).value,
-        note: document.querySelector(SELECTORS.createFormFields.expenseNote).value,
-        invoice_issuer: document.querySelector(SELECTORS.createFormFields.expenseIssuer).value
+        categories: selectedCategoriesArray,
+        invoice_date_time: createExpenseForm.querySelector(SELECTORS.createFormFields.expenseDate).value,
+        price: createExpenseForm.querySelector(SELECTORS.createFormFields.expenseValue).value,
+        note: createExpenseForm.querySelector(SELECTORS.createFormFields.expenseNote).value,
+        invoice_issuer: createExpenseForm.querySelector(SELECTORS.createFormFields.expenseIssuer).value
     };
 
     fetch('/api/v1/expenses/', {
@@ -65,18 +168,74 @@ function saveExpense(e) {
     })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Failed to create expense');
+                throw new Error('Failed to create expense ' + response.statusText);
             }
 
             return response.json();
         })
         .then(data => {
+
+            Utils.closeModal(SELECTORS.createExpenseModal);
+
+            addExpenseToTable(data);
+            toggleNoExpenseFoundInTableVisibility(false);
+
             Utils.showNotificationMessage('Expense added successfully', "success");
 
-            // wait 1 second before reloading the page in order to show a success message to the user
-            setTimeout(function () {
-                location.reload(); // Reload page to fetch updated expenses TODO maybe update the table instead of reloading the page
-            }, 1000);
+            setupDomEvents();
+
+        })
+        .catch(error => {
+            console.error('Error creating expense:', error);
+            Utils.showNotificationMessage('Unable to create the expense. Please ensure all fields are filled out correctly.', "error");
+        });
+}
+
+function saveOCRExpense(e) {
+    console.log('OCR Expense');
+    const createOCRExpenseForm = document.querySelector(SELECTORS.createOCRExpenseForm);
+    // make sure the required fields are fulfilled
+    if (!createOCRExpenseForm || !createOCRExpenseForm.checkValidity()) {
+        createOCRExpenseForm.classList.add(DATA.bootstrapFormValidated);
+        return;
+    }
+
+    const ocrFileUpload = createOCRExpenseForm.querySelector(SELECTORS.createOCRFormFields.ocrFileUpload).files[0];
+    if (!ocrFileUpload) {
+        Utils.showNotificationMessage('Please upload an image file.', "error");
+        return;
+    }
+
+    // JSON sent to the API
+    const formData = new FormData();
+    formData.append('image', ocrFileUpload);
+
+    fetch('/api/v1/expenses/ocr/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCsrfTokenFromForm(createOCRExpenseForm)
+        },
+        body: formData
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to create expense ' + response.statusText);
+            }
+
+            return response.json();
+        })
+        .then(data => {
+
+            // console.log(data)
+
+            // Utils.closeModal(SELECTORS.createExpenseModal);
+            //
+            // addExpenseToTable(data);
+            // Utils.toggleElementVisibility(SELECTORS.noExpensesCard, false);
+            //
+            // Utils.showNotificationMessage('Expense added successfully', "success");
+            //
+            // setupDomEvents();
 
         })
         .catch(error => {
@@ -99,12 +258,16 @@ function onDeleteExpenseButtonClick(e) {
 
 function deleteExpense(e) {
     const toDeleteExpenseId = e.currentTarget.dataset.expenseId;
+    const errorMessage = 'An error occurred while trying to delete the expense. Please try again later.';
+
     if (!toDeleteExpenseId || isNaN(parseInt(toDeleteExpenseId))) {
+        Utils.showNotificationMessage(errorMessage, "error");
         return;
     }
 
     const deleteForm = document.querySelector(SELECTORS.deleteExpenseForm);
     if (!deleteForm) {
+        Utils.showNotificationMessage(errorMessage, "error");
         return;
     }
 
@@ -116,21 +279,115 @@ function deleteExpense(e) {
         },
     })
         .then(response => {
-            if (response.ok) {
-                Utils.showNotificationMessage('Expense deleted successfully', "success");
-
-                setTimeout(function () {
-                    location.reload(); // Reload page to fetch updated expenses TODO maybe update the table instead of reloading the page
-                }, 1000);
-
-            } else {
-                throw new Error(`Failed to delete expense: ${response.status}`);
+            if (!response.ok) {
+                throw new Error(`Failed to delete expense: ${response.statusText}`);
             }
+
+            Utils.closeModal(SELECTORS.deleteExpenseEntryModal);
+            Utils.showNotificationMessage('Expense deleted successfully', "success");
+
+            setTimeout(function () {
+                // we need to reload the page after delete. Reason is that the library is buggy, when
+                // there is some filter applied, and we try to use the library to remove the selected row, then
+                // an error is thrown
+                location.reload();
+            }, 1000);
+
         })
         .catch(error => {
             console.error(error);
-            Utils.showNotificationMessage('An error occurred while trying to delete the expense.', "error");
+            Utils.showNotificationMessage(errorMessage, "error");
         });
+}
+
+function populateExpensesTable() {
+    fetch('/api/v1/expenses/', {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+            'Cache-Control': 'max-age=3600' // Cache for 1 hour
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.json();
+        })
+
+        .then(data => {
+            if (!data.results) {
+                throw new Error("Error fetching expenses");
+            }
+
+            reinitializeVanillaDataTable();
+            addExpensesListToTable(data.results);
+            setupDomEvents();
+
+        })
+        .catch(error => {
+            console.error(error.message);
+            Utils.showNotificationMessage('We were unable to load your expense list. Please try again later.', "error");
+        });
+}
+
+function addExpensesListToTable(expenses) {
+    const expensesTable = document.querySelector(SELECTORS.expenseTable);
+    if (!expensesTable) {
+        toggleNoExpenseFoundInTableVisibility();
+        throw new Error("No expenses table found");
+    }
+
+    if (!expenses) {
+        toggleNoExpenseFoundInTableVisibility();
+        throw new Error("List with expenses not provided");
+    }
+
+    if (!expenses.length) {
+        toggleNoExpenseFoundInTableVisibility();
+        return;
+    }
+
+    expenses.forEach(expense => {
+        addExpenseToTable(expense);
+    });
+}
+
+function addExpenseToTable(expense, table = document.querySelector(SELECTORS.expenseTable)) {
+    const tableBody = table.querySelector(SELECTORS.expenseTableBody);
+    if (!tableBody) {
+        throw new Error('Table body not found');
+    }
+
+    // Prepare the data to be inserted into the DataTable
+    let categories = '';
+    if (expense.categories && expense.categories.length) {
+        categories = expense.categories.map(category => category.name).join(', ');
+    }
+
+    const newData = [{
+        "Date": Utils.stringToFormattedDate(expense.invoice_date_time),
+        "Spent": expense.price,
+        "Note": expense.note,
+        "Issuer": expense.invoice_issuer,
+        "Category": categories,
+        "Actions": `<button class="btn btn-sm btn-danger delete-expense-btn" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="${SELECTORS.deleteExpenseEntryModal}" 
+                    data-expense-id="${expense.id}">Delete</button>`
+    }];
+
+    // Use the DataTable's insert method to add the data
+    if (DATA.vanillaDataTableInstance) {
+        DATA.vanillaDataTableInstance.insert(newData);
+    }
+}
+
+function toggleNoExpenseFoundInTableVisibility(show=true) {
+    const noExpensesCard = document.querySelector(SELECTORS.noExpensesCard);
+    if (noExpensesCard) {
+        noExpensesCard.classList.toggle('hidden', !show);
+    }
 }
 
 function getCsrfTokenFromForm(form) {
@@ -144,4 +401,12 @@ function getCsrfTokenFromForm(form) {
     }
 
     return '';
+}
+
+function reinitializeVanillaDataTable() {
+    if (DATA.vanillaDataTableInstance) {
+        DATA.vanillaDataTableInstance.refresh();
+    } else {
+        DATA.vanillaDataTableInstance = Utils.initializeVanillaDataTable(SELECTORS.expenseTable);
+    }
 }
