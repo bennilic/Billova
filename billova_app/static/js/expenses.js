@@ -115,18 +115,22 @@ function saveOCRExpense(e) {
         return;
     }
 
+    const ocrFileUpload = createOCRExpenseForm.querySelector(SELECTORS.createOCRFormFields.ocrFileUpload).files[0];
+    if (!ocrFileUpload) {
+        Utils.showNotificationMessage('Please upload an image file.', "error");
+        return;
+    }
+
     // JSON sent to the API
-    const ocrExpenseData = {
-        "image": createOCRExpenseForm.querySelector(SELECTORS.createOCRFormFields.ocrFileUpload).value,
-    };
+    const formData = new FormData();
+    formData.append('image', ocrFileUpload);
 
     fetch('/api/v1/expenses/ocr/', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
             'X-CSRFToken': getCsrfTokenFromForm(createOCRExpenseForm)
         },
-        body: ocrExpenseData
+        body: formData
     })
         .then(response => {
             if (!response.ok) {
@@ -137,7 +141,7 @@ function saveOCRExpense(e) {
         })
         .then(data => {
 
-            console.log(data)
+            // console.log(data)
 
             // Utils.closeModal(SELECTORS.createExpenseModal);
             //
