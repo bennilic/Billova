@@ -1,6 +1,5 @@
 import logging
 
-from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -11,6 +10,7 @@ from django.views.generic import TemplateView
 from django.views.generic.edit import FormView
 from pytz import all_timezones
 
+from billova_app.forms import AccountDeleteForm, UserSettingsForm
 from billova_app.models import UserSettings
 from billova_app.utils.settings_utils import get_current_currencies
 
@@ -37,12 +37,6 @@ class AccountOverviewView(LoginRequiredMixin, TemplateView):
             'currency': profile.currency if profile else "USD",
         })
         return context
-
-
-class UserSettingsForm(forms.ModelForm):
-    class Meta:
-        model = UserSettings
-        fields = ['currency', 'language']
 
 
 @method_decorator(login_required, name='dispatch')
@@ -133,30 +127,6 @@ class UpdateUserSettingsView(FormView):
 
         messages.success(request, "User settings updated successfully!")
         return redirect('account_settings')
-
-
-class AccountDeleteForm(forms.Form):
-    username_confirmation = forms.CharField(
-        label="Confirm Username",
-        max_length=150,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-        }),
-        required=True
-    )
-
-    def __init__(self, *args, **kwargs):
-        # Extract the username from the kwargs
-        username = kwargs.pop('username', None)
-        super().__init__(*args, **kwargs)
-        # Dynamically set the placeholder
-        if username:
-            self.fields['username_confirmation'].widget.attrs.update({
-                'placeholder': f'Enter "{username}" to confirm deletion'
-            })
-            logger.debug(f"Placeholder for username_confirmation set to: Enter '{username}' to confirm deletion")
-        else:
-            logger.warning("Username not provided for AccountDeleteForm")
 
 
 class AccountDeletionView(LoginRequiredMixin, FormView):
