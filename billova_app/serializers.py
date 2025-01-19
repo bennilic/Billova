@@ -64,6 +64,14 @@ class ExpenseSerializer(serializers.HyperlinkedModelSerializer):
         return instance
 
 
+class ExpenseOCRSerializer(serializers.Serializer):
+    image = serializers.ImageField()
+
+    def validate(self, data):
+        # Can be empty. ImageField will check if the file is an image.
+        return data
+
+
 class UserSettingsSerializer(serializers.HyperlinkedModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
 

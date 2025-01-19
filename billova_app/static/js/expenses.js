@@ -10,6 +10,11 @@ const SELECTORS = {
     confirmDeleteExpenseButton: '.confirm-delete-expense-btn',
     createExpenseModalOpenerBtn: '.create-expenseEntry-btn',
     createExpenseForm: '#expenseEntryForm',
+    createOCRExpenseForm: '#ocrExpenseEntryForm',
+    saveOCRExpenseButton: '#saveOCRExpenseEntryButton',
+    createOCRFormFields: {
+        ocrFileUpload: '#ocrFileUpload'
+    },
     deleteExpenseForm: '#deleteExpenseForm',
     deleteExpenseEntryModal: '#deleteExpenseEntryModal',
     createExpenseModal: '#createExpenseEntryModal',
@@ -115,6 +120,11 @@ function setupDomEvents() {
         saveExpenseButton.addEventListener('click', saveExpense);
     }
 
+    const saveOCRExpenseButton = document.querySelector(SELECTORS.saveOCRExpenseButton);
+    if (saveOCRExpenseButton) {
+        saveOCRExpenseButton.addEventListener('click', saveOCRExpense);
+    }
+
     const deleteExpenseButtons = document.querySelectorAll(SELECTORS.deleteExpenseButton);
 
     if (deleteExpenseButtons) {
@@ -173,6 +183,59 @@ function saveExpense(e) {
             Utils.showNotificationMessage('Expense added successfully', "success");
 
             setupDomEvents();
+
+        })
+        .catch(error => {
+            console.error('Error creating expense:', error);
+            Utils.showNotificationMessage('Unable to create the expense. Please ensure all fields are filled out correctly.', "error");
+        });
+}
+
+function saveOCRExpense(e) {
+    console.log('OCR Expense');
+    const createOCRExpenseForm = document.querySelector(SELECTORS.createOCRExpenseForm);
+    // make sure the required fields are fulfilled
+    if (!createOCRExpenseForm || !createOCRExpenseForm.checkValidity()) {
+        createOCRExpenseForm.classList.add(DATA.bootstrapFormValidated);
+        return;
+    }
+
+    const ocrFileUpload = createOCRExpenseForm.querySelector(SELECTORS.createOCRFormFields.ocrFileUpload).files[0];
+    if (!ocrFileUpload) {
+        Utils.showNotificationMessage('Please upload an image file.', "error");
+        return;
+    }
+
+    // JSON sent to the API
+    const formData = new FormData();
+    formData.append('image', ocrFileUpload);
+
+    fetch('/api/v1/expenses/ocr/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCsrfTokenFromForm(createOCRExpenseForm)
+        },
+        body: formData
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to create expense ' + response.statusText);
+            }
+
+            return response.json();
+        })
+        .then(data => {
+
+            // console.log(data)
+
+            // Utils.closeModal(SELECTORS.createExpenseModal);
+            //
+            // addExpenseToTable(data);
+            // Utils.toggleElementVisibility(SELECTORS.noExpensesCard, false);
+            //
+            // Utils.showNotificationMessage('Expense added successfully', "success");
+            //
+            // setupDomEvents();
 
         })
         .catch(error => {
