@@ -2,13 +2,14 @@ import logging
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, UpdateView
 from django.views.generic.edit import FormView
 from pytz import all_timezones
 
-from billova_app.forms import UserSettingsForm, UserForm
+from billova_app.forms import UserSettingsForm, UserForm, ProfilePictureForm, EmailUpdateForm
 from billova_app.models import UserSettings
 from billova_app.utils.settings_utils import get_currency_choices
 
@@ -176,3 +177,36 @@ class UpdatePersonalInfoView(LoginRequiredMixin, FormView):
         context = super().get_context_data(**kwargs)
         context.update(kwargs)  # Add user_form and settings_form
         return context
+
+
+class UpdateProfilePictureView(LoginRequiredMixin, UpdateView):
+    model = UserSettings
+    form_class = ProfilePictureForm
+    template_name = 'account_settings.html'
+    success_url = reverse_lazy('account_settings')
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(UserSettings, owner=self.request.user)
+
+    def form_valid(self, form):
+        form.save()  # Ensure the form is saved
+        messages.success(self.request, "Profile picture updated successfully.")
+        logger.info(f"Profile picture updated successfully for user {self.request.user}.")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        logger.warning(f"Profile picture form submission failed for user {self.request.user}. Errors: {form.errors}")
+        messages.error(self.request,
+                       "There was an error with your submission. Please correct the errors and try again.")
+        return super().form_invalid(form)
+
+
+class UpdateEmailView(LoginRequiredMixin, UpdateView):
+    model = User
+    form_class = EmailUpdateForm
+    template_name = 'account_settings.html'
+    success_url = reverse_lazy('account_settings')  # Replace with your desired redirect URL
+
+    def form_valid(self, form):
+        messages.success(self.request, "Email updated successfully.")
+        return super().form_valid(form)

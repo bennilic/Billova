@@ -44,3 +44,18 @@ class AccountDeleteForm(forms.Form):
             logger.debug(f"Placeholder for username_confirmation set to: Enter '{username}' to confirm deletion")
         else:
             logger.warning("Username not provided for AccountDeleteForm")
+
+
+class ProfilePictureForm(forms.ModelForm):
+    class Meta:
+        model = UserSettings  # Use UserSettings model
+        fields = ['profile_picture']  # Only include the profile_picture field
+
+
+class EmailUpdateForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['email']
+        widgets = {
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+        }

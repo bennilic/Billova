@@ -5,7 +5,8 @@ from billova_app import api_views
 from .views import homepage, settings, signup
 from .views.account.account_deletion import AccountDeletionView
 from .views.account.account_overview import AccountOverviewView
-from .views.account.account_settings import AccountSettingsView, UpdateUserSettingsView, UpdatePersonalInfoView
+from .views.account.account_settings import AccountSettingsView, UpdateUserSettingsView, UpdatePersonalInfoView, \
+    UpdateProfilePictureView, UpdateEmailView
 from .views.categories import CategoriesView
 from .views.expenses import ExpensesOverview
 from .views.login import CustomLoginView
@@ -33,7 +34,11 @@ urlpatterns = [
     path('account/overview/', AccountOverviewView.as_view(), name='account_overview'),
     path('account/settings/', AccountSettingsView.as_view(), name='account_settings'),
     path('account/settings/update_personal_info/', UpdatePersonalInfoView.as_view(), name='update_personal_info'),
-    path("settings/update/", UpdateUserSettingsView.as_view(), name="update_user_settings"),
+    path("account/settings/update/", UpdateUserSettingsView.as_view(), name="update_user_settings"),
+
+    path('account/update/profile-picture/', UpdateProfilePictureView.as_view(), name='update_profile_picture'),
+    path('account/update/email/', UpdateEmailView.as_view(), name='update_email'),
+
     path('account/delete/', AccountDeletionView.as_view(), name='delete_account'),
 
     # Authentication
