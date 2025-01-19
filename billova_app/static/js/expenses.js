@@ -125,6 +125,11 @@ function setupDomEvents() {
     if (saveOCRExpenseButton) {
         saveOCRExpenseButton.addEventListener('click', saveOCRExpense);
     }
+
+    const saveExpenseButton = document.querySelector(SELECTORS.saveExpenseButton);
+    if (saveExpenseButton) {
+        saveExpenseButton.addEventListener('click', saveExpense);
+    }
 }
 
 function saveExpense(e) {
@@ -191,11 +196,21 @@ function saveOCRExpense(e) {
         return;
     }
 
-    const ocrFileUpload = createOCRExpenseForm.querySelector(SELECTORS.createOCRFormFields.ocrFileUpload).files[0];
+    const ocrFileUploadInput = createOCRExpenseForm.querySelector(SELECTORS.createOCRFormFields.ocrFileUpload);
+    if (!ocrFileUploadInput) {
+        console.log('File upload input not found');
+        return;
+    }
+
+    const ocrFileUpload = ocrFileUploadInput.files[0];
     if (!ocrFileUpload) {
         Utils.showNotificationMessage('Please upload an image file.', "error");
         return;
     }
+
+    // disable the button to not allow the user to upload the same file again
+    // while the current one is still being processed
+    toggleSaveOCRExpenseButtonState(true);
 
     // JSON sent to the API
     const formData = new FormData();
@@ -217,24 +232,32 @@ function saveOCRExpense(e) {
         })
         .then(data => {
 
-            // console.log(data)
+            addExpenseToTable(data);
+            Utils.toggleElementVisibility(SELECTORS.noExpensesCard, false);
+            Utils.showNotificationMessage('Expense added successfully', "success");
 
-            // Utils.closeModal(SELECTORS.createExpenseModal);
-            //
-            // addExpenseToTable(data);
-            // Utils.toggleElementVisibility(SELECTORS.noExpensesCard, false);
-            //
-            // Utils.showNotificationMessage('Expense added successfully', "success");
-            //
-            // setupDomEvents();
+            // re-enable the submit button
+            toggleSaveOCRExpenseButtonState(false);
+
+            // reset the input field
+            ocrFileUploadInput.value = '';
 
         })
         .catch(error => {
             console.error('Error creating expense:', error);
+
+            // re-enable the submit button
+            toggleSaveOCRExpenseButtonState(false);
             Utils.showNotificationMessage('Unable to create the expense. Please ensure all fields are filled out correctly.', "error");
         });
 }
 
+function toggleSaveOCRExpenseButtonState(disable=false) {
+    const button = document.querySelector(SELECTORS.saveOCRExpenseButton);
+    if (button) {
+        button.disabled = disable;
+    }
+}
 
 function onDeleteModalShown(e) {
     const triggerButton = e.relatedTarget;
