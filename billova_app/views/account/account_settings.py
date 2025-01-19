@@ -6,7 +6,9 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 from django.views.generic.edit import FormView
+from pytz import all_timezones
 
+import billova_app
 from billova_app.forms import UserSettingsForm, UserForm
 from billova_app.models import UserSettings
 
@@ -22,12 +24,6 @@ class AccountSettingsView(LoginRequiredMixin, TemplateView):
         # Fetch the user's settings or set default values
         user_settings = get_object_or_404(UserSettings, owner=self.request.user)
 
-        # Define choices for the dropdowns
-        popular_timezones = [
-            "UTC", "Etc/GMT", "Europe/London", "Europe/Berlin", "Europe/Vienna",
-            "America/New_York", "Asia/Tokyo", "Asia/Dubai",
-        ]
-
         popular_languages = [
             ("en", "English"), ("de", "German"), ("fr", "French"),
             ("es", "Spanish"), ("it", "Italian"), ("ro", "Romanian"), ("tr", "Turkish"),
@@ -36,21 +32,12 @@ class AccountSettingsView(LoginRequiredMixin, TemplateView):
             ("AT", "Austrian"), ("DE", "German"), ("CH", "Swiss"),
             ("US", "American"), ("UK", "British"),
         ]
-        popular_currencies = [
-            ("USD", "US Dollar"),
-            ("EUR", "Euro"),
-            ("GBP", "British Pound"),
-            ("JPY", "Japanese Yen"),
-            ("CHF", "Swiss Franc"),
-            ("RON", "Romanian Leu"),
-            ("TRY", "Turkish Lira"),
-        ]
 
         # Add current settings and choices to the context
-        context["timezone_choices"] = [(tz, tz) for tz in popular_timezones]
+        context["timezone_choices"] = [(tz, tz) for tz in all_timezones]
         context["language_choices"] = popular_languages
         context["numeric_format_choices"] = numeric_formats
-        context["currency_choices"] = popular_currencies
+        context["currency_choices"] = billova_app.models.CURRENCY_CHOICES
         context["current_settings"] = {
             "timezone": user_settings.timezone,
             "language": user_settings.language,

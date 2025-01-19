@@ -2,6 +2,8 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 
+from billova_app.utils.settings_utils import get_currency_choices
+
 
 class Expense(models.Model):
     invoice_date_time = models.DateTimeField(default=timezone.now)
@@ -43,8 +45,12 @@ class UserSettings(models.Model):
         ("tr", "Turkish"),
     ]
 
+    # Generate the tuples
+
+    CURRENCY_CHOICES = get_currency_choices(LANGUAGE_CHOICES)
+
     owner = models.OneToOneField(User, on_delete=models.CASCADE)
-    currency = models.CharField(max_length=10, default='USD')
+    currency = models.JSONField(null=True, blank=True, choices=CURRENCY_CHOICES)  # Store as JSON for flexibility
     language = models.CharField(max_length=2, choices=LANGUAGE_CHOICES, default='en')
     timezone = models.CharField(max_length=50, default='ECT/Vienna')
     numeric_format = models.CharField(max_length=2, choices=NUMERIC_FORMAT_CHOICES, default='AT')

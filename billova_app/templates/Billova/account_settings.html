@@ -103,10 +103,10 @@
                             <div class="mb-3">
                                 <label for="timezone" class="form-label">Timezone</label>
                                 <select id="timezone" name="timezone" class="form-select">
-                                    {% for value, name in timezone_choices %}
-                                        <option value="{{ value }}"
-                                                {% if value == current_settings.timezone %}selected{% endif %}>
-                                            {{ name }}
+                                    {% for key, value in timezone_choices %}
+                                        <option value="{{ key }}"
+                                                {% if key == current_settings.timezone %}selected{% endif %}>
+                                            {{ value }}
                                         </option>
                                     {% endfor %}
                                 </select>
