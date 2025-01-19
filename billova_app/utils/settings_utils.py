@@ -1,7 +1,6 @@
 import logging
 
 from babel import Locale
-from babel.numbers import get_currency_name, get_currency_symbol
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -36,15 +35,20 @@ def get_current_currencies(language='en'):
     return current_currencies
 
 
+from babel.numbers import get_currency_name
+
+
 def get_currency_choices(languages):
-    CURRENCY_CHOICES = []
-    for code, language in languages:
+    """
+    Generates a list of currency choices from the provided languages.
+    Each choice is a tuple (currency_code, currency_name).
+    """
+    currency_codes = ["USD", "EUR", "GBP", "JPY", "TRY"]  # Add more codes as needed
+    choices = []
+    for code in currency_codes:
         try:
-            locale = Locale(code)  # Create the locale
-            default_currency = locale.currency  # Get default currency for the locale
-            currency_name = get_currency_name(default_currency, locale=code)  # Get currency name
-            currency_symbol = get_currency_symbol(default_currency, locale=code)  # Get currency symbol
-            CURRENCY_CHOICES.append((language, default_currency, currency_name, currency_symbol))
+            currency_name = get_currency_name(code)  # Get the human-readable name
+            choices.append((code, currency_name))  # Create the (value, name) tuple
         except Exception as e:
-            print(f"Could not retrieve currency for language {language}: {e}")
-    return CURRENCY_CHOICES
+            print(f"Error retrieving currency name for {code}: {e}")
+    return choices

@@ -8,9 +8,9 @@ from django.views.generic import TemplateView
 from django.views.generic.edit import FormView
 from pytz import all_timezones
 
-import billova_app
 from billova_app.forms import UserSettingsForm, UserForm
 from billova_app.models import UserSettings
+from billova_app.utils.settings_utils import get_currency_choices
 
 logger = logging.getLogger(__name__)
 
@@ -33,11 +33,12 @@ class AccountSettingsView(LoginRequiredMixin, TemplateView):
             ("US", "American"), ("UK", "British"),
         ]
 
+        CURRENCY_CHOICES = get_currency_choices(popular_languages)
         # Add current settings and choices to the context
         context["timezone_choices"] = [(tz, tz) for tz in all_timezones]
         context["language_choices"] = popular_languages
         context["numeric_format_choices"] = numeric_formats
-        context["currency_choices"] = billova_app.models.CURRENCY_CHOICES
+        context["currency_choices"] = CURRENCY_CHOICES
         context["current_settings"] = {
             "timezone": user_settings.timezone,
             "language": user_settings.language,
@@ -53,17 +54,20 @@ class UpdateUserSettingsView(LoginRequiredMixin, FormView):
     form_class = UserSettingsForm
     success_url = reverse_lazy("account_settings")
 
-    def post(self, request, *args, **kwargs):
-        user_settings, created = UserSettings.objects.get_or_create(owner=request.user)
-
-        # Update settings based on POST data
-        user_settings.timezone = request.POST.get("timezone", user_settings.timezone)
-        user_settings.language = request.POST.get("language", user_settings.language)
-        user_settings.numeric_format = request.POST.get("numeric_format", user_settings.numeric_format)
+    def form_valid(self, form):
+        user_settings, created = UserSettings.objects.get_or_create(owner=self.request.user)
+        user_settings.currency = form.cleaned_data['currency']
+        user_settings.language = form.cleaned_data['language']
+        user_settings.timezone = form.cleaned_data['timezone']
+        user_settings.numeric_format = form.cleaned_data['numeric_format']
         user_settings.save()
 
-        messages.success(request, "Your settings have been updated!")
-        return super().form_valid(self.get_form())
+        messages.success(self.request, "Settings updated successfully!")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "There was an error updating your settings.")
+        return super().form_invalid(form)
 
 
 class UpdatePersonalInfoView(LoginRequiredMixin, FormView):

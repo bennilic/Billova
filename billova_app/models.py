@@ -50,7 +50,11 @@ class UserSettings(models.Model):
     CURRENCY_CHOICES = get_currency_choices(LANGUAGE_CHOICES)
 
     owner = models.OneToOneField(User, on_delete=models.CASCADE)
-    currency = models.JSONField(null=True, blank=True, choices=CURRENCY_CHOICES)  # Store as JSON for flexibility
+    currency = models.CharField(
+        max_length=3,
+        choices=CURRENCY_CHOICES,
+        default="EUR",
+    )
     language = models.CharField(max_length=2, choices=LANGUAGE_CHOICES, default='en')
     timezone = models.CharField(max_length=50, default='ECT/Vienna')
     numeric_format = models.CharField(max_length=2, choices=NUMERIC_FORMAT_CHOICES, default='AT')
