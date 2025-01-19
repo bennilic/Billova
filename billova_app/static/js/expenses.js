@@ -36,6 +36,11 @@ document.addEventListener('DOMContentLoaded', function () {
         modalOpenerBtn.addEventListener('click', onModalCreateModalBtnOpenerClick);
     }
 
+    const deleteEntryModal = document.querySelector(SELECTORS.deleteExpenseEntryModal);
+    if (deleteEntryModal) {
+        deleteEntryModal.addEventListener('shown.bs.modal', onDeleteModalShown);
+    }
+
     populateExpensesTable();
 });
 
@@ -114,14 +119,6 @@ function setupDomEvents() {
     if (saveExpenseButton) {
         saveExpenseButton.addEventListener('click', saveExpense);
     }
-
-    const deleteExpenseButtons = document.querySelectorAll(SELECTORS.deleteExpenseButton);
-
-    if (deleteExpenseButtons) {
-        deleteExpenseButtons.forEach(button => {
-            button.addEventListener('click', onDeleteExpenseButtonClick);
-        });
-    }
 }
 
 function saveExpense(e) {
@@ -181,15 +178,17 @@ function saveExpense(e) {
         });
 }
 
-function onDeleteExpenseButtonClick(e) {
-    const confirmDeleteExpenseButton = document.querySelector(SELECTORS.confirmDeleteExpenseButton);
-    if (!confirmDeleteExpenseButton) {
+
+function onDeleteModalShown(e) {
+    const triggerButton = e.relatedTarget;
+    const confirmDeleteExpenseButton = e.currentTarget.querySelector(SELECTORS.confirmDeleteExpenseButton);
+    if (!confirmDeleteExpenseButton || !triggerButton) {
         return;
     }
 
     // the id of the expense is set as data attribute on the confirm button. When the button is clicked,
     // we will then use the value in the data attribute for the REST Delete method
-    confirmDeleteExpenseButton.dataset.expenseId = e.currentTarget.dataset.expenseId;
+    confirmDeleteExpenseButton.dataset.expenseId = triggerButton.dataset.expenseId;
     confirmDeleteExpenseButton.addEventListener('click', deleteExpense);
 }
 
