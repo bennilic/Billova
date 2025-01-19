@@ -49,7 +49,7 @@ class UserSettings(models.Model):
 
     CURRENCY_CHOICES = get_currency_choices(LANGUAGE_CHOICES)
 
-    owner = models.OneToOneField(User, on_delete=models.CASCADE)
+    owner = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
     currency = models.CharField(
         max_length=3,
         choices=CURRENCY_CHOICES,

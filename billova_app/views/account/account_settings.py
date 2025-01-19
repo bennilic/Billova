@@ -9,7 +9,7 @@ from django.views.generic import TemplateView, UpdateView
 from django.views.generic.edit import FormView
 from pytz import all_timezones
 
-from billova_app.forms import UserSettingsForm, UserForm, ProfilePictureForm, EmailUpdateForm
+from billova_app.forms import UserSettingsForm, UserForm, ProfilePictureForm
 from billova_app.models import UserSettings
 from billova_app.utils.settings_utils import get_currency_choices
 
@@ -203,10 +203,18 @@ class UpdateProfilePictureView(LoginRequiredMixin, UpdateView):
 
 class UpdateEmailView(LoginRequiredMixin, UpdateView):
     model = User
-    form_class = EmailUpdateForm
+    fields = ['email']
     template_name = 'account_settings.html'
-    success_url = reverse_lazy('account_settings')  # Replace with your desired redirect URL
+    success_url = reverse_lazy('account_settings')  # Redirect after successful update
+
+    def get_object(self, queryset=None):
+        # Return the current logged-in user
+        return self.request.user
 
     def form_valid(self, form):
-        messages.success(self.request, "Email updated successfully.")
+        messages.success(self.request, "Your email has been updated successfully.")
         return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "There was an error updating your email. Please try again.")
+        return super().form_invalid(form)

@@ -52,10 +52,13 @@ class ProfilePictureForm(forms.ModelForm):
         fields = ['profile_picture']  # Only include the profile_picture field
 
 
-class EmailUpdateForm(forms.ModelForm):
+class UpdateEmailForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['email']
-        widgets = {
-            'email': forms.EmailInput(attrs={'class': 'form-control'}),
-        }
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("This email is already in use by another account.")
+        return email
