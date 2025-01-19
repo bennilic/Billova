@@ -56,24 +56,11 @@ class UserSettingsViewSet(viewsets.ModelViewSet):
         serializer.save(owner=self.request.user)
 
 
-class MonthlyExpensesPagination(PageNumberPagination):
-    """
-    Custom pagination for Monthly Expenses API.
-    - Default page size: 10.
-    - Allows clients to set a custom page size using the 'page_size' query parameter.
-    - Maximum page size: 50, to prevent excessive data load.
-    """
-    page_size = 10  # Default page size
-    page_size_query_param = 'page_size'  # Allow clients to customize page size
-    max_page_size = 50  # Limit maximum number of results per page
-
-
 class MonthlyExpensesViewSet(viewsets.ViewSet):
     """
     A ViewSet for listing monthly expenses grouped by months.
     """
     permission_classes = [permissions.IsAuthenticated, IsOwner]
-    pagination_class = MonthlyExpensesPagination
 
     def list(self, request):
         user = request.user
@@ -90,7 +77,7 @@ class MonthlyExpensesViewSet(viewsets.ViewSet):
         # PageNumberPagination divides the results of a query into "pages"
         # and returns only the data for the requested page. We will use it to limit the results the
         # user gets with one request.
-        paginator = self.pagination_class()
+        paginator = PageNumberPagination()
         # Paginate a queryset if needed to return only a part of the results
         paginated_expenses = paginator.paginate_queryset(expenses, request)
 
