@@ -43,7 +43,7 @@ class ExpenseViewSet(viewsets.ModelViewSet):
                     invoice_as_text=receipt.invoice_as_text,
                 )
             except:
-                return HttpResponse("Ooops, something went wrong while processing the receipt.")
+                return Response({'detail': 'OCR failed'}, status=status.HTTP_400_BAD_REQUEST)
 
 
             global_user = User.objects.get(username='global')
@@ -53,7 +53,7 @@ class ExpenseViewSet(viewsets.ModelViewSet):
             expense_serializer = ExpenseSerializer(expense, context={'request': request})
             return Response(expense_serializer.data, status=status.HTTP_201_CREATED)
 
-        return HttpResponse('Invalid input data.')
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
