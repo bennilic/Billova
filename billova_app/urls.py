@@ -3,9 +3,9 @@ from rest_framework.routers import DefaultRouter
 
 from billova_app import api_views
 from .views import homepage, settings, signup
-from .views.account import AccountOverviewView, AccountDeletionView
-from .views.account import AccountSettingsView
-from .views.account import UpdateUserSettingsView, UpdatePersonalInfoView
+from .views.account.account_deletion import AccountDeletionView
+from .views.account.account_overview import AccountOverviewView
+from .views.account.account_settings import AccountSettingsView, UpdateUserSettingsView, UpdatePersonalInfoView
 from .views.categories import CategoriesView
 from .views.expenses import ExpensesOverview
 from .views.login import CustomLoginView

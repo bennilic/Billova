@@ -18,11 +18,16 @@ class UserForm(forms.ModelForm):
 class UserSettingsForm(forms.ModelForm):
     class Meta:
         model = UserSettings
-        fields = ['currency', 'language', 'timezone', 'numeric_format', 'profile_picture']
-        widgets = {
-            'language': forms.Select(choices=UserSettings.LANGUAGE_CHOICES, attrs={'class': 'form-select'}),
-            'numeric_format': forms.Select(choices=UserSettings.NUMERIC_FORMAT_CHOICES, attrs={'class': 'form-select'}),
-        }
+        fields = ['timezone', 'currency', 'language', 'numeric_format', 'profile_picture']
+
+    def __init__(self, *args, **kwargs):
+        timezones = kwargs.pop('timezones', [])
+        currencies = kwargs.pop('currencies', [])
+        super().__init__(*args, **kwargs)
+
+        # Dynamically set timezone choices
+        self.fields['timezone'].widget = forms.Select(choices=timezones)
+        self.fields['currency'].widget = forms.Select(choices=currencies)
 
 
 # Delete Account

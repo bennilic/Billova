@@ -79,11 +79,18 @@
                                 </select>
                             </div>
 
-                            <!-- Timezone -->
                             <div class="mb-3">
                                 <label for="timezone" class="form-label">Timezone</label>
-                                {{ form.timezone }}
+                                <select id="timezone" name="timezone" class="form-select">
+                                    {% for tz, name in timezone_choices %}
+                                        <option value="{{ tz }}"
+                                                {% if form.instance.timezone == tz %}selected{% endif %}>
+                                            {{ name }} ({{ tz }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
                             </div>
+
 
                             <!-- Numeric Format -->
                             <div class="mb-3">
