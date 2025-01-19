@@ -11,7 +11,10 @@ const LOAD_MORE_PAGE_SIZE_NUMBER = 5;
 const SELECTORS = {
     noExpensesCard: '.no-expenses-card',
     showMoreButton: '#showMoreButton',
-    monthlyExpensesContainer: '#monthlyExpensesContainer'
+    monthlyExpensesContainer: '#monthlyExpensesContainer',
+    accordionItem: '.accordion-item',
+    accordionButton: '.accordion-button',
+    accordionCollapse: '.accordion-collapse'
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -41,6 +44,10 @@ function loadMonthlyExpenses(page, size=FIRST_PAGE_SIZE_NUMBER) {
         })
         .then(data => {
             renderMonthlyExpenses(data.results);
+
+            if (currentPage === 1) {
+                collapseFirstAccordionItem();
+            }
 
             // display the show more button if there are more expenses which can be loaded
             let showButton = data.results.length >= size;
@@ -117,4 +124,20 @@ function renderMonthlyExpenses(expenses) {
         // Append to container
         monthCard.appendTo(container);
     });
+}
+
+function collapseFirstAccordionItem() {
+    const expensesContainer = document.querySelector(SELECTORS.monthlyExpensesContainer);
+    if (!expensesContainer) {
+        console.log('Accordion container not found');
+    }
+
+    const firstAccordionItem = expensesContainer.querySelector(SELECTORS.accordionItem);
+    if (!firstAccordionItem) {
+        console.log('No accordion items found');
+    }
+
+    firstAccordionItem.querySelector(SELECTORS.accordionButton).classList.remove('collapsed');
+    firstAccordionItem.querySelector(SELECTORS.accordionButton).classList.remove('collapsed');
+    firstAccordionItem.querySelector(SELECTORS.accordionCollapse).classList.add('show');
 }
