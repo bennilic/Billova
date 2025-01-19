@@ -1,4 +1,5 @@
 import base64
+from time import timezone
 
 from django.contrib.auth.models import User
 from django.core.serializers import serialize
@@ -10,6 +11,8 @@ from billova_app.models import Expense, Category, UserSettings
 from billova_app.ocr.receipt import Receipt
 from billova_app.serializers import ExpenseSerializer, CategorySerializer, UserSettingsSerializer, ExpenseOCRSerializer
 from billova_app.permissions import IsOwner
+from django.utils import timezone
+from dateutil import parser
 
 
 class ExpenseViewSet(viewsets.ModelViewSet):
@@ -34,20 +37,28 @@ class ExpenseViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             image = serializer.validated_data['image']
 
-            receipt = Receipt(image.file.getvalue())
-            receipt.analyze()
+            try:
+                receipt = Receipt(image.file.getvalue())
+                receipt.analyze()
 
-            Expense.objects.create(
-                owner=request.user,
-                invoice_date_time=receipt.invoice_date_time,
-                price=receipt.price,
-                invoice_issuer=receipt.invoice_issuer,
-                invoice_as_text=receipt.invoice_as_text,
-            )
+                expense = Expense.objects.create(
+                    owner=request.user,
+                    invoice_date_time=receipt.invoice_date_time,
+                    price=receipt.price,
+                    invoice_issuer=receipt.invoice_issuer,
+                    invoice_as_text=receipt.invoice_as_text,
+                )
+            except:
+                return HttpResponse("Ooops, something went wrong while processing the receipt.")
 
-            return HttpResponse('OK')
 
-        return HttpResponse('Invalid')
+            global_user = User.objects.get(username='global')
+            category = Category.objects.get_or_create(name="Generated", owner=global_user)[0]
+            expense.categories.set([category])
+
+            return HttpResponse(expense)
+
+        return HttpResponse('Invalid input data.')
 
 
 class CategoryViewSet(viewsets.ModelViewSet):

@@ -3,6 +3,7 @@ from datetime import timezone
 from io import BytesIO
 
 import requests
+from dateutil import parser
 
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -27,19 +28,17 @@ class Receipt:
 
         self.invoice_date_time = timezone.now()
         self.price = None
-        self.invoice_issuer = None
-        self.invoice_as_text = None
+        self.invoice_issuer = ''
+        self.invoice_as_text = ''
         self.categories = [{"name":"Generated", "owner": User.objects.get(username='global')}]
 
     def analyze(self):
         url = "https://api.veryfi.com/api/v8/partner/documents/"
 
-        # File-like object for the binary receipt data
         file_like = BytesIO(self.__receipt)
 
-        # Files payload
         files = {
-            "file": ("receipt.jpg", file_like, "image/jpeg"),  # (filename, file-like object, MIME type)
+            "file": ("receipt.jpg", file_like, "image/jpeg"),
         }
 
         # Headers for authentication
@@ -52,10 +51,24 @@ class Receipt:
         response = requests.post(url, headers=headers, files=files)
 
         data = response.json()
-        # self.invoice_date_time = data.get("created")
-        self.price = data.get("total")
-        self.invoice_issuer = data.get("vendor", {}).get("name")
-        self.invoice_as_text = data.get("ocr_text")
+        try:
+            self.invoice_date_time = parser.parse(data.get("date"))
+        except:
+            self.invoice_date_time = timezone.now()
 
+        try:
+            self.price = float(data.get("total"))
+        except:
+            raise ValueError("Price not found in receipt.")
+
+        try:
+            self.invoice_issuer = data.get("vendor", {}).get("name")
+        except:
+            self.invoice_issuer = ''
+
+        try:
+            self.invoice_as_text = data.get("ocr_text")
+        except:
+            self.invoice_as_text = ''
 
         return None
