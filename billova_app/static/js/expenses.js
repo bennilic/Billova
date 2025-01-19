@@ -7,6 +7,11 @@ const SELECTORS = {
     deleteExpenseButton: '.delete-expense-btn',
     confirmDeleteExpenseButton: '.confirm-delete-expense-btn',
     createExpenseForm: '#expenseEntryForm',
+    createOCRExpenseForm: '#ocrExpenseEntryForm',
+    saveOCRExpenseButton: '#saveOCRExpenseEntryButton',
+    createOCRFormFields: {
+        ocrFileUpload: '#ocrFileUpload'
+    },
     deleteExpenseForm: '#deleteExpenseForm',
     csrfToken: "[name=csrfmiddlewaretoken]",
     createFormFields: {
@@ -31,6 +36,11 @@ function setupDomEvents() {
     const saveExpenseButton = document.querySelector(SELECTORS.saveExpenseButton);
     if (saveExpenseButton) {
         saveExpenseButton.addEventListener('click', saveExpense);
+    }
+
+    const saveOCRExpenseButton = document.querySelector(SELECTORS.saveOCRExpenseButton);
+    if (saveOCRExpenseButton) {
+        saveOCRExpenseButton.addEventListener('click', saveOCRExpense);
     }
 
     const deleteExpenseButtons = document.querySelectorAll(SELECTORS.deleteExpenseButton);
@@ -88,6 +98,52 @@ function saveExpense(e) {
             setTimeout(function () {
                 location.reload(); // Reload page to fetch updated expenses TODO maybe update the table instead of reloading the page
             }, 1000);
+
+        })
+        .catch(error => {
+            console.error('Error creating expense:', error);
+            Utils.showNotificationMessage('Unable to create the expense. Please ensure all fields are filled out correctly.', "error");
+        });
+}
+
+function saveOCRExpense(e) {
+    const createOCRExpenseForm = document.querySelector(SELECTORS.createOCRExpenseForm);
+    // make sure the required fields are fulfilled
+    if (!createOCRExpenseForm || !createOCRExpenseForm.checkValidity()) {
+        createOCRExpenseForm.classList.add(DATA.bootstrapFormValidated);
+        return;
+    }
+
+    // JSON sent to the API
+    const ocrExpenseData = {
+        file: createOCRExpenseForm.querySelector(SELECTORS.createOCRFormFields.ocrFileUpload).value,
+    };
+
+    fetch('/api/v1/expenses/ocr/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfTokenFromForm(createOCRExpenseForm)
+        },
+        body: JSON.stringify(ocrExpenseData)
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to create expense ' + response.statusText);
+            }
+
+            return response.json();
+        })
+        .then(data => {
+
+            Utils.closeModal(SELECTORS.createExpenseModal);
+
+            addExpenseToTable(data);
+            Utils.toggleElementVisibility(SELECTORS.noExpensesCard, false);
+
+            Utils.showNotificationMessage('Expense added successfully', "success");
+
+            setupDomEvents();
 
         })
         .catch(error => {
