@@ -27,6 +27,7 @@ class AccountSettingsView(LoginRequiredMixin, TemplateView):
             "UTC", "Etc/GMT", "Europe/London", "Europe/Berlin", "Europe/Vienna",
             "America/New_York", "Asia/Tokyo", "Asia/Dubai",
         ]
+
         popular_languages = [
             ("en", "English"), ("de", "German"), ("fr", "French"),
             ("es", "Spanish"), ("it", "Italian"), ("ro", "Romanian"), ("tr", "Turkish"),
@@ -46,7 +47,7 @@ class AccountSettingsView(LoginRequiredMixin, TemplateView):
         ]
 
         # Add current settings and choices to the context
-        context["timezone_choices"] = popular_timezones
+        context["timezone_choices"] = [(tz, tz) for tz in popular_timezones]
         context["language_choices"] = popular_languages
         context["numeric_format_choices"] = numeric_formats
         context["currency_choices"] = popular_currencies
