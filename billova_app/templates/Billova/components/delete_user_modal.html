@@ -1,0 +1,50 @@
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteAccountModalLabel">Delete Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="deleteAccountForm" method="post" action="{% url 'delete_account' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <p class="text-danger">Type your username to confirm account deletion:</p>
+                    <input type="text" id="usernameConfirmation" name="username_confirmation" class="form-control"
+                           placeholder="Enter your username {{ user.username }}" required>
+                    <small class="text-danger d-none" id="usernameError">Username does not match.</small>
+                    {{ form.username_confirmation }}
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                    <!-- Left side button -->
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+
+                    <!-- Right side button -->
+                    <button type="submit" class="btn btn-danger">
+                        Delete
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const confirmDeleteForm = document.getElementById('deleteAccountForm');
+        const usernameInput = document.getElementById('usernameConfirmation');
+        const usernameError = document.getElementById('usernameError');
+        const currentUsername = "{{ request.user.username }}";
+
+        confirmDeleteForm.addEventListener('submit', function (e) {
+            usernameError.classList.add('d-none');
+            if (usernameInput.value.trim() !== currentUsername) {
+                e.preventDefault();
+                usernameError.classList.remove('d-none');
+                usernameError.textContent = "Wrong username entered!";
+            }
+        });
+    });
+</script>

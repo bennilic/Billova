@@ -1,68 +1,64 @@
-{% extends "Billova/layout.html" %}
+{% extends "layout.html" %}
 {% load static %}
-
-{% block title %}Account Overview{% endblock %}
-
 {% block content %}
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6">
-                <div class="card shadow">
-                    <div class="card-body">
-                        <h1 class="text-center mb-4">Account Overview</h1>
+    <div class="container mt-5">
+        <div class="row">
+            <!-- Sidebar Navigation -->
+            <div class="col-12 col-lg-2">
+                <!-- Nav -->
+                <nav class="nav nav-pills position-sticky flex-column mb-5" id="accountNav" style="top: 32px">
+                    <a class="nav-link active" href="{% url 'account_overview' %}">Overview</a>
+                    <a class="nav-link" href="{% url 'account_settings' %}">Settings</a>
+                    <a href="#" class="nav-link text-danger" data-bs-toggle="modal"
+                       data-bs-target="#deleteAccountModal">Delete
+                        account</a>
+                </nav>
+            </div>
+            <!-- Main Content -->
+            <div class="col-md-9">
+                <!-- Header Section -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Account</h2>
+                    <div>
+                        <a href="{% url 'account_settings' %}" class="btn btn-outline-secondary me-2">Edit</a>
+                    </div>
+                </div>
 
+                <!-- User Information -->
+                <div class="card m-5">
+                    <div class="card-body d-flex">
                         <!-- Profile Picture -->
-                        <div class="text-center mb-4">
-                            {% if user.profile.profile_picture %}
-                                <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture"
-                                     class="img-thumbnail rounded-circle" style="max-width: 150px;">
-                            {% else %}
-                                <img src="{% static 'images/default-profile.png' %}" alt="Default Profile Picture"
-                                     class="img-thumbnail rounded-circle" style="max-width: 150px;">
-                            {% endif %}
+                        <div class="me-4">
+                            <img src="{{ profile_picture|default:'/static/images/default_profile.png' }}"
+                                 alt="Profile Picture"
+                                 class="rounded-circle"
+                                 style="width: 100px; height: 100px;">
                         </div>
-
-                        <!-- User Details -->
-                        <ul class="list-group list-group-flush">
-                            <!-- Name -->
-                            <li class="list-group-item">
-                                <strong>Name:</strong>
-                                <span class="float-end">{{ user.profile.name }}</span>
-                            </li>
-
-                            <!-- Email -->
-                            <li class="list-group-item">
-                                <strong>Email Address:</strong>
-                                <span class="float-end">{{ user.email }}</span>
-                            </li>
-
-                            <!-- Currency -->
-                            <li class="list-group-item">
-                                <strong>Preferred Currency:</strong>
-                                <span class="float-end">{{ user.profile.currency }}</span>
-                            </li>
-
-                            <!-- Language -->
-                            <li class="list-group-item">
-                                <strong>Preferred Language:</strong>
-                                <span class="float-end">
-                                {% if user.profile.language == "en" %}English{% elif user.profile.language == "de" %}
-                                    German{% elif user.profile.language == "fr" %}
-                                    French{% elif user.profile.language == "es" %}Spanish{% else %}
-                                    {{ user.profile.language }}
-                                {% endif %}
-                            </span>
-                            </li>
-
-                            <!-- Timezone -->
-                            <li class="list-group-item">
-                                <strong>Timezone:</strong>
-                                <span class="float-end">{{ user.profile.timezone }}</span>
-                            </li>
-                        </ul>
+                        <!-- User Info -->
+                        <div>
+                            <h4>{{ user.username }}</h4>
+                            <p class="text-muted">{{ user.email }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card m-5">
+                    <div class="card-body ">
+                        <h5 class="card-title">User Settings</h5>
+                        <p>language: {{ user_settings.language }}</p>
+                        <p>Numeric Format: {{ user_settings.numeric_format }}</p>
+                        <p>Currency: {{ user_settings.currency }}</p>
+                        <p>Timezone: {{ user_settings.timezone }}</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    {% include './components/delete_user_modal.html' %}
+
+
+    <script src="{% static 'js/account.js' %}"></script>
+
 {% endblock %}
+
+

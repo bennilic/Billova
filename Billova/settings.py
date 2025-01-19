@@ -153,7 +153,7 @@ LOGIN_REDIRECT_URL = '/'  # Change to your desired redirect URL
 LOGOUT_REDIRECT_URL = '/'  # Optional logout redirect
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # messages
 
@@ -201,12 +201,6 @@ LOGGING = {
             'filename': LOGS_DIR / 'django.log',
             'formatter': 'verbose',
         },
-        'billova_file': {
-            'level': LOG_LEVEL,
-            'class': 'logging.FileHandler',
-            'filename': LOGS_DIR / 'billova.log',
-            'formatter': 'verbose',
-        },
         'billova_app_file': {
             'level': LOG_LEVEL,
             'class': 'logging.FileHandler',
@@ -230,11 +224,6 @@ LOGGING = {
             'handlers': ['django_file', 'console'],
             'level': 'INFO',
             'propagate': True,
-        },
-        'Billova': {
-            'handlers': ['billova_file', 'console'],
-            'level': LOG_LEVEL,
-            'propagate': False,
         },
         'billova_app': {
             'handlers': ['billova_app_file', 'console'],
