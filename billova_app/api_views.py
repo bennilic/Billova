@@ -1,5 +1,4 @@
 from django.contrib.auth.models import User
-from django.http import HttpResponseRedirect, HttpResponse
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 

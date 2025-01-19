@@ -107,6 +107,7 @@ function saveExpense(e) {
 }
 
 function saveOCRExpense(e) {
+    console.log('OCR Expense');
     const createOCRExpenseForm = document.querySelector(SELECTORS.createOCRExpenseForm);
     // make sure the required fields are fulfilled
     if (!createOCRExpenseForm || !createOCRExpenseForm.checkValidity()) {
@@ -116,7 +117,7 @@ function saveOCRExpense(e) {
 
     // JSON sent to the API
     const ocrExpenseData = {
-        file: createOCRExpenseForm.querySelector(SELECTORS.createOCRFormFields.ocrFileUpload).value,
+        "image": createOCRExpenseForm.querySelector(SELECTORS.createOCRFormFields.ocrFileUpload).value,
     };
 
     fetch('/api/v1/expenses/ocr/', {
@@ -125,7 +126,7 @@ function saveOCRExpense(e) {
             'Content-Type': 'application/json',
             'X-CSRFToken': getCsrfTokenFromForm(createOCRExpenseForm)
         },
-        body: JSON.stringify(ocrExpenseData)
+        body: ocrExpenseData
     })
         .then(response => {
             if (!response.ok) {
@@ -136,14 +137,16 @@ function saveOCRExpense(e) {
         })
         .then(data => {
 
-            Utils.closeModal(SELECTORS.createExpenseModal);
+            console.log(data)
 
-            addExpenseToTable(data);
-            Utils.toggleElementVisibility(SELECTORS.noExpensesCard, false);
-
-            Utils.showNotificationMessage('Expense added successfully', "success");
-
-            setupDomEvents();
+            // Utils.closeModal(SELECTORS.createExpenseModal);
+            //
+            // addExpenseToTable(data);
+            // Utils.toggleElementVisibility(SELECTORS.noExpensesCard, false);
+            //
+            // Utils.showNotificationMessage('Expense added successfully', "success");
+            //
+            // setupDomEvents();
 
         })
         .catch(error => {
