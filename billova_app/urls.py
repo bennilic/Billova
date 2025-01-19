@@ -33,7 +33,7 @@ urlpatterns = [
     path('account/overview/', AccountOverviewView.as_view(), name='account_overview'),
     path('account/settings/', AccountSettingsView.as_view(), name='account_settings'),
     path('account/settings/update_personal_info/', UpdatePersonalInfoView.as_view(), name='update_personal_info'),
-    path('account/settings/update_user_settings/', UpdateUserSettingsView.as_view(), name='update_user_settings'),
+    path("settings/update/", UpdateUserSettingsView.as_view(), name="update_user_settings"),
     path('account/delete/', AccountDeletionView.as_view(), name='delete_account'),
 
     # Authentication

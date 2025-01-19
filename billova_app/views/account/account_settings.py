@@ -1,7 +1,5 @@
 import logging
 
-from babel import Locale
-from babel.dates import get_timezone_location
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -29,36 +27,53 @@ class AccountSettingsView(LoginRequiredMixin, TemplateView):
             "America/New_York", "Asia/Tokyo", "Asia/Dubai"
         ]
 
-        # Get user locale, default to 'en'
-        user_locale = Locale.parse("en")  # Replace with user-preferred locale dynamically
+        # Define popular languages
+        popular_languages = [
+            ("en", "English"),
+            ("de", "German"),
+            ("fr", "French"),
+            ("es", "Spanish"),
+            ("it", "Italian"),
+            ("ro", "Romanian"),
+            ("tr", "Turkish"),
+        ]
 
-        # Use Babel to get human-readable timezone locations
-        timezone_names = {tz: get_timezone_location(tz, locale=user_locale) for tz in popular_timezones}
+        # Define numeric formats
+        numeric_formats = [
+            ('AT', 'Austrian'),
+            ('DE', 'German'),
+            ('CH', 'Swiss'),
+            ('US', 'American'),
+            ('UK', 'British'),
+        ]
 
         # Add the choices to context
-        context["timezone_choices"] = timezone_names.items()
+        context["timezone_choices"] = popular_timezones
+        context["language_choices"] = popular_languages
+        context["numeric_format_choices"] = numeric_formats
+        context["currency_choices"] = ["EUR", "GBP", "USD", "CHF", "JPY", "RON", "TRY"]
 
         return context
 
 
 @method_decorator(login_required, name='dispatch')
 class UpdateUserSettingsView(FormView):
-    template_name = 'Billova/account_settings.html'
+    template_name = "account_settings.html"
+    success_url = reverse_lazy("account_settings")
 
     def post(self, request, *args, **kwargs):
-        profile = request.user.profile
+        user_settings, created = UserSettings.objects.get_or_create(owner=request.user)
 
-        # Update settings
-        profile.language = request.POST.get('language')
-        profile.currency = request.POST.get('currency')
-        profile.timezone = request.POST.get('timezone')
-        profile.numeric_format = request.POST.get('numeric_format')
+        # Update fields
+        user_settings.timezone = request.POST.get("timezone")
+        user_settings.language = request.POST.get("language")
+        user_settings.numeric_format = request.POST.get("numeric_format")
 
         # Save changes
-        profile.save()
+        user_settings.save()
 
-        messages.success(request, "User settings updated successfully!")
-        return redirect('account_settings')
+        messages.success(request, "Settings updated successfully!")
+        return redirect(self.success_url)
 
 
 class UpdatePersonalInfoView(LoginRequiredMixin, FormView):

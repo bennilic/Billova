@@ -34,11 +34,13 @@ class UserSettings(models.Model):
     ]
 
     LANGUAGE_CHOICES = [
-        ('en', 'English'),
-        ('de', 'German'),
-        ('fr', 'French'),
-        ('it', 'Italian'),
-        ('es', 'Spanish'),
+        ("en", "English"),
+        ("de", "German"),
+        ("fr", "French"),
+        ("es", "Spanish"),
+        ("it", "Italian"),
+        ("ro", "Romanian"),
+        ("tr", "Turkish"),
     ]
 
     owner = models.OneToOneField(User, on_delete=models.CASCADE)
