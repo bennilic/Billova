@@ -18,7 +18,11 @@ class UserForm(forms.ModelForm):
 class UserSettingsForm(forms.ModelForm):
     class Meta:
         model = UserSettings
-        fields = ['profile_picture', 'currency', 'language', 'timezone', 'numeric_format']
+        fields = ['currency', 'language', 'timezone', 'numeric_format', 'profile_picture']
+        widgets = {
+            'language': forms.Select(choices=UserSettings.LANGUAGE_CHOICES, attrs={'class': 'form-select'}),
+            'numeric_format': forms.Select(choices=UserSettings.NUMERIC_FORMAT_CHOICES, attrs={'class': 'form-select'}),
+        }
 
 
 # Delete Account

@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 
@@ -24,11 +25,25 @@ class Category(models.Model):
 
 
 class UserSettings(models.Model):
-    # https://en.wikipedia.org/wiki/ISO_4217 - 3 letter currency code
-    currency = models.CharField(max_length=3, default='EUR')
-    # https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes - 2 letter language code
-    language = models.CharField(max_length=2, default='en')
-    timezone = models.CharField(max_length=50, default='Europe/Vienna')  # Set default timezone
-    numeric_format = models.CharField(max_length=50, default='Austrian')
-    profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)  # Add this field
-    owner = models.OneToOneField('auth.User', related_name='user_settings', on_delete=models.CASCADE)
+    NUMERIC_FORMAT_CHOICES = [
+        ('AT', 'Austrian'),
+        ('DE', 'German'),
+        ('CH', 'Swiss'),
+        ('US', 'American'),
+        ('UK', 'British'),
+    ]
+
+    LANGUAGE_CHOICES = [
+        ('en', 'English'),
+        ('de', 'German'),
+        ('fr', 'French'),
+        ('it', 'Italian'),
+        ('es', 'Spanish'),
+    ]
+
+    owner = models.OneToOneField(User, on_delete=models.CASCADE)
+    currency = models.CharField(max_length=10, default='USD')
+    language = models.CharField(max_length=2, choices=LANGUAGE_CHOICES, default='en')
+    timezone = models.CharField(max_length=50, default='ECT/Vienna')
+    numeric_format = models.CharField(max_length=2, choices=NUMERIC_FORMAT_CHOICES, default='AT')
+    profile_picture = models.ImageField(upload_to='profile_pics/', null=True, blank=True)

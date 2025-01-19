@@ -10,9 +10,8 @@ from django.views.generic import TemplateView
 from django.views.generic.edit import FormView
 from pytz import all_timezones
 
-from billova_app.forms import AccountDeleteForm, UserSettingsForm
+from billova_app.forms import AccountDeleteForm, UserSettingsForm, UserForm
 from billova_app.models import UserSettings
-from billova_app.utils.settings_utils import get_current_currencies
 
 logger = logging.getLogger(__name__)
 
@@ -39,31 +38,6 @@ class AccountOverviewView(LoginRequiredMixin, TemplateView):
         return context
 
 
-@method_decorator(login_required, name='dispatch')
-class UpdatePersonalInfoView(FormView):
-    template_name = 'account_settings.html'
-    success_url = '/account/settings/'  # Update to your desired redirect URL
-
-    def post(self, request, *args, **kwargs):
-        user = request.user
-        profile = user.profile
-
-        # Update email
-        user.email = request.POST.get('email')
-
-        # Update profile picture
-        profile_picture = request.FILES.get('profile_picture')
-        if profile_picture:
-            profile.profile_picture = profile_picture
-
-        # Save updates
-        user.save()
-        profile.save()
-
-        messages.success(request, "Personal information updated successfully!")
-        return redirect('account_settings')
-
-
 class AccountSettingsView(LoginRequiredMixin, FormView):
     template_name = "account_settings.html"
     form_class = UserSettingsForm
@@ -72,39 +46,32 @@ class AccountSettingsView(LoginRequiredMixin, FormView):
     def get_initial(self):
         """Populate the form with the user's current settings."""
         initial = super().get_initial()
-        profile = getattr(self.request.user, 'profile', None)
-        if profile:
-            initial.update({
-                'currency': profile.currency,
-                'language': profile.language,
-            })
+        user_settings, created = UserSettings.objects.get_or_create(owner=self.request.user)
+        initial.update({
+            'currency': user_settings.currency,
+            'language': user_settings.language,
+            'timezone': user_settings.timezone,
+            'numeric_format': user_settings.numeric_format,
+        })
         return initial
 
     def form_valid(self, form):
         """Save the updated user settings."""
-        try:
-            profile = getattr(self.request.user, 'profile', None)
-            if profile:
-                profile.currency = form.cleaned_data['currency']
-                profile.language = form.cleaned_data['language']
-                profile.save()
-                messages.success(self.request, "Your settings have been updated successfully!")
-                logger.info(f"User {self.request.user.username} updated their settings.")
-            else:
-                messages.error(self.request, "No profile found. Unable to update settings.")
-                logger.error(f"No profile found for user {self.request.user.username}.")
-        except Exception as e:
-            messages.error(self.request, "An error occurred while saving your settings.")
-            logger.exception(f"Error saving settings for {self.request.user.username}: {str(e)}")
-
+        user_settings, created = UserSettings.objects.get_or_create(owner=self.request.user)
+        for field in form.cleaned_data:
+            setattr(user_settings, field, form.cleaned_data[field])
+        user_settings.save()
+        messages.success(self.request, "Your settings have been updated successfully!")
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         """Provide additional context for the settings page."""
         context = super().get_context_data(**kwargs)
         context.update({
-            'currencies': get_current_currencies(),
+            'currencies': UserSettings.objects.values_list('currency', flat=True).distinct(),
             'timezones': all_timezones,
+            'languages': UserSettings.LANGUAGE_CHOICES,
+            'numeric_formats': UserSettings.NUMERIC_FORMAT_CHOICES,
         })
         return context
 
@@ -170,3 +137,44 @@ class AccountDeletionView(LoginRequiredMixin, FormView):
         """Handle invalid form submission."""
         logger.warning(f"Form validation failed for user {self.request.user.username}. Errors: {form.errors}")
         return super().form_invalid(form)
+
+
+class UpdatePersonalInfoView(LoginRequiredMixin, FormView):
+    template_name = "account_settings.html"
+    success_url = reverse_lazy("account_settings")  # Redirect URL after successful update
+
+    def get(self, request, *args, **kwargs):
+        """Handle GET request to prepopulate forms."""
+        user = request.user
+        user_settings, created = UserSettings.objects.get_or_create(owner=user)
+
+        user_form = UserForm(instance=user)
+        settings_form = UserSettingsForm(instance=user_settings)
+
+        return self.render_to_response(self.get_context_data(
+            user_form=user_form,
+            settings_form=settings_form
+        ))
+
+    def post(self, request, *args, **kwargs):
+        """Handle POST request to update data."""
+        user = request.user
+        user_settings, created = UserSettings.objects.get_or_create(owner=user)
+
+        user_form = UserForm(request.POST, instance=user)
+        settings_form = UserSettingsForm(request.POST, request.FILES, instance=user_settings)
+
+        if user_form.is_valid() and settings_form.is_valid():
+            user_form.save()
+            settings_form.save()
+            messages.success(request, "Your personal information has been updated successfully!")
+            return self.form_valid(user_form)
+        else:
+            messages.error(request, "There was an error updating your information.")
+            return self.form_invalid(user_form)
+
+    def get_context_data(self, **kwargs):
+        """Add the forms to the template context."""
+        context = super().get_context_data(**kwargs)
+        context.update(kwargs)  # Add user_form and settings_form
+        return context
