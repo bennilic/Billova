@@ -54,8 +54,9 @@ class UserSettings(models.Model):
         max_length=3,
         choices=CURRENCY_CHOICES,
         default="EUR",
+
     )
-    language = models.CharField(max_length=2, choices=LANGUAGE_CHOICES, default='en')
+    language = models.CharField(max_length=2, choices=LANGUAGE_CHOICES, default='English')
     timezone = models.CharField(max_length=50, default='ECT/Vienna')
-    numeric_format = models.CharField(max_length=2, choices=NUMERIC_FORMAT_CHOICES, default='AT')
-    profile_picture = models.ImageField(upload_to='profile_pics/', null=True, blank=True)
+    numeric_format = models.CharField(max_length=2, choices=NUMERIC_FORMAT_CHOICES, default='Austrian')
+    profile_picture = models.ImageField(upload_to='billova_app/static/images/profile_pics/', null=True, blank=True)
