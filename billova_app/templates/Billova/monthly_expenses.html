@@ -1,0 +1,44 @@
+{% extends "Billova/layout.html" %}
+{% load static %}
+
+{% block title %}
+    Monthly Expenses
+{% endblock %}
+
+{% block style %}
+    <link rel="stylesheet" href="{% static 'css/expenses.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="container monthly-expenses-container px-4 py-5">
+        <div class="mb-10 expenses__title">
+            <h2 class="mb-4"><i class="bi bi-cash me-1"></i> Monthly Expenses</h2>
+        </div>
+
+        <div class="card no-expenses-card mb-10 m-t-5 hidden">
+            <div class="card-body text-center">
+                <h4 class="card-title">No expenses found</h4>
+                <p class="card-text">
+                    It looks like there are no expenses recorded. Feel free to add new ones <a href="{% url 'expensesOverview' %}">here</a>.
+                </p>
+            </div>
+        </div>
+
+        <div id="monthlyExpensesContainer" class="accordion">
+            {# will be populated in js via REST #}
+        </div>
+        <div class="d-flex justify-content-center">
+            <button id="showMoreButton" class="btn btn-secondary mt-10 hidden">Show More</button>
+        </div>
+
+        <div id="noMoreItemsInfo" class="text-center mt-4 hidden">
+            <p class="text-muted">You have reached the end of the list. No more items to display.</p>
+        </div>
+
+    </div>
+
+{% endblock %}
+
+{% block script %}
+    <script type="module" src="{% static 'js/monthly_expenses.js' %}"></script>
+{% endblock %}

@@ -11,3 +11,12 @@
     display: flex;
     justify-content: center;
 }
+
+#monthlyExpensesContainer .accordion-header {
+    background: var(--bs-tertiary-bg);
+    padding: 20px;
+}
+
+.monthly-expenses-container #showMoreButton {
+    width: 200px;
+}

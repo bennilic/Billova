@@ -36,11 +36,7 @@ const DATA = {
 };
 
 document.addEventListener('DOMContentLoaded', function () {
-    const modalOpenerBtn = document.querySelector(SELECTORS.createExpenseModalOpenerBtn);
-    if (modalOpenerBtn) {
-        modalOpenerBtn.addEventListener('click', onModalCreateModalBtnOpenerClick);
-    }
-
+    setupDomEvents();
     populateExpensesTable();
 });
 
@@ -115,9 +111,14 @@ function addCategoriesToSelectList(category) {
 }
 
 function setupDomEvents() {
-    const saveExpenseButton = document.querySelector(SELECTORS.saveExpenseButton);
-    if (saveExpenseButton) {
-        saveExpenseButton.addEventListener('click', saveExpense);
+    const modalOpenerBtn = document.querySelector(SELECTORS.createExpenseModalOpenerBtn);
+    if (modalOpenerBtn) {
+        modalOpenerBtn.addEventListener('click', onModalCreateModalBtnOpenerClick);
+    }
+
+    const deleteEntryModal = document.querySelector(SELECTORS.deleteExpenseEntryModal);
+    if (deleteEntryModal) {
+        deleteEntryModal.addEventListener('shown.bs.modal', onDeleteModalShown);
     }
 
     const saveOCRExpenseButton = document.querySelector(SELECTORS.saveOCRExpenseButton);
@@ -125,12 +126,9 @@ function setupDomEvents() {
         saveOCRExpenseButton.addEventListener('click', saveOCRExpense);
     }
 
-    const deleteExpenseButtons = document.querySelectorAll(SELECTORS.deleteExpenseButton);
-
-    if (deleteExpenseButtons) {
-        deleteExpenseButtons.forEach(button => {
-            button.addEventListener('click', onDeleteExpenseButtonClick);
-        });
+    const saveExpenseButton = document.querySelector(SELECTORS.saveExpenseButton);
+    if (saveExpenseButton) {
+        saveExpenseButton.addEventListener('click', saveExpense);
     }
 }
 
@@ -178,11 +176,9 @@ function saveExpense(e) {
             Utils.closeModal(SELECTORS.createExpenseModal);
 
             addExpenseToTable(data);
-            toggleNoExpenseFoundInTableVisibility(false);
+            Utils.toggleElementVisibility(SELECTORS.noExpensesCard, false);
 
             Utils.showNotificationMessage('Expense added successfully', "success");
-
-            setupDomEvents();
 
         })
         .catch(error => {
@@ -200,11 +196,21 @@ function saveOCRExpense(e) {
         return;
     }
 
-    const ocrFileUpload = createOCRExpenseForm.querySelector(SELECTORS.createOCRFormFields.ocrFileUpload).files[0];
+    const ocrFileUploadInput = createOCRExpenseForm.querySelector(SELECTORS.createOCRFormFields.ocrFileUpload);
+    if (!ocrFileUploadInput) {
+        console.log('File upload input not found');
+        return;
+    }
+
+    const ocrFileUpload = ocrFileUploadInput.files[0];
     if (!ocrFileUpload) {
         Utils.showNotificationMessage('Please upload an image file.', "error");
         return;
     }
+
+    // disable the button to not allow the user to upload the same file again
+    // while the current one is still being processed
+    toggleSaveOCRExpenseButtonState(true);
 
     // JSON sent to the API
     const formData = new FormData();
@@ -226,33 +232,43 @@ function saveOCRExpense(e) {
         })
         .then(data => {
 
-            // console.log(data)
+            addExpenseToTable(data);
+            Utils.toggleElementVisibility(SELECTORS.noExpensesCard, false);
+            Utils.showNotificationMessage('Expense added successfully', "success");
 
-            // Utils.closeModal(SELECTORS.createExpenseModal);
-            //
-            // addExpenseToTable(data);
-            // Utils.toggleElementVisibility(SELECTORS.noExpensesCard, false);
-            //
-            // Utils.showNotificationMessage('Expense added successfully', "success");
-            //
-            // setupDomEvents();
+            // re-enable the submit button
+            toggleSaveOCRExpenseButtonState(false);
+
+            // reset the input field
+            ocrFileUploadInput.value = '';
 
         })
         .catch(error => {
             console.error('Error creating expense:', error);
+
+            // re-enable the submit button
+            toggleSaveOCRExpenseButtonState(false);
             Utils.showNotificationMessage('Unable to create the expense. Please ensure all fields are filled out correctly.', "error");
         });
 }
 
-function onDeleteExpenseButtonClick(e) {
-    const confirmDeleteExpenseButton = document.querySelector(SELECTORS.confirmDeleteExpenseButton);
-    if (!confirmDeleteExpenseButton) {
+function toggleSaveOCRExpenseButtonState(disable=false) {
+    const button = document.querySelector(SELECTORS.saveOCRExpenseButton);
+    if (button) {
+        button.disabled = disable;
+    }
+}
+
+function onDeleteModalShown(e) {
+    const triggerButton = e.relatedTarget;
+    const confirmDeleteExpenseButton = e.currentTarget.querySelector(SELECTORS.confirmDeleteExpenseButton);
+    if (!confirmDeleteExpenseButton || !triggerButton) {
         return;
     }
 
     // the id of the expense is set as data attribute on the confirm button. When the button is clicked,
     // we will then use the value in the data attribute for the REST Delete method
-    confirmDeleteExpenseButton.dataset.expenseId = e.currentTarget.dataset.expenseId;
+    confirmDeleteExpenseButton.dataset.expenseId = triggerButton.dataset.expenseId;
     confirmDeleteExpenseButton.addEventListener('click', deleteExpense);
 }
 
@@ -301,29 +317,10 @@ function deleteExpense(e) {
 }
 
 function populateExpensesTable() {
-    fetch('/api/v1/expenses/', {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'Cache-Control': 'max-age=3600' // Cache for 1 hour
-        }
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok ' + response.statusText);
-            }
-            return response.json();
-        })
-
-        .then(data => {
-            if (!data.results) {
-                throw new Error("Error fetching expenses");
-            }
-
+    fetchAllExpenses()
+        .then(expenses => {
             reinitializeVanillaDataTable();
-            addExpensesListToTable(data.results);
-            setupDomEvents();
-
+            addExpensesListToTable(expenses); // Pass all fetched expenses
         })
         .catch(error => {
             console.error(error.message);
@@ -331,20 +328,46 @@ function populateExpensesTable() {
         });
 }
 
+async function fetchAllExpenses(url = '/api/v1/expenses/') {
+    // We are using django pagination, this means we always get 10 results for each request.
+    // In the expense table we want to load all the data at once and initialize the table.
+    const expenses = [];
+
+    // Iterate over all the available result pages and create a new request for each of them
+    while (url) {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+            }
+        });
+        if (!response.ok) {
+            Utils.toggleElementVisibility(SELECTORS.noExpensesCard, true);
+            throw new Error('Network response was not ok ' + response.statusText);
+        }
+
+        const data = await response.json();
+        expenses.push(...data.results); // Add current page results
+        url = data.next; // Get the next page URL
+    }
+
+    return expenses;
+}
+
 function addExpensesListToTable(expenses) {
     const expensesTable = document.querySelector(SELECTORS.expenseTable);
     if (!expensesTable) {
-        toggleNoExpenseFoundInTableVisibility();
+        Utils.toggleElementVisibility(SELECTORS.noExpensesCard, true);
         throw new Error("No expenses table found");
     }
 
     if (!expenses) {
-        toggleNoExpenseFoundInTableVisibility();
+        Utils.toggleElementVisibility(SELECTORS.noExpensesCard, true);
         throw new Error("List with expenses not provided");
     }
 
     if (!expenses.length) {
-        toggleNoExpenseFoundInTableVisibility();
+        Utils.toggleElementVisibility(SELECTORS.noExpensesCard, true);
         return;
     }
 
@@ -380,13 +403,6 @@ function addExpenseToTable(expense, table = document.querySelector(SELECTORS.exp
     // Use the DataTable's insert method to add the data
     if (DATA.vanillaDataTableInstance) {
         DATA.vanillaDataTableInstance.insert(newData);
-    }
-}
-
-function toggleNoExpenseFoundInTableVisibility(show=true) {
-    const noExpensesCard = document.querySelector(SELECTORS.noExpensesCard);
-    if (noExpensesCard) {
-        noExpensesCard.classList.toggle('hidden', !show);
     }
 }
 

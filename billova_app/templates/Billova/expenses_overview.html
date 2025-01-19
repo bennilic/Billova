@@ -35,14 +35,13 @@
 
             <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
-            <div class="input-group d-flex justify-content-end mb-3">
-                <div class="custom-file">
-                    <input type="file" class="custom-file-input" id="ocrFileUpload" name="ocrFileUpload" accept="image/*"
+            <div class="d-flex justify-content-end mb-5">
+                <div class="custom-file d-flex">
+                    <input type="file" class="custom-file-input form-control" id="ocrFileUpload" name="ocrFileUpload" accept="image/*"
                            capture="environment">
-                    <label class="custom-file-label" for="ocrFileUpload">Scan Receipt</label>
                 </div>
-                <div class="input-group-append">
-                     <button type="button" class="btn btn-outline-secondary" id="saveOCRExpenseEntryButton">
+                <div class="input-group-append ms-5">
+                     <button type="button" class="btn btn-secondary" id="saveOCRExpenseEntryButton">
                         Upload Receipt
                     </button>
                 </div>
