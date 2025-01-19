@@ -31,16 +31,7 @@ const DATA = {
 };
 
 document.addEventListener('DOMContentLoaded', function () {
-    const modalOpenerBtn = document.querySelector(SELECTORS.createExpenseModalOpenerBtn);
-    if (modalOpenerBtn) {
-        modalOpenerBtn.addEventListener('click', onModalCreateModalBtnOpenerClick);
-    }
-
-    const deleteEntryModal = document.querySelector(SELECTORS.deleteExpenseEntryModal);
-    if (deleteEntryModal) {
-        deleteEntryModal.addEventListener('shown.bs.modal', onDeleteModalShown);
-    }
-
+    setupDomEvents();
     populateExpensesTable();
 });
 
@@ -115,6 +106,16 @@ function addCategoriesToSelectList(category) {
 }
 
 function setupDomEvents() {
+    const modalOpenerBtn = document.querySelector(SELECTORS.createExpenseModalOpenerBtn);
+    if (modalOpenerBtn) {
+        modalOpenerBtn.addEventListener('click', onModalCreateModalBtnOpenerClick);
+    }
+
+    const deleteEntryModal = document.querySelector(SELECTORS.deleteExpenseEntryModal);
+    if (deleteEntryModal) {
+        deleteEntryModal.addEventListener('shown.bs.modal', onDeleteModalShown);
+    }
+
     const saveExpenseButton = document.querySelector(SELECTORS.saveExpenseButton);
     if (saveExpenseButton) {
         saveExpenseButton.addEventListener('click', saveExpense);
@@ -168,8 +169,6 @@ function saveExpense(e) {
             Utils.toggleElementVisibility(SELECTORS.noExpensesCard, false);
 
             Utils.showNotificationMessage('Expense added successfully', "success");
-
-            setupDomEvents();
 
         })
         .catch(error => {
@@ -241,7 +240,6 @@ function populateExpensesTable() {
         .then(expenses => {
             reinitializeVanillaDataTable();
             addExpensesListToTable(expenses); // Pass all fetched expenses
-            setupDomEvents();
         })
         .catch(error => {
             console.error(error.message);
