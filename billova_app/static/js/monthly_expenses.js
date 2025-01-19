@@ -109,15 +109,15 @@ function renderMonthlyExpenses(expenses) {
             .class('accordion-header')
             .append(accordionButton);
 
-        const categoriesLabel = new ElementBuilder('p')
+        const categoriesLabel = new ElementBuilder('h5')
             .class('mb-1 fw-bold')
             .text('Categories:');
 
         const categoriesContent = new ElementBuilder('p')
-            .class('mb-5')
+            .class('mb-7')
             .text(expense.categories.join(', '));
 
-        const totalSpendLabel = new ElementBuilder('p')
+        const totalSpendLabel = new ElementBuilder('h5')
             .class('mb-1 fw-bold')
             .text('Total Spend:');
 
