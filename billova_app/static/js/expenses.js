@@ -53,7 +53,13 @@ function onCreateExpenseModalShown(formSelector) {
     }
 }
 
-function fetchAndUpdateCategoriesList(form) {
+/**
+ * Fetch all the categories of the current user and update
+ * the select list containing them.
+ * @param form the form in which the select list can be found
+ * @param callback a callback to be called after successful REST request, default is undefined
+ */
+function fetchAndUpdateCategoriesList(form, callback=undefined) {
     if (!form) {
         console.log("The categories select list cannot be updated for the form " + form);
         return;
@@ -80,8 +86,11 @@ function fetchAndUpdateCategoriesList(form) {
             }
 
             populateCategoriesSelectList(data.results, form);
-
             DATA.allCategoriesList = data.results;
+
+            if (typeof callback === 'function') {
+                callback();
+            }
 
         })
         .catch(error => {
@@ -309,10 +318,6 @@ function onEditExpenseModalShown(e, formSelector) {
         return;
     }
 
-    if (!DATA.allCategoriesList) {
-        fetchAndUpdateCategoriesList(editForm);
-    }
-
     const triggerButton = e.relatedTarget;
     const editedExpenseId = parseInt(triggerButton.dataset.expenseId);
     const expenses = getExpensesFromSessionStorage();
@@ -329,7 +334,20 @@ function onEditExpenseModalShown(e, formSelector) {
         return;
     }
 
-    prefillInputFieldsOnEditAction(editedExpense, editForm);
+    // the callback will be called in case the edit modal is opening for the first time.
+    // The reason is that the categories are fetched async using REST, and they are rendered in
+    // the promise, which means, at the moment when the modal opens, we do not have the categories rendered.
+    // In edit mode, we want to prefill the inputs, and therefore, we need a callback after the categories
+    // were already rendered.
+    const prefillCallback = () => {
+        prefillInputFieldsOnEditAction(editedExpense, editForm);
+    };
+
+    if (!DATA.allCategoriesList) {
+        fetchAndUpdateCategoriesList(editForm, prefillCallback);
+    } else {
+        prefillInputFieldsOnEditAction(editedExpense, editForm);
+    }
 
     const editModal = editForm.closest(SELECTORS.editExpenseEntryModal);
     if (editModal) {
@@ -437,9 +455,13 @@ function populateExpensesTable() {
         });
 }
 
+/**
+ * Fetch all expenses asynchronous.
+ * We are using django pagination, this means we always get 10 results for each request.
+ * In the expense table, we want to load all the data at once and initialize the table
+ * with the received data.
+ */
 async function fetchAllExpenses(url = '/api/v1/expenses/') {
-    // We are using django pagination, this means we always get 10 results for each request.
-    // In the expense table we want to load all the data at once and initialize the table.
     const expenses = [];
 
     // Iterate over all the available result pages and create a new request for each of them
