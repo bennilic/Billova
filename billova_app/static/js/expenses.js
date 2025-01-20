@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function () {
     populateExpensesTable();
 });
 
-function onModalCreateModalBtnOpenerClick(formSelector) {
+function onCreateExpenseModalShown(formSelector) {
     // no need to recreate the categories list if already done. This happens when the user opened the
     // modal dialog before
     if (!DATA.allCategoriesList) {
@@ -131,10 +131,10 @@ function addCategoriesToSelectList(category, form) {
 }
 
 function setupDomEvents() {
-    const modalOpenerBtn = document.querySelector(SELECTORS.createExpenseModalOpenerBtn);
-    if (modalOpenerBtn) {
-        modalOpenerBtn.addEventListener('click', (e) => {
-            onModalCreateModalBtnOpenerClick(SELECTORS.createExpenseForm);
+    const createEntryModal = document.querySelector(SELECTORS.createExpenseModal);
+    if (createEntryModal) {
+        createEntryModal.addEventListener('shown.bs.modal', (e) => {
+            onCreateExpenseModalShown(SELECTORS.createExpenseForm);
         });
     }
 
@@ -275,7 +275,10 @@ function saveOCRExpense(e) {
 
             // re-enable the submit button
             toggleSaveOCRExpenseButtonState(false);
-            Utils.showNotificationMessage('Unable to create the expense. Please ensure all fields are filled out correctly.', "error");
+            Utils.showNotificationMessage('Unable to create the expense. You can create the expense manually.', "error");
+
+            // show the modal for manual creation
+            Utils.showBootstrapModal(SELECTORS.createExpenseModal);
         });
 }
 

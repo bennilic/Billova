@@ -82,3 +82,16 @@ export function toggleElementVisibility(selector, show=true) {
         element.classList.toggle('hidden', !show);
     }
 }
+
+export function showBootstrapModal(modalSelector) {
+    const modal = document.querySelector(modalSelector);
+    if (!modal) {
+        console.log("Modal with the selector " + modalSelector + " not found in DOM.");
+    }
+
+    const bsModal = new bootstrap.Modal(modal, {
+        keyboard: false
+    });
+
+    bsModal.show();
+}
