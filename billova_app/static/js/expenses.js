@@ -1,15 +1,17 @@
 import * as Utils from './utils/utils.js';
-import {ElementBuilder} from "./builder/builder.js";
+import {ElementBuilder, ButtonBuilder} from "./builder/builder.js";
 
 
 const SELECTORS = {
     expenseTable: '#expensesTable',
     expenseTableBody: '.uiExpensesTblBody',
     saveExpenseButton: '#saveExpenseEntryButton',
+    editExpenseButton: '.edit-expense-btn',
     deleteExpenseButton: '.delete-expense-btn',
     confirmDeleteExpenseButton: '.confirm-delete-expense-btn',
     createExpenseModalOpenerBtn: '.create-expenseEntry-btn',
     createExpenseForm: '#expenseEntryForm',
+    editExpenseForm: '#editExpenseEntryForm',
     createOCRExpenseForm: '#ocrExpenseEntryForm',
     saveOCRExpenseButton: '#saveOCRExpenseEntryButton',
     createOCRFormFields: {
@@ -18,21 +20,24 @@ const SELECTORS = {
     deleteExpenseForm: '#deleteExpenseForm',
     deleteExpenseEntryModal: '#deleteExpenseEntryModal',
     createExpenseModal: '#createExpenseEntryModal',
+    editExpenseEntryModal: '#editExpenseEntryModal',
     noExpensesCard: '.no-expenses-card',
     csrfToken: "[name=csrfmiddlewaretoken]",
-    createFormFields: {
+    createEditFormFields: {
         expenseCategories: '#expenseCategories',
         expenseValue: '#expenseValue',
         expenseDate: '#expenseDate',
         expenseIssuer: '#expenseIssuer',
-        expenseNote: '#expenseNote'
+        expenseNote: '#expenseNote',
+        updateExpenseButton: '#updateExpenseEntryButton'
     }
 };
 
 const DATA = {
     bootstrapFormValidated: 'was-validated', // used by bootstrap to style invalid forms
     vanillaDataTableInstance: undefined,
-    categoriesListCreated: false
+    allCategoriesList: undefined,
+    sessionStorageKey: "expenses"
 };
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -40,10 +45,17 @@ document.addEventListener('DOMContentLoaded', function () {
     populateExpensesTable();
 });
 
-function onModalCreateModalBtnOpenerClick() {
-    // guard - no need to recreate the categories list if already done. This happens when the user opened the
+function onModalCreateModalBtnOpenerClick(formSelector) {
+    // no need to recreate the categories list if already done. This happens when the user opened the
     // modal dialog before
-    if (DATA.categoriesListCreated) {
+    if (!DATA.allCategoriesList) {
+        fetchAndUpdateCategoriesList(document.querySelector(formSelector));
+    }
+}
+
+function fetchAndUpdateCategoriesList(form) {
+    if (!form) {
+        console.log("The categories select list cannot be updated for the form " + form);
         return;
     }
 
@@ -67,9 +79,9 @@ function onModalCreateModalBtnOpenerClick() {
                 throw new Error("Error fetching categories");
             }
 
-            populateCategoriesSelectList(data.results);
+            populateCategoriesSelectList(data.results, form);
 
-            DATA.categoriesListCreated = true;
+            DATA.allCategoriesList = data.results;
 
         })
         .catch(error => {
@@ -78,25 +90,33 @@ function onModalCreateModalBtnOpenerClick() {
         });
 }
 
-function populateCategoriesSelectList(categories) {
+function populateCategoriesSelectList(categories, form) {
     if (!categories) {
         throw new Error('No categories provided');
     }
 
     categories.forEach(function(item, index) {
-        addCategoriesToSelectList(item);
+        addCategoriesToSelectList(item, form);
     });
 }
 
-function addCategoriesToSelectList(category) {
+/**
+ * Update the select list containing the categories of the current user.
+ * @param category category to be added to the select list
+ * @param form the form to which the select list belongs
+ */
+function addCategoriesToSelectList(category, form) {
     if (!category) {
         throw new Error("No category provided");
     }
     if (!category.name) {
         throw new Error("Name of category not found");
     }
+    if (!form) {
+        throw new Error("Html form was not provided");
+    }
 
-    const selectList = document.querySelector(SELECTORS.createFormFields.expenseCategories);
+    const selectList = form.querySelector(SELECTORS.createEditFormFields.expenseCategories);
     if (!selectList) {
         throw new Error("Categories Select List not found");
     }
@@ -113,7 +133,16 @@ function addCategoriesToSelectList(category) {
 function setupDomEvents() {
     const modalOpenerBtn = document.querySelector(SELECTORS.createExpenseModalOpenerBtn);
     if (modalOpenerBtn) {
-        modalOpenerBtn.addEventListener('click', onModalCreateModalBtnOpenerClick);
+        modalOpenerBtn.addEventListener('click', (e) => {
+            onModalCreateModalBtnOpenerClick(SELECTORS.createExpenseForm);
+        });
+    }
+
+    const editEntryModal = document.querySelector(SELECTORS.editExpenseEntryModal);
+    if (editEntryModal) {
+        editEntryModal.addEventListener('shown.bs.modal', (e) => {
+            onEditExpenseModalShown(e, SELECTORS.editExpenseForm);
+        });
     }
 
     const deleteEntryModal = document.querySelector(SELECTORS.deleteExpenseEntryModal);
@@ -134,26 +163,22 @@ function setupDomEvents() {
 
 function saveExpense(e) {
     const createExpenseForm = document.querySelector(SELECTORS.createExpenseForm);
+    if (!createExpenseForm) {
+        return;
+    }
     // make sure the required fields are fulfilled
-    if (!createExpenseForm || !createExpenseForm.checkValidity()) {
+    if (!createExpenseForm.checkValidity()) {
         createExpenseForm.classList.add(DATA.bootstrapFormValidated);
         return;
     }
 
-    const selectedCategoriesOptions
-        = createExpenseForm.querySelector(SELECTORS.createFormFields.expenseCategories).selectedOptions;
-
-    const selectedCategoriesArray = Array.from(selectedCategoriesOptions).map(({ value }) => ({
-        name: value
-    }));
-
     // JSON sent to the API
     const expenseData = {
-        categories: selectedCategoriesArray,
-        invoice_date_time: createExpenseForm.querySelector(SELECTORS.createFormFields.expenseDate).value,
-        price: createExpenseForm.querySelector(SELECTORS.createFormFields.expenseValue).value,
-        note: createExpenseForm.querySelector(SELECTORS.createFormFields.expenseNote).value,
-        invoice_issuer: createExpenseForm.querySelector(SELECTORS.createFormFields.expenseIssuer).value
+        categories: getCategoriesArrayFromSelectList(createExpenseForm),
+        invoice_date_time: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseDate).value,
+        price: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseValue).value,
+        note: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseNote).value,
+        invoice_issuer: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseIssuer).value
     };
 
     fetch('/api/v1/expenses/', {
@@ -176,6 +201,8 @@ function saveExpense(e) {
             Utils.closeModal(SELECTORS.createExpenseModal);
 
             addExpenseToTable(data);
+            addExpenseToSessionStorage(data);
+
             Utils.toggleElementVisibility(SELECTORS.noExpensesCard, false);
 
             Utils.showNotificationMessage('Expense added successfully', "success");
@@ -272,6 +299,84 @@ function onDeleteModalShown(e) {
     confirmDeleteExpenseButton.addEventListener('click', deleteExpense);
 }
 
+function onEditExpenseModalShown(e, formSelector) {
+    const editForm = document.querySelector(formSelector);
+    if (!editForm) {
+        console.log("The given edit form was not found " + editForm);
+        return;
+    }
+
+    if (!DATA.allCategoriesList) {
+        fetchAndUpdateCategoriesList(editForm);
+    }
+
+    const triggerButton = e.relatedTarget;
+    const editedExpenseId = parseInt(triggerButton.dataset.expenseId);
+    const expenses = getExpensesFromSessionStorage();
+    const errorMessage = "We cannot access the necessary information for your expense";
+
+    if (!expenses) {
+        Utils.showNotificationMessage(errorMessage, "error");
+        return;
+    }
+
+    const editedExpense = getExpenseById(editedExpenseId, expenses);
+    if (!editedExpense) {
+        Utils.showNotificationMessage(errorMessage, "error");
+        return;
+    }
+
+    prefillInputFieldsOnEditAction(editedExpense, editForm);
+
+    const editModal = editForm.closest(SELECTORS.editExpenseEntryModal);
+    if (editModal) {
+        editModal.querySelector(SELECTORS.createEditFormFields.updateExpenseButton).addEventListener("click", (e) => {
+            updateExpense(editedExpenseId, editForm);
+        });
+    }
+}
+
+function prefillInputFieldsOnEditAction(editedExpense, editForm) {
+    if (!editedExpense) {
+        console.error("Edited expense is missing.");
+        return;
+    }
+    if (!editForm) {
+        console.error("Edit form is missing.");
+        return;
+    }
+
+    editForm.querySelector(SELECTORS.createEditFormFields.expenseDate).value = editedExpense.invoice_date_time || '';
+    editForm.querySelector(SELECTORS.createEditFormFields.expenseValue).value = editedExpense.price || '';
+    editForm.querySelector(SELECTORS.createEditFormFields.expenseIssuer).value = editedExpense.invoice_issuer || '';
+
+    const formattedDate = editedExpense.invoice_date_time
+        ? new Date(editedExpense.invoice_date_time).toISOString().split('T')[0]
+        : '';
+    editForm.querySelector(SELECTORS.createEditFormFields.expenseDate).value = formattedDate || '';
+
+    editForm.querySelector(SELECTORS.createEditFormFields.expenseNote).value = editedExpense.note || '';
+
+    // Populate the categories in the select field
+    const categorySelect = editForm.querySelector(SELECTORS.createEditFormFields.expenseCategories);
+    if (categorySelect) {
+        // Clear existing selections
+        Array.from(categorySelect.options).forEach(option => {
+            option.selected = false;
+        });
+
+        // Select the relevant categories
+        if (editedExpense.categories && editedExpense.categories.length > 0) {
+            editedExpense.categories.forEach(category => {
+                const matchingOption = Array.from(categorySelect.options).find(option => option.value === category.name);
+                if (matchingOption) {
+                    matchingOption.selected = true;
+                }
+            });
+        }
+    }
+}
+
 function deleteExpense(e) {
     const toDeleteExpenseId = e.currentTarget.dataset.expenseId;
     const errorMessage = 'An error occurred while trying to delete the expense. Please try again later.';
@@ -321,6 +426,7 @@ function populateExpensesTable() {
         .then(expenses => {
             reinitializeVanillaDataTable();
             addExpensesListToTable(expenses); // Pass all fetched expenses
+            saveExpensesInSessionStorage(expenses);
         })
         .catch(error => {
             console.error(error.message);
@@ -352,6 +458,55 @@ async function fetchAllExpenses(url = '/api/v1/expenses/') {
     }
 
     return expenses;
+}
+
+function updateExpense(expenseId, editExpenseForm) {
+    if (!editExpenseForm) {
+        return;
+    }
+    if (!editExpenseForm.checkValidity()) {
+        editExpenseForm.classList.add(DATA.bootstrapFormValidated);
+        return;
+    }
+
+    // JSON sent to the API
+    const expenseData = {
+        categories: getCategoriesArrayFromSelectList(editExpenseForm),
+        invoice_date_time: editExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseDate).value,
+        price: editExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseValue).value,
+        note: editExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseNote).value,
+        invoice_issuer: editExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseIssuer).value
+    };
+
+    fetch(`/api/v1/expenses/${expenseId}/`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCsrfTokenFromForm(editExpenseForm)
+        },
+        body: JSON.stringify(expenseData)
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to update expense: ${response.statusText}`);
+            }
+
+            return response.json();
+        })
+        .then(data => {
+
+            Utils.closeModal(SELECTORS.editExpenseEntryModal);
+            Utils.showNotificationMessage('Expense updated successfully', "success");
+
+            setTimeout(function () {
+                location.reload();
+            }, 1000);
+
+        })
+        .catch(error => {
+            console.error('Error creating expense:', error);
+            Utils.showNotificationMessage('Unable to update the expense. Please ensure all fields are filled out correctly.', "error");
+        });
 }
 
 function addExpensesListToTable(expenses) {
@@ -388,16 +543,32 @@ function addExpenseToTable(expense, table = document.querySelector(SELECTORS.exp
         categories = expense.categories.map(category => category.name).join(', ');
     }
 
+    const editButton = new ButtonBuilder()
+        .class('btn btn-sm btn-secondary me-2 edit-expense-btn')
+        .with('data-bs-toggle', 'modal')
+        .with('data-bs-target', `${SELECTORS.editExpenseEntryModal}`)
+        .with('data-expense-id', expense.id)
+        .text('Edit');
+
+    const deleteButton = new ButtonBuilder()
+        .class('btn btn-sm btn-danger delete-expense-btn')
+        .with('data-bs-toggle', 'modal')
+        .with('data-bs-target', `${SELECTORS.deleteExpenseEntryModal}`)
+        .with('data-expense-id', expense.id)
+        .text('Delete');
+
+    const actionsContainer = new ElementBuilder('div')
+        .class('d-flex')
+        .append(editButton)
+        .append(deleteButton);
+
     const newData = [{
         "Date": Utils.stringToFormattedDate(expense.invoice_date_time),
         "Spent": expense.price,
         "Note": expense.note,
         "Issuer": expense.invoice_issuer,
         "Category": categories,
-        "Actions": `<button class="btn btn-sm btn-danger delete-expense-btn" 
-                    data-bs-toggle="modal" 
-                    data-bs-target="${SELECTORS.deleteExpenseEntryModal}" 
-                    data-expense-id="${expense.id}">Delete</button>`
+        "Actions": actionsContainer.build().outerHTML
     }];
 
     // Use the DataTable's insert method to add the data
@@ -425,4 +596,62 @@ function reinitializeVanillaDataTable() {
     } else {
         DATA.vanillaDataTableInstance = Utils.initializeVanillaDataTable(SELECTORS.expenseTable);
     }
+}
+
+/**
+ * Store expenses in session storage.
+ * When the user edits an expense, we will access the data stored in session storage
+ * to be able to prefill the input fields.
+ */
+function saveExpensesInSessionStorage(expenses) {
+    if (!window.sessionStorage) {
+        return console.log("Session storage not supported in your browser.");
+    }
+    window.sessionStorage.setItem(DATA.sessionStorageKey, JSON.stringify(expenses));
+}
+
+/**
+ * Update the existing object in session storage or create a new one if it does not exist.
+ */
+function addExpenseToSessionStorage(expense) {
+    if (!window.sessionStorage) {
+        return console.log("Session storage not supported in your browser.");
+    }
+
+    let currentExpenses = window.sessionStorage.getItem(DATA.sessionStorageKey);
+
+    if (!currentExpenses) {
+        currentExpenses = [];
+    } else {
+        currentExpenses = JSON.parse(currentExpenses);
+    }
+
+    currentExpenses.push(expense);
+
+    window.sessionStorage.setItem(DATA.sessionStorageKey, JSON.stringify(currentExpenses));
+}
+
+function getExpensesFromSessionStorage() {
+    const storedExpenses = window.sessionStorage.getItem(DATA.sessionStorageKey);
+
+    if (!storedExpenses) {
+        return [];
+    }
+
+    return JSON.parse(storedExpenses);
+}
+
+function getExpenseById(expenseId, expenses) {
+    const expense = expenses.find(exp => exp.id === expenseId);
+
+    return expense || null;
+}
+
+function getCategoriesArrayFromSelectList(form) {
+    const selectedCategoriesOptions
+        = form.querySelector(SELECTORS.createEditFormFields.expenseCategories).selectedOptions;
+
+    return Array.from(selectedCategoriesOptions).map(({ value }) => ({
+        name: value
+    }));
 }
