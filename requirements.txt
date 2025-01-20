@@ -16,3 +16,4 @@ typing_extensions==4.12.2
 urllib3==2.3.0
 veryfi==4.0.1
 pytz~=2024.2
+babel~=2.9.1
