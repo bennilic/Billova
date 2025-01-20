@@ -20,10 +20,23 @@ class AccountSettingsView(LoginRequiredMixin, TemplateView):
     template_name = "account_settings.html"
 
     def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
         try:
-            # Initialize context data
-            context = super().get_context_data(**kwargs)
-            user_settings = get_object_or_404(UserSettings, owner=self.request.user)
+            # Retrieve or create default UserSettings for the logged-in user
+            user_settings, created = UserSettings.objects.get_or_create(
+                owner=self.request.user,
+                defaults={
+                    "timezone": "UTC",
+                    "language": "en",
+                    "numeric_format": "US",
+                    "currency": "USD",
+                }
+            )
+
+            if created:
+                logger.info(f"Default UserSettings created for user {self.request.user}.")
+                messages.info(self.request, "Default user settings have been created.")
 
             # Define popular languages and numeric formats
             popular_languages = [
@@ -38,7 +51,7 @@ class AccountSettingsView(LoginRequiredMixin, TemplateView):
             # Generate currency choices
             CURRENCY_CHOICES = get_currency_choices(popular_languages)
 
-            # Add current settings and choices to the context
+            # Add settings and choices to the context
             context.update({
                 "timezone_choices": [(tz, tz) for tz in all_timezones],
                 "language_choices": popular_languages,
@@ -52,26 +65,37 @@ class AccountSettingsView(LoginRequiredMixin, TemplateView):
                 },
             })
 
-            logger.info(f"Account settings loaded successfully for user {self.request.user}.")
-            return context
-
-        except UserSettings.DoesNotExist:
-            logger.error(f"UserSettings not found for user {self.request.user}. Creating default settings.")
-            messages.error(self.request, "Your settings could not be retrieved. Default values will be used.")
-            context["current_settings"] = {
-                "timezone": "UTC",
-                "language": "en",
-                "numeric_format": "US",
-                "currency": "USD",
-            }
-            return context
+            logger.info(f"UserSettings loaded successfully for user {self.request.user}.")
 
         except Exception as e:
-            logger.error(f"An error occurred while loading account settings for user {self.request.user}: {e}",
-                         exc_info=True)
+            # Handle unexpected errors gracefully
+            logger.error(f"An error occurred while loading settings for user {self.request.user}: {e}", exc_info=True)
             messages.error(self.request, "An unexpected error occurred while loading your settings. Please try again.")
-            context = super().get_context_data(**kwargs)
-            return context
+
+            # Fallback to default settings in case of error
+            context.update({
+                "timezone_choices": [(tz, tz) for tz in all_timezones],
+                "language_choices": [
+                    ("en", "English"), ("de", "German"), ("fr", "French"),
+                    ("es", "Spanish"), ("it", "Italian"), ("ro", "Romanian"), ("tr", "Turkish"),
+                ],
+                "numeric_format_choices": [
+                    ("AT", "Austrian"), ("DE", "German"), ("CH", "Swiss"),
+                    ("US", "American"), ("UK", "British"),
+                ],
+                "currency_choices": get_currency_choices([
+                    ("en", "English"), ("de", "German"), ("fr", "French"),
+                    ("es", "Spanish"), ("it", "Italian"), ("ro", "Romanian"), ("tr", "Turkish"),
+                ]),
+                "current_settings": {
+                    "timezone": "UTC",
+                    "language": "en",
+                    "numeric_format": "US",
+                    "currency": "USD",
+                },
+            })
+
+        return context
 
 
 class UpdateUserSettingsView(LoginRequiredMixin, FormView):
