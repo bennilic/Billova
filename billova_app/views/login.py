@@ -16,13 +16,16 @@ class EmailOrUsernameModelBackend(ModelBackend):
         if username is None:
             username = kwargs.get(User.USERNAME_FIELD)
         try:
-            # Check if the username matches either email or username
             user = User.objects.get(email=username) if '@' in username else User.objects.get(username=username)
+            logger.info(f"Found user: {user}")
         except User.DoesNotExist:
+            logger.warning(f"User not found: {username}")
             return None
         else:
-            if user.check_password(password) and self1.user_can_authenticate(user):
+            if user.check_password(password) and self.user_can_authenticate(user):
+                logger.info(f"User authenticated: {user}")
                 return user
+            logger.warning(f"Authentication failed for user: {username}")
         return None
 
 
