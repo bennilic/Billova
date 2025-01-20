@@ -20,3 +20,7 @@
 .monthly-expenses-container #showMoreButton {
     width: 200px;
 }
+
+.dataTable-container {
+    height: auto !important;
+}
