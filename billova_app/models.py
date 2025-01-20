@@ -57,6 +57,6 @@ class UserSettings(models.Model):
 
     )
     language = models.CharField(max_length=2, choices=LANGUAGE_CHOICES, default='English')
-    timezone = models.CharField(max_length=50, default='ECT/Vienna')
+    timezone = models.CharField(max_length=50, default='Europe/Vienna')
     numeric_format = models.CharField(max_length=2, choices=NUMERIC_FORMAT_CHOICES, default='Austrian')
     profile_picture = models.ImageField(upload_to='billova_app/static/images/profile_pics/', null=True, blank=True)
