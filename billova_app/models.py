@@ -8,15 +8,14 @@ from billova_app.utils.settings_utils import get_currency_choices
 class Expense(models.Model):
     invoice_date_time = models.DateTimeField(default=timezone.now)
     price = models.DecimalField(max_digits=14, decimal_places=2)  # 1 Billion with 2 decimal places
+    currency = models.CharField(max_length=3)
     note = models.TextField(blank=True)
     invoice_issuer = models.TextField(blank=True)
     invoice_as_text = models.TextField(blank=True)
     categories = models.ManyToManyField('Category', related_name='expenses')
     owner = models.ForeignKey('auth.User', related_name='expenses', on_delete=models.CASCADE)
-    currency = models.CharField(max_length=3)
 
     def save(self, *args, **kwargs):
-        # Auto-populate currency if not already set
         if not self.currency and self.owner:
             user_settings = UserSettings.objects.filter(owner=self.owner).first()
             if user_settings:
