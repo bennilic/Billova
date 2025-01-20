@@ -1,5 +1,5 @@
 import * as Utils from './utils/utils.js';
-import {ElementBuilder, ButtonBuilder} from "./builder/builder.js";
+import {ButtonBuilder, ElementBuilder} from "./builder/builder.js";
 
 
 const SELECTORS = {
@@ -59,7 +59,7 @@ function onCreateExpenseModalShown(formSelector) {
  * @param form the form in which the select list can be found
  * @param callback a callback to be called after successful REST request, default is undefined
  */
-function fetchAndUpdateCategoriesList(form, callback=undefined) {
+function fetchAndUpdateCategoriesList(form, callback = undefined) {
     if (!form) {
         console.log("The categories select list cannot be updated for the form " + form);
         return;
@@ -104,7 +104,7 @@ function populateCategoriesSelectList(categories, form) {
         throw new Error('No categories provided');
     }
 
-    categories.forEach(function(item, index) {
+    categories.forEach(function (item, index) {
         addCategoriesToSelectList(item, form);
     });
 }
@@ -291,7 +291,7 @@ function saveOCRExpense(e) {
         });
 }
 
-function toggleSaveOCRExpenseButtonState(disable=false) {
+function toggleSaveOCRExpenseButtonState(disable = false) {
     const button = document.querySelector(SELECTORS.saveOCRExpenseButton);
     if (button) {
         button.disabled = disable;
@@ -377,6 +377,13 @@ function prefillInputFieldsOnEditAction(editedExpense, editForm) {
     editForm.querySelector(SELECTORS.createEditFormFields.expenseDate).value = formattedDate || '';
 
     editForm.querySelector(SELECTORS.createEditFormFields.expenseNote).value = editedExpense.note || '';
+
+    // Populate the currency field
+    const currencyField = editForm.querySelector(SELECTORS.createEditFormFields.expenseCurrency);
+    if (currencyField) {
+        currencyField.value = editedExpense.currency || 'EUR';
+    }
+
 
     // Populate the categories in the select field
     const categorySelect = editForm.querySelector(SELECTORS.createEditFormFields.expenseCategories);
@@ -568,6 +575,9 @@ function addExpenseToTable(expense, table = document.querySelector(SELECTORS.exp
         categories = expense.categories.map(category => category.name).join(', ');
     }
 
+    const currency = expense.currency || 'EUR'; // Default to USD if currency is not set
+
+
     const editButton = new ButtonBuilder()
         .class('btn btn-sm btn-secondary me-2 edit-expense-btn')
         .with('data-bs-toggle', 'modal')
@@ -590,6 +600,7 @@ function addExpenseToTable(expense, table = document.querySelector(SELECTORS.exp
     const newData = [{
         "Date": Utils.stringToFormattedDate(expense.invoice_date_time),
         "Spent": expense.price,
+        "Currency": currency,
         "Note": expense.note,
         "Issuer": expense.invoice_issuer,
         "Category": categories,
@@ -676,7 +687,7 @@ function getCategoriesArrayFromSelectList(form) {
     const selectedCategoriesOptions
         = form.querySelector(SELECTORS.createEditFormFields.expenseCategories).selectedOptions;
 
-    return Array.from(selectedCategoriesOptions).map(({ value }) => ({
+    return Array.from(selectedCategoriesOptions).map(({value}) => ({
         name: value
     }));
 }

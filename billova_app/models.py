@@ -13,6 +13,18 @@ class Expense(models.Model):
     invoice_as_text = models.TextField(blank=True)
     categories = models.ManyToManyField('Category', related_name='expenses')
     owner = models.ForeignKey('auth.User', related_name='expenses', on_delete=models.CASCADE)
+    currency = models.CharField(max_length=3)
+
+    def save(self, *args, **kwargs):
+        # Auto-populate currency if not already set
+        if not self.currency and self.owner:
+            user_settings = UserSettings.objects.filter(owner=self.owner).first()
+            if user_settings:
+                self.currency = user_settings.currency
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.price} {self.currency} - {self.note}"
 
     class Meta:
         ordering = ['invoice_date_time']
@@ -25,6 +37,7 @@ class Category(models.Model):
     class Meta:
         ordering = ['name']
         # TODO make primary key (name, owner)
+
 
 class UserSettings(models.Model):
     NUMERIC_FORMAT_CHOICES = [
