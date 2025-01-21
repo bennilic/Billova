@@ -16,7 +16,9 @@ const SELECTORS = {
     editCategoryModalOpenerBtn: '.editCategoryBtn',
     modalTitle: '.modal-title',
     confirmDeleteCategoryBtn: '.confirm-delete-category-btn',
-    categoriesSearchInput: '#categoriesSearchInput'
+    categoriesSearchInput: '#categoriesSearchInput',
+    noCategoriesMessage: '#noCategoriesMessage',
+    filterCategoryContainer: '.filter-container'
 };
 
 const DATA = {
@@ -31,10 +33,15 @@ document.addEventListener('DOMContentLoaded', function () {
 function populateCategoriesList() {
     fetchAllCategories()
         .then(categories => {
+            if (categories.length === 0) {
+                toggleNoCategoriesMessageVisibility(true);
+            }
+
             addCategoriesToList(categories);
         })
         .catch(error => {
             console.error(error.message);
+            toggleNoCategoriesMessageVisibility(true);
             Utils.showNotificationMessage('We were unable to load your categories. Please try again later.', "error");
         })
 }
@@ -171,6 +178,8 @@ function saveCategory() {
         .then(data => {
             Utils.closeModal(SELECTORS.createCategoryModal);
 
+            toggleNoCategoriesMessageVisibility(false);
+
             // Add the new category to the list dynamically
             const categoriesList = document.querySelector(SELECTORS.categoriesList);
             addCategoryToList(data, categoriesList);
@@ -266,6 +275,10 @@ function deleteCategory(categoryId, deleteForm=document.querySelector(SELECTORS.
 
             // Remove the category item from the list dynamically
             removeCategoryListItem(categoryId);
+
+            if (isCategoryListEmpty()) {
+                toggleNoCategoriesMessageVisibility(true);
+            }
 
             Utils.closeModal(SELECTORS.deleteCategoryModal);
             Utils.showNotificationMessage('Category deleted successfully', "success");
@@ -399,4 +412,13 @@ function setupDomEvents() {
     if (categoriesSearchInput) {
         categoriesSearchInput.addEventListener('input', filterCategoriesList);
     }
+}
+
+function toggleNoCategoriesMessageVisibility(show) {
+    Utils.toggleElementVisibility(SELECTORS.filterCategoryContainer, !show); // display filter if we have categories
+    Utils.toggleElementVisibility(SELECTORS.noCategoriesMessage, show);
+}
+
+function isCategoryListEmpty() {
+    return !document.querySelector(SELECTORS.categoriesList + ' li');
 }

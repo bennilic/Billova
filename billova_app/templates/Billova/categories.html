@@ -22,7 +22,11 @@
             </div>
 
             <div class="card-body categories-card-body">
-                <div class="form-floating mb-3">
+                <div id="noCategoriesMessage" class="alert alert-info hidden" role="alert">
+                    No categories available. Please create one to get started!
+                </div>
+                
+                <div class="form-floating mb-3 filter-container">
                     <input type="text" class="form-control" id="categoriesSearchInput" placeholder="Please type category name...">
                     <label for="categoriesSearchInput">Search for category</label>
                 </div>
