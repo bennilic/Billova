@@ -2,7 +2,20 @@ import {ElementBuilder, ButtonBuilder} from "./builder/builder.js";
 import * as Utils from './utils/utils.js';
 
 const SELECTORS = {
-    categoriesList: '.categories-list-group'
+    categoriesList: '.categories-list-group',
+    deleteCategoriesModalTitle: '#deleteCategoryModalTitle',
+    createCategoryNameInput: '#createCategoryName',
+    editCategoryNameInput: '#editCategoryName',
+    createCategoryModal: '#createCategoryModal',
+    editCategoryModal: '#editCategoryModal',
+    deleteCategoryModal: '#deleteCategoryModal',
+    createCategoryButton: '#saveCreateCategoryButton',
+    createCategoryForm: '#createCategoryForm',
+    editCategoryForm: '#editCategoryForm'
+};
+
+const DATA = {
+    bootstrapFormValidated: 'was-validated' // used by bootstrap to style invalid forms
 };
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -89,14 +102,14 @@ function addCategoryToList(category, categoriesList=document.querySelector(SELEC
         .class('btn btn-secondary btn-sm me-2')
         .attr({
             'data-bs-toggle': 'modal',
-            'data-bs-target': '#editCategoryModal'
+            'data-bs-target': SELECTORS.editCategoryModal
         });
 
     const deleteButton = new ButtonBuilder('Delete')
         .class('btn btn-danger btn-sm')
         .attr({
             'data-bs-toggle': 'modal',
-            'data-bs-target': '#deleteCategoryModal'
+            'data-bs-target': SELECTORS.deleteCategoryModal
         });
 
     const buttonContainer = new ElementBuilder('div')
@@ -108,6 +121,63 @@ function addCategoryToList(category, categoriesList=document.querySelector(SELEC
     listItem.appendTo(categoriesList);
 }
 
-function setupDomEvents() {
+function saveCategory() {
+    const createCategoryForm = document.querySelector(SELECTORS.createCategoryForm);
+    if (!createCategoryForm) {
+        console.log('Create category form not found.');
+        return;
+    }
 
+    // make sure the required fields are fulfilled
+    if (!createCategoryForm.checkValidity()) {
+        createCategoryForm.classList.add(DATA.bootstrapFormValidated);
+        return;
+    }
+
+    // JSON data sent to the API
+    const categoryData = {
+        name: createCategoryForm.querySelector(SELECTORS.createCategoryNameInput).value
+    };
+
+    // Perform the POST request to create a category
+    fetch('/api/v1/categories/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': Utils.getCsrfTokenFromForm(createCategoryForm)
+        },
+        body: JSON.stringify(categoryData)
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to create category ' + response.statusText);
+            }
+
+            return response.json();
+        })
+        .then(data => {
+            // Close the modal after success
+            Utils.closeModal(SELECTORS.createCategoryModal);
+
+            // Add the new category to the list dynamically
+            const categoriesList = document.querySelector(SELECTORS.categoriesList);
+            addCategoryToList(data, categoriesList);
+
+            // Show a success notification
+            Utils.showNotificationMessage('Category added successfully', "success");
+        })
+        .catch(error => {
+            console.error('Error creating category:', error);
+            Utils.showNotificationMessage(
+                'Unable to create the category. Please ensure all fields are filled out correctly.',
+                "error"
+            );
+        });
+}
+
+function setupDomEvents() {
+    const createCategoryBtn = document.querySelector(SELECTORS.createCategoryButton);
+    if (createCategoryBtn) {
+        createCategoryBtn.addEventListener('click', saveCategory);
+    }
 }
