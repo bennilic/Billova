@@ -3,7 +3,6 @@ import * as Utils from './utils/utils.js';
 
 const SELECTORS = {
     categoriesList: '.categories-list-group',
-    deleteCategoriesModalTitle: '#deleteCategoryModalTitle',
     createCategoryNameInput: '#createCategoryName',
     editCategoryNameInput: '#editCategoryName',
     createCategoryModal: '#createCategoryModal',
@@ -12,8 +11,11 @@ const SELECTORS = {
     createCategoryButton: '#saveCreateCategoryButton',
     createCategoryForm: '#createCategoryForm',
     editCategoryForm: '#editCategoryForm',
+    deleteCategoryForm: '#deleteCategoryForm',
     saveEditCategoryBtn: '#saveEditCategoryButton',
-    editCategoryModalOpenerBtn: '.editCategoryBtn'
+    editCategoryModalOpenerBtn: '.editCategoryBtn',
+    modalTitle: '.modal-title',
+    confirmDeleteCategoryBtn: '.confirm-delete-category-btn'
 };
 
 const DATA = {
@@ -114,7 +116,8 @@ function addCategoryToList(category, categoriesList=document.querySelector(SELEC
         .attr({
             'data-bs-toggle': 'modal',
             'data-bs-target': SELECTORS.deleteCategoryModal,
-            'data-category-id': category.id
+            'data-category-id': category.id,
+            'data-category-name': category.name
         });
 
     const buttonContainer = new ElementBuilder('div')
@@ -129,7 +132,7 @@ function addCategoryToList(category, categoriesList=document.querySelector(SELEC
 function saveCategory() {
     const createCategoryForm = document.querySelector(SELECTORS.createCategoryForm);
     if (!createCategoryForm) {
-        console.log('Create category form not found.');
+        console.warn('Create category form not found.');
         return;
     }
 
@@ -182,7 +185,7 @@ function saveCategory() {
 function onEditCategoryModalShown(e, formSelector) {
     const editForm = e.currentTarget.querySelector(formSelector);
     if (!editForm) {
-        console.log("The given edit form was not found " + editForm);
+        console.warn("The given edit form was not found " + formSelector);
         return;
     }
 
@@ -190,7 +193,7 @@ function onEditCategoryModalShown(e, formSelector) {
     const categoryId = parseInt(triggerButton.dataset.categoryId);
 
     if (isNaN(categoryId)) {
-        console.log('Wrong id format ' + categoryId);
+        console.warn('Wrong id format ' + categoryId);
         return;
     }
 
@@ -202,9 +205,75 @@ function onEditCategoryModalShown(e, formSelector) {
     });
 }
 
+function onDeleteCategoryModalShown(e, formSelector) {
+    const deleteForm = e.currentTarget.querySelector(formSelector);
+    if (!deleteForm) {
+        console.warn("The given delete form was not found " + formSelector);
+        return;
+    }
+
+    const triggerButton = e.relatedTarget;
+    const categoryId = parseInt(triggerButton.dataset.categoryId);
+
+    if (isNaN(categoryId)) {
+        console.warn('Wrong id format ' + categoryId);
+        return;
+    }
+
+    e.currentTarget.querySelector(SELECTORS.modalTitle).innerText
+        = "Delete " + triggerButton.dataset.categoryName;
+
+    const confirmDeleteButton = e.currentTarget.querySelector(SELECTORS.confirmDeleteCategoryBtn);
+
+    // Remove any existing event listeners to prevent duplicate calls
+    const newConfirmDeleteHandler = () => deleteCategory(categoryId);
+    confirmDeleteButton.removeEventListener('click', confirmDeleteButton._confirmDeleteHandler);
+    confirmDeleteButton._confirmDeleteHandler = newConfirmDeleteHandler; // Save reference
+    confirmDeleteButton.addEventListener('click', newConfirmDeleteHandler);
+}
+
+function deleteCategory(categoryId, deleteForm=document.querySelector(SELECTORS.deleteCategoryForm)) {
+    if (!categoryId) {
+        console.warn('Category ID is not provided or invalid.');
+        return;
+    }
+    if (!deleteForm) {
+        console.warn('Delete form was not found.');
+        return;
+    }
+
+    // Perform the DELETE request to remove the category
+    fetch(`/api/v1/categories/${categoryId}/`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': Utils.getCsrfTokenFromForm(deleteForm)
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to delete category: ${response.statusText}`);
+            }
+
+            // Remove the category item from the list dynamically
+            removeCategoryListItem(categoryId);
+
+            Utils.closeModal(SELECTORS.deleteCategoryModal);
+            Utils.showNotificationMessage('Category deleted successfully', "success");
+
+        })
+        .catch(error => {
+            console.error('Error deleting category:', error);
+            Utils.showNotificationMessage(
+                'Unable to delete the category. Please try again later.',
+                "error"
+            );
+        });
+}
+
 function updateCategory(categoryId, editForm) {
     if (!editForm) {
-        console.log('Edit form not found');
+        console.warn('Edit form not found');
         return;
     }
 
@@ -270,6 +339,18 @@ function updateCategoryListItem(categoryId, newData) {
     categoryListItem.querySelector(SELECTORS.editCategoryModalOpenerBtn).dataset.categoryName = newData.name;
 }
 
+function removeCategoryListItem(categoryId) {
+    const categoryListItem = document.querySelector(
+        `${SELECTORS.categoriesList} [data-category-id="${categoryId}"]`
+    );
+
+    if (categoryListItem) {
+        categoryListItem.remove();
+    } else {
+        console.warn(`Category list item with ID ${categoryId} not found.`);
+    }
+}
+
 function setupDomEvents() {
     const createCategoryBtn = document.querySelector(SELECTORS.createCategoryButton);
     if (createCategoryBtn) {
@@ -280,6 +361,13 @@ function setupDomEvents() {
     if (editModal) {
         editModal.addEventListener('shown.bs.modal', (e) => {
             onEditCategoryModalShown(e, SELECTORS.editCategoryForm);
+        });
+    }
+
+    const deleteModal = document.querySelector(SELECTORS.deleteCategoryModal);
+    if (deleteModal) {
+        deleteModal.addEventListener('shown.bs.modal', (e) => {
+            onDeleteCategoryModalShown(e, SELECTORS.deleteCategoryForm);
         });
     }
 }
