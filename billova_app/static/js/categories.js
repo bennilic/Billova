@@ -35,6 +35,7 @@ function populateCategoriesList() {
         .then(categories => {
             if (categories.length === 0) {
                 toggleNoCategoriesMessageVisibility(true);
+                return;
             }
 
             addCategoriesToList(categories);
@@ -84,11 +85,6 @@ function addCategoriesToList(categories) {
 
     if (!categories) {
         throw new Error("List with categories not provided");
-    }
-
-    if (!categories.length) {
-        // TODO maybe some <p> that no categories here
-        return;
     }
 
     categories.forEach(category => {
