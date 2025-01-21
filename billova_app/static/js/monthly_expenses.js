@@ -68,7 +68,9 @@ function loadMonthlyExpenses(page) {
                 Utils.toggleElementVisibility(SELECTORS.noExpensesCard, true);
             }
 
-            Utils.showNotificationMessage('We were unable to load your monthly expenses. Please try again later.', "error");
+            Utils.showNotificationMessage(
+                'We were unable to load your monthly expenses. Please try again later.',
+                "error");
             console.error('Error fetching monthly expenses:', error);
         });
 }
