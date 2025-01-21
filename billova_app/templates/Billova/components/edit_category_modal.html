@@ -1,0 +1,29 @@
+<div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryLabel" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCategoryLabel">Edit Category</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editCategoryForm" class="needs-validation" method="post" novalidate>
+                    {% csrf_token %}
+                    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+                    <!-- Hidden input to store the category ID -->
+                    <input type="hidden" id="editCategoryId" name="categoryId" />
+
+                    <div class="mb-3">
+                        <label for="editCategoryName" class="form-label">Category Name</label>
+                        <input type="text" id="editCategoryName" class="form-control" name="categoryName" required />
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveEditCategoryButton">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>

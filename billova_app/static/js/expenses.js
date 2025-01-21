@@ -95,7 +95,9 @@ function fetchAndUpdateCategoriesList(form, callback=undefined) {
         })
         .catch(error => {
             console.error(error.message);
-            Utils.showNotificationMessage('We were unable to load your categories list. Please try again later.', "error");
+            Utils.showNotificationMessage(
+                'We were unable to load your categories list. Please try again later.',
+                "error");
         });
 }
 
@@ -173,6 +175,7 @@ function setupDomEvents() {
 function saveExpense(e) {
     const createExpenseForm = document.querySelector(SELECTORS.createExpenseForm);
     if (!createExpenseForm) {
+        console.log('Create expense form not found.');
         return;
     }
     // make sure the required fields are fulfilled
@@ -194,7 +197,7 @@ function saveExpense(e) {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfTokenFromForm(createExpenseForm)
+            'X-CSRFToken': Utils.getCsrfTokenFromForm(createExpenseForm)
         },
         body: JSON.stringify(expenseData)
     })
@@ -219,7 +222,9 @@ function saveExpense(e) {
         })
         .catch(error => {
             console.error('Error creating expense:', error);
-            Utils.showNotificationMessage('Unable to create the expense. Please ensure all fields are filled out correctly.', "error");
+            Utils.showNotificationMessage(
+                'Unable to create the expense. Please ensure all fields are filled out correctly.',
+                "error");
         });
 }
 
@@ -255,7 +260,7 @@ function saveOCRExpense(e) {
     fetch('/api/v1/expenses/ocr/', {
         method: 'POST',
         headers: {
-            'X-CSRFToken': getCsrfTokenFromForm(createOCRExpenseForm)
+            'X-CSRFToken': Utils.getCsrfTokenFromForm(createOCRExpenseForm)
         },
         body: formData
     })
@@ -284,7 +289,9 @@ function saveOCRExpense(e) {
 
             // re-enable the submit button
             toggleSaveOCRExpenseButtonState(false);
-            Utils.showNotificationMessage('Unable to create the expense. You can create the expense manually.', "error");
+            Utils.showNotificationMessage(
+                'Unable to create the expense. You can create the expense manually.',
+                "error");
 
             // show the modal for manual creation
             Utils.showBootstrapModal(SELECTORS.createExpenseModal);
@@ -314,7 +321,7 @@ function onDeleteModalShown(e) {
 function onEditExpenseModalShown(e, formSelector) {
     const editForm = document.querySelector(formSelector);
     if (!editForm) {
-        console.log("The given edit form was not found " + editForm);
+        console.log("The given edit form was not found " + formSelector);
         return;
     }
 
@@ -351,9 +358,10 @@ function onEditExpenseModalShown(e, formSelector) {
 
     const editModal = editForm.closest(SELECTORS.editExpenseEntryModal);
     if (editModal) {
-        editModal.querySelector(SELECTORS.createEditFormFields.updateExpenseButton).addEventListener("click", (e) => {
-            updateExpense(editedExpenseId, editForm);
-        });
+        editModal.querySelector(SELECTORS.createEditFormFields.updateExpenseButton)
+            .addEventListener("click", (e) => {
+                updateExpense(editedExpenseId, editForm);
+            });
     }
 }
 
@@ -417,7 +425,7 @@ function deleteExpense(e) {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfTokenFromForm(deleteForm)
+            'X-CSRFToken': Utils.getCsrfTokenFromForm(deleteForm)
         },
     })
         .then(response => {
@@ -451,7 +459,9 @@ function populateExpensesTable() {
         })
         .catch(error => {
             console.error(error.message);
-            Utils.showNotificationMessage('We were unable to load your expense list. Please try again later.', "error");
+            Utils.showNotificationMessage(
+                'We were unable to load your expense list. Please try again later.',
+                "error");
         });
 }
 
@@ -462,7 +472,7 @@ function populateExpensesTable() {
  * with the received data.
  */
 async function fetchAllExpenses(url = '/api/v1/expenses/') {
-    const expenses = [];
+    let expenses = [];
 
     // Iterate over all the available result pages and create a new request for each of them
     while (url) {
@@ -507,7 +517,7 @@ function updateExpense(expenseId, editExpenseForm) {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfTokenFromForm(editExpenseForm)
+            'X-CSRFToken': Utils.getCsrfTokenFromForm(editExpenseForm)
         },
         body: JSON.stringify(expenseData)
     })
@@ -530,7 +540,9 @@ function updateExpense(expenseId, editExpenseForm) {
         })
         .catch(error => {
             console.error('Error creating expense:', error);
-            Utils.showNotificationMessage('Unable to update the expense. Please ensure all fields are filled out correctly.', "error");
+            Utils.showNotificationMessage(
+                'Unable to update the expense. Please ensure all fields are filled out correctly.',
+                "error");
         });
 }
 
@@ -600,19 +612,6 @@ function addExpenseToTable(expense, table = document.querySelector(SELECTORS.exp
     if (DATA.vanillaDataTableInstance) {
         DATA.vanillaDataTableInstance.insert(newData);
     }
-}
-
-function getCsrfTokenFromForm(form) {
-    if (!form) {
-        return '';
-    }
-
-    let token = form.querySelector(SELECTORS.csrfToken);
-    if (token) {
-        return token.value;
-    }
-
-    return '';
 }
 
 function reinitializeVanillaDataTable() {
