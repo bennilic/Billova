@@ -34,7 +34,7 @@ class ExpenseViewSet(viewsets.ModelViewSet):
             image = serializer.validated_data['image']
 
             try:
-                receipt = Receipt(image.file.getvalue())
+                receipt = Receipt(image.file.read())
                 receipt.analyze()
 
                 expense = Expense.objects.create(
@@ -44,8 +44,8 @@ class ExpenseViewSet(viewsets.ModelViewSet):
                     invoice_issuer=receipt.invoice_issuer,
                     invoice_as_text=receipt.invoice_as_text,
                 )
-            except:
-                return Response({'detail': 'OCR failed'}, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as e:
+                return Response({'detail': e}, status=status.HTTP_400_BAD_REQUEST)
 
 
             global_user = User.objects.get(username='global')
