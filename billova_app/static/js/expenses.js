@@ -171,6 +171,26 @@ function setupDomEvents() {
     }
 }
 
+function normalizeCurrencyInput(input) {
+    const currencyMap = {
+        '€': 'EUR',
+        'Euro': 'EUR',
+        'EUR': 'EUR',
+        '$': 'USD',
+        'Dollar': 'USD',
+        'USD': 'USD',
+        '£': 'GBP',
+        'Pound': 'GBP',
+        'GBP': 'GBP',
+        '¥': 'JPY',
+        'Yen': 'JPY',
+        'JPY': 'JPY'
+        // Add more mappings if needed
+    };
+
+    return currencyMap[input] || input; // Default to input if no match
+}
+
 function saveExpense(e) {
     const createExpenseForm = document.querySelector(SELECTORS.createExpenseForm);
     if (!createExpenseForm) {
@@ -202,9 +222,11 @@ function saveExpense(e) {
     })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Failed to create expense ' + response.statusText);
+                return response.json().then(errorData => {
+                    console.error('Validation errors:', errorData);
+                    throw new Error('Failed to create expense: ' + (errorData.detail || response.statusText));
+                });
             }
-
             return response.json();
         })
         .then(data => {

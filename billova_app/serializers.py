@@ -32,21 +32,35 @@ class CategorySerializer(serializers.HyperlinkedModelSerializer):
 class ExpenseSerializer(serializers.HyperlinkedModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
     categories = serializers.PrimaryKeyRelatedField(many=True, queryset=Category.objects.all())
+    CURRENCY_MAP = {
+        '€': 'EUR',
+        'Euro': 'EUR',
+        'EUR': 'EUR',
+        '$': 'USD',
+        'Dollar': 'USD',
+        'USD': 'USD',
+        '£': 'GBP',
+        'Pound': 'GBP',
+        'GBP': 'GBP',
+        '¥': 'JPY',
+        'Yen': 'JPY',
+        'JPY': 'JPY',
+        'Lei': 'RON',
+        'RON': 'RON',
+        # Add more mappings as needed
+    }
 
     class Meta:
         model = Expense
-        fields = [
-            'url', 'id', 'invoice_date_time', 'price', 'currency', 'note',
-            'categories', 'invoice_issuer', 'invoice_as_text', 'owner'
-        ]
+        fields = ['id', 'invoice_date_time', 'price', 'currency', 'note', 'categories', 'invoice_issuer', 'owner']
         read_only_fields = ['owner']
 
-    def validate_categories(self, value):
-        user = self.context['request'].user
-        for category in value:
-            if category.owner != user and category.owner.username != 'global':
-                raise serializers.ValidationError(f"Category {category.name} is not accessible.")
-        return value
+    def validate_currency(self, value):
+        normalized_currency = self.CURRENCY_MAP.get(value.strip(), None)
+        if not normalized_currency:
+            raise serializers.ValidationError(
+                f"Invalid currency: {value}. Please use symbols, full names, or ISO codes.")
+        return normalized_currency
 
     def create(self, validated_data):
         categories_data = validated_data.pop('categories', [])
