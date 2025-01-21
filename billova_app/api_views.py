@@ -1,21 +1,23 @@
 import logging
-from django.contrib import messages
+
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
 from django.db.models import Sum
 from django.db.models.functions import TruncMonth
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
-from django.db import transaction
-from django.core.exceptions import ObjectDoesNotExist
+
 from billova_app.models import Expense, Category, UserSettings
 from billova_app.ocr.receipt import Receipt
-from billova_app.serializers import ExpenseSerializer, CategorySerializer, UserSettingsSerializer, ExpenseOCRSerializer
 from billova_app.permissions import IsOwner
+from billova_app.serializers import ExpenseSerializer, CategorySerializer, UserSettingsSerializer, ExpenseOCRSerializer
 
 # Set up the logger
 logger = logging.getLogger(__name__)
+
 
 class ExpenseViewSet(viewsets.ModelViewSet):
     """
@@ -167,4 +169,5 @@ class MonthlyExpensesViewSet(viewsets.ViewSet):
 
         except Exception as e:
             logger.error(f"Failed to fetch monthly expenses for user {user}: {e}")
-            return Response({'detail': 'Failed to fetch monthly expenses'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'detail': 'Failed to fetch monthly expenses'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)

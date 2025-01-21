@@ -187,6 +187,7 @@ function saveExpense(e) {
         categories: getCategoriesArrayFromSelectList(createExpenseForm),
         invoice_date_time: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseDate).value,
         price: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseValue).value,
+        currency: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseCurrency).value,
         note: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseNote).value,
         invoice_issuer: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseIssuer).value
     };
@@ -513,34 +514,33 @@ function updateExpense(expenseId, editExpenseForm) {
 
     };
 
-    fetch(`/api/v1/expenses/${expenseId}/`, {
-        method: 'PUT',
+    fetch('/api/v1/expenses/', {
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfTokenFromForm(editExpenseForm)
+            'X-CSRFToken': getCsrfTokenFromForm(createExpenseForm)
         },
         body: JSON.stringify(expenseData)
     })
         .then(response => {
             if (!response.ok) {
-                throw new Error(`Failed to update expense: ${response.statusText}`);
+                return response.json().then(errorData => {
+                    console.error('Validation errors:', errorData);
+                    throw new Error('Failed to create expense: ' + errorData.detail || response.statusText);
+                });
             }
-
             return response.json();
         })
         .then(data => {
-
-            Utils.closeModal(SELECTORS.editExpenseEntryModal);
-            Utils.showNotificationMessage('Expense updated successfully', "success");
-
-            setTimeout(function () {
-                location.reload();
-            }, 1000);
-
+            Utils.closeModal(SELECTORS.createExpenseModal);
+            addExpenseToTable(data);
+            addExpenseToSessionStorage(data);
+            Utils.toggleElementVisibility(SELECTORS.noExpensesCard, false);
+            Utils.showNotificationMessage('Expense added successfully', "success");
         })
         .catch(error => {
-            console.error('Error creating expense:', error);
-            Utils.showNotificationMessage('Unable to update the expense. Please ensure all fields are filled out correctly.', "error");
+            console.error('Error creating expense:', error.message);
+            Utils.showNotificationMessage('Unable to create the expense. Please ensure all fields are filled out correctly.', "error");
         });
 }
 
