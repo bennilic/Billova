@@ -321,7 +321,7 @@ function onDeleteModalShown(e) {
 function onEditExpenseModalShown(e, formSelector) {
     const editForm = document.querySelector(formSelector);
     if (!editForm) {
-        console.log("The given edit form was not found " + editForm);
+        console.log("The given edit form was not found " + formSelector);
         return;
     }
 
