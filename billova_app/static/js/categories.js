@@ -1,4 +1,4 @@
-import {ElementBuilder, ButtonBuilder} from "./builder/builder.js";
+import {ButtonBuilder, ElementBuilder} from "./builder/builder.js";
 import * as Utils from './utils/utils.js';
 
 const SELECTORS = {
@@ -11,7 +11,9 @@ const SELECTORS = {
     deleteCategoryModal: '#deleteCategoryModal',
     createCategoryButton: '#saveCreateCategoryButton',
     createCategoryForm: '#createCategoryForm',
-    editCategoryForm: '#editCategoryForm'
+    editCategoryForm: '#editCategoryForm',
+    saveEditCategoryBtn: '#saveEditCategoryButton',
+    editCategoryModalOpenerBtn: '.editCategoryBtn'
 };
 
 const DATA = {
@@ -99,17 +101,20 @@ function addCategoryToList(category, categoriesList=document.querySelector(SELEC
         .text(category.name);
 
     const editButton = new ButtonBuilder('Edit')
-        .class('btn btn-secondary btn-sm me-2')
+        .class('btn btn-secondary btn-sm me-2 editCategoryBtn')
         .attr({
             'data-bs-toggle': 'modal',
-            'data-bs-target': SELECTORS.editCategoryModal
+            'data-bs-target': SELECTORS.editCategoryModal,
+            'data-category-id': category.id,
+            'data-category-name': category.name
         });
 
     const deleteButton = new ButtonBuilder('Delete')
-        .class('btn btn-danger btn-sm')
+        .class('btn btn-danger btn-sm deleteCategoryBtn')
         .attr({
             'data-bs-toggle': 'modal',
-            'data-bs-target': SELECTORS.deleteCategoryModal
+            'data-bs-target': SELECTORS.deleteCategoryModal,
+            'data-category-id': category.id
         });
 
     const buttonContainer = new ElementBuilder('div')
@@ -156,7 +161,6 @@ function saveCategory() {
             return response.json();
         })
         .then(data => {
-            // Close the modal after success
             Utils.closeModal(SELECTORS.createCategoryModal);
 
             // Add the new category to the list dynamically
@@ -175,9 +179,107 @@ function saveCategory() {
         });
 }
 
+function onEditCategoryModalShown(e, formSelector) {
+    const editForm = e.currentTarget.querySelector(formSelector);
+    if (!editForm) {
+        console.log("The given edit form was not found " + editForm);
+        return;
+    }
+
+    const triggerButton = e.relatedTarget;
+    const categoryId = parseInt(triggerButton.dataset.categoryId);
+
+    if (isNaN(categoryId)) {
+        console.log('Wrong id format ' + categoryId);
+        return;
+    }
+
+    // prefill the edit input
+    editForm.querySelector(SELECTORS.editCategoryNameInput).value = triggerButton.dataset.categoryName;
+
+    e.currentTarget.querySelector(SELECTORS.saveEditCategoryBtn).addEventListener("click", (e) => {
+        updateCategory(categoryId, editForm);
+    });
+}
+
+function updateCategory(categoryId, editForm) {
+    if (!editForm) {
+        console.log('Edit form not found');
+        return;
+    }
+
+    // Validate the form before submission
+    if (!editForm.checkValidity()) {
+        editForm.classList.add(DATA.bootstrapFormValidated);
+        return;
+    }
+
+    // Prepare the data to be sent in the API request
+    const categoryData = {
+        name: editForm.querySelector(SELECTORS.editCategoryNameInput).value
+    };
+
+    // Perform the PUT request to update the category
+    fetch(`/api/v1/categories/${categoryId}/`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': Utils.getCsrfTokenFromForm(editForm)
+        },
+        body: JSON.stringify(categoryData)
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to update category: ${response.statusText}`);
+            }
+
+            return response.json();
+        })
+        .then(data => {
+
+            updateCategoryListItem(categoryId, data);
+            Utils.closeModal(SELECTORS.editCategoryModal);
+            Utils.showNotificationMessage('Category updated successfully', "success");
+
+        })
+        .catch(error => {
+            console.error('Error updating category:', error);
+            Utils.showNotificationMessage(
+                'Unable to update the category. Please ensure all fields are filled out correctly.',
+                "error"
+            );
+        });
+}
+
+function updateCategoryListItem(categoryId, newData) {
+    // Find the list item with the matching category ID
+    const categoryListItem = document.querySelector(
+        `${SELECTORS.categoriesList} [data-category-id="${categoryId}"]`
+    );
+
+    if (!categoryListItem) {
+        console.warn(`Category list item with ID ${categoryId} not found.`);
+        return;
+    }
+
+    // Update the text content of the category
+    categoryListItem.childNodes[0].textContent = newData.name;
+
+    // Update the data attributes
+    categoryListItem.dataset.categoryName = newData.name;
+    categoryListItem.querySelector(SELECTORS.editCategoryModalOpenerBtn).dataset.categoryName = newData.name;
+}
+
 function setupDomEvents() {
     const createCategoryBtn = document.querySelector(SELECTORS.createCategoryButton);
     if (createCategoryBtn) {
         createCategoryBtn.addEventListener('click', saveCategory);
+    }
+
+    const editModal = document.querySelector(SELECTORS.editCategoryModal);
+    if (editModal) {
+        editModal.addEventListener('shown.bs.modal', (e) => {
+            onEditCategoryModalShown(e, SELECTORS.editCategoryForm);
+        });
     }
 }
