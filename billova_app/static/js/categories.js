@@ -103,30 +103,34 @@ function addCategoryToList(category, categoriesList=document.querySelector(SELEC
         })
         .text(category.name);
 
-    const editButton = new ButtonBuilder('Edit')
-        .class('btn btn-secondary btn-sm me-2 editCategoryBtn')
-        .attr({
-            'data-bs-toggle': 'modal',
-            'data-bs-target': SELECTORS.editCategoryModal,
-            'data-category-id': category.id,
-            'data-category-name': category.name
-        });
+    // the user is not able to edit/delete system categories
+    if (category.owner.toLowerCase() !== 'global') {
+        const editButton = new ButtonBuilder('Edit')
+            .class('btn btn-secondary btn-sm me-2 editCategoryBtn')
+            .attr({
+                'data-bs-toggle': 'modal',
+                'data-bs-target': SELECTORS.editCategoryModal,
+                'data-category-id': category.id,
+                'data-category-name': category.name
+            });
 
-    const deleteButton = new ButtonBuilder('Delete')
-        .class('btn btn-danger btn-sm deleteCategoryBtn')
-        .attr({
-            'data-bs-toggle': 'modal',
-            'data-bs-target': SELECTORS.deleteCategoryModal,
-            'data-category-id': category.id,
-            'data-category-name': category.name
-        });
+        const deleteButton = new ButtonBuilder('Delete')
+            .class('btn btn-danger btn-sm deleteCategoryBtn')
+            .attr({
+                'data-bs-toggle': 'modal',
+                'data-bs-target': SELECTORS.deleteCategoryModal,
+                'data-category-id': category.id,
+                'data-category-name': category.name
+            });
 
-    const buttonContainer = new ElementBuilder('div')
-        .class('d-flex')
-        .append(editButton)
-        .append(deleteButton);
+        const buttonContainer = new ElementBuilder('div')
+            .class('d-flex')
+            .append(editButton)
+            .append(deleteButton);
 
-    listItem.append(buttonContainer);
+        listItem.append(buttonContainer);
+    }
+
     listItem.appendTo(categoriesList);
 }
 
