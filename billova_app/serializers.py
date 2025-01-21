@@ -35,6 +35,7 @@ class ExpenseSerializer(serializers.HyperlinkedModelSerializer):
             'url', 'id', 'invoice_date_time', 'price', 'currency', 'note',
             'categories', 'invoice_issuer', 'invoice_as_text', 'owner'
         ]
+        read_only_fields = ['owner']  # Ensure 'owner' is not required in the payload
 
     def create(self, validated_data):
         categories_data = validated_data.pop('categories', [])
@@ -44,7 +45,7 @@ class ExpenseSerializer(serializers.HyperlinkedModelSerializer):
         # Retrieve the currency from the UserSettings model
         if user:
             user_settings = UserSettings.objects.filter(owner=user).first()
-            validated_data['currency'] = user_settings.currency if user_settings else 'USD'
+            validated_data['currency'] = user_settings.currency if user_settings else 'EUR'
 
         expense = Expense.objects.create(**validated_data)
 

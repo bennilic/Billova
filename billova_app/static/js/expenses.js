@@ -26,6 +26,7 @@ const SELECTORS = {
     createEditFormFields: {
         expenseCategories: '#expenseCategories',
         expenseValue: '#expenseValue',
+        expenseCurrency: '#expenseCurrency',
         expenseDate: '#expenseDate',
         expenseIssuer: '#expenseIssuer',
         expenseNote: '#expenseNote',
@@ -507,7 +508,9 @@ function updateExpense(expenseId, editExpenseForm) {
         invoice_date_time: editExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseDate).value,
         price: editExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseValue).value,
         note: editExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseNote).value,
-        invoice_issuer: editExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseIssuer).value
+        invoice_issuer: editExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseIssuer).value,
+        currency: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseCurrency).value  // Add this line
+
     };
 
     fetch(`/api/v1/expenses/${expenseId}/`, {
