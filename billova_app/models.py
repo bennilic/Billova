@@ -12,6 +12,7 @@ class Expense(models.Model):
     invoice_issuer = models.TextField(blank=True)
     invoice_as_text = models.TextField(blank=True)
     categories = models.ManyToManyField('Category', related_name='expenses')
+    currency = models.CharField(max_length=3, default='EUR')
     owner = models.ForeignKey('auth.User', related_name='expenses', on_delete=models.CASCADE)
 
     class Meta:
@@ -24,7 +25,6 @@ class Category(models.Model):
 
     class Meta:
         ordering = ['name']
-        # TODO make primary key (name, owner)
 
 class UserSettings(models.Model):
     NUMERIC_FORMAT_CHOICES = [
@@ -54,7 +54,6 @@ class UserSettings(models.Model):
         max_length=3,
         choices=CURRENCY_CHOICES,
         default="EUR",
-
     )
     language = models.CharField(max_length=2, choices=LANGUAGE_CHOICES, default='English')
     timezone = models.CharField(max_length=50, default='Europe/Vienna')

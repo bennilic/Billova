@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models import Sum
 from django.db.models.functions import TruncMonth
@@ -43,6 +44,7 @@ class ExpenseViewSet(viewsets.ModelViewSet):
                     price=receipt.price,
                     invoice_issuer=receipt.invoice_issuer,
                     invoice_as_text=receipt.invoice_as_text,
+                    currency=UserSettings.objects.get(owner=self.request.user).currency
                 )
             except Exception as e:
                 return Response({'detail': e}, status=status.HTTP_400_BAD_REQUEST)

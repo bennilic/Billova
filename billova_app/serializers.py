@@ -24,19 +24,23 @@ class CategorySerializer(serializers.HyperlinkedModelSerializer):
                 return Category.objects.create(owner=user, **validated_data)
         return Response({'detail': 'Category already exists.'}, status=status.HTTP_400_BAD_REQUEST)
 
+
 class ExpenseSerializer(serializers.HyperlinkedModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
     categories = CategorySerializer(many=True, read_only=False)
 
     class Meta:
         model = Expense
-        fields = ['url', 'id', 'invoice_date_time', 'price', 'note', 'categories', 'invoice_issuer', 'invoice_as_text',
+        fields = ['url', 'id', 'invoice_date_time', 'price', 'currency', 'note', 'categories', 'invoice_issuer',
+                  'invoice_as_text',
                   'owner']
 
     def create(self, validated_data):
         categories_data = validated_data.pop('categories')
         expense = Expense.objects.create(**validated_data)
         global_user = User.objects.get(username='global')
+        expense.currency = UserSettings.objects.get(owner=expense.owner).currency
+        expense.save()
         for category_data in categories_data:
             try:
                 category = Category.objects.get(owner=expense.owner, **category_data)
@@ -52,6 +56,7 @@ class ExpenseSerializer(serializers.HyperlinkedModelSerializer):
         instance.note = validated_data.get('note', instance.note)
         instance.invoice_issuer = validated_data.get('invoice_issuer', instance.invoice_issuer)
         instance.invoice_as_text = validated_data.get('invoice_as_text', instance.invoice_as_text)
+        instance.currency = validated_data.get('currency', instance.currency)
         instance.save()
         instance.categories.clear()
         global_user = User.objects.get(username='global')
