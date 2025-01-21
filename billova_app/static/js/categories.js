@@ -200,9 +200,13 @@ function onEditCategoryModalShown(e, formSelector) {
     // prefill the edit input
     editForm.querySelector(SELECTORS.editCategoryNameInput).value = triggerButton.dataset.categoryName;
 
-    e.currentTarget.querySelector(SELECTORS.saveEditCategoryBtn).addEventListener("click", (e) => {
-        updateCategory(categoryId, editForm);
-    });
+    const editCategoryButton = e.currentTarget.querySelector(SELECTORS.saveEditCategoryBtn);
+
+    // Remove any existing event listeners to prevent duplicate calls
+    const newConfirmEditHandler = () => updateCategory(categoryId, editForm);
+    editCategoryButton.removeEventListener('click', editCategoryButton._confirmEditHandler);
+    editCategoryButton._confirmEditHandler = newConfirmEditHandler; // Save reference
+    editCategoryButton.addEventListener('click', newConfirmEditHandler);
 }
 
 function onDeleteCategoryModalShown(e, formSelector) {
