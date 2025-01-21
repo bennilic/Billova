@@ -15,7 +15,8 @@ const SELECTORS = {
     saveEditCategoryBtn: '#saveEditCategoryButton',
     editCategoryModalOpenerBtn: '.editCategoryBtn',
     modalTitle: '.modal-title',
-    confirmDeleteCategoryBtn: '.confirm-delete-category-btn'
+    confirmDeleteCategoryBtn: '.confirm-delete-category-btn',
+    categoriesSearchInput: '#categoriesSearchInput'
 };
 
 const DATA = {
@@ -355,6 +356,21 @@ function removeCategoryListItem(categoryId) {
     }
 }
 
+function filterCategoriesList(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const categoriesList = document.querySelectorAll(SELECTORS.categoriesList + ' li');
+
+    categoriesList.forEach(item => {
+        const categoryName = item.dataset.categoryName.toLowerCase();
+
+        if (categoryName.includes(searchTerm)) {
+            item.classList.remove('hidden');
+        } else {
+            item.classList.add('hidden');
+        }
+    });
+}
+
 function setupDomEvents() {
     const createCategoryBtn = document.querySelector(SELECTORS.createCategoryButton);
     if (createCategoryBtn) {
@@ -373,5 +389,10 @@ function setupDomEvents() {
         deleteModal.addEventListener('shown.bs.modal', (e) => {
             onDeleteCategoryModalShown(e, SELECTORS.deleteCategoryForm);
         });
+    }
+
+    const categoriesSearchInput = document.querySelector(SELECTORS.categoriesSearchInput);
+    if (categoriesSearchInput) {
+        categoriesSearchInput.addEventListener('input', filterCategoriesList);
     }
 }
