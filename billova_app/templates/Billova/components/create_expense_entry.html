@@ -27,6 +27,18 @@
                     </div>
 
                     <div class="mb-3">
+                        <label for="expenseCurrency" class="form-label">Currency</label>
+                        <select id="expenseCurrency" class="form-select" name="expenseCurrency" required>
+                            <option value="USD">USD - US Dollar</option>
+                            <option value="EUR">EUR - Euro</option>
+                            <option value="GBP">GBP - British Pound</option>
+                            <option value="JPY">JPY - Japanese Yen</option>
+                            <option value="RON">RON - Romanian Leu</option>
+                            <option value="TRY">TRY - Turkish Lira</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
                         <label for="expenseDate" class="form-label">Date</label>
                         <input type="date" id="expenseDate" class="form-control" name="expenseDate" min="2000-01-01"
                                required/>

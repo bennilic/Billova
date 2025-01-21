@@ -1,16 +1,16 @@
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models import Sum
 from django.db.models.functions import TruncMonth
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
 
 from billova_app.models import Expense, Category, UserSettings
 from billova_app.ocr.receipt import Receipt
-from billova_app.serializers import ExpenseSerializer, CategorySerializer, UserSettingsSerializer, ExpenseOCRSerializer
 from billova_app.permissions import IsOwner
-from rest_framework.response import Response
+from billova_app.serializers import ExpenseSerializer, CategorySerializer, UserSettingsSerializer, ExpenseOCRSerializer
+
 
 class ExpenseViewSet(viewsets.ModelViewSet):
     """
@@ -48,7 +48,6 @@ class ExpenseViewSet(viewsets.ModelViewSet):
                 )
             except Exception as e:
                 return Response({'detail': e}, status=status.HTTP_400_BAD_REQUEST)
-
 
             global_user = User.objects.get(username='global')
             category = Category.objects.get_or_create(name="Generated", owner=global_user)[0]
@@ -133,4 +132,3 @@ class MonthlyExpensesViewSet(viewsets.ViewSet):
         ]
 
         return paginator.get_paginated_response(response_data)
-

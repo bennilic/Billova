@@ -15,9 +15,18 @@ class Expense(models.Model):
     currency = models.CharField(max_length=3, default='EUR')
     owner = models.ForeignKey('auth.User', related_name='expenses', on_delete=models.CASCADE)
 
+    def save(self, *args, **kwargs):
+        if not self.currency and self.owner:
+            user_settings = UserSettings.objects.filter(owner=self.owner).first()
+            if user_settings:
+                self.currency = user_settings.currency
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.price} {self.currency} - {self.note}"
+
     class Meta:
         ordering = ['invoice_date_time']
-
 
 class Category(models.Model):
     name = models.CharField(max_length=255)
@@ -25,6 +34,7 @@ class Category(models.Model):
 
     class Meta:
         ordering = ['name']
+
 
 class UserSettings(models.Model):
     NUMERIC_FORMAT_CHOICES = [

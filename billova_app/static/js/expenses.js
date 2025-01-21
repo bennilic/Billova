@@ -1,5 +1,5 @@
 import * as Utils from './utils/utils.js';
-import {ElementBuilder, ButtonBuilder} from "./builder/builder.js";
+import {ButtonBuilder, ElementBuilder} from "./builder/builder.js";
 
 
 const SELECTORS = {
@@ -26,6 +26,7 @@ const SELECTORS = {
     createEditFormFields: {
         expenseCategories: '#expenseCategories',
         expenseValue: '#expenseValue',
+        expenseCurrency: '#expenseCurrency',
         expenseDate: '#expenseDate',
         expenseIssuer: '#expenseIssuer',
         expenseNote: '#expenseNote',
@@ -59,7 +60,7 @@ function onCreateExpenseModalShown(formSelector) {
  * @param form the form in which the select list can be found
  * @param callback a callback to be called after successful REST request, default is undefined
  */
-function fetchAndUpdateCategoriesList(form, callback=undefined) {
+function fetchAndUpdateCategoriesList(form, callback = undefined) {
     if (!form) {
         console.log("The categories select list cannot be updated for the form " + form);
         return;
@@ -104,7 +105,7 @@ function populateCategoriesSelectList(categories, form) {
         throw new Error('No categories provided');
     }
 
-    categories.forEach(function(item, index) {
+    categories.forEach(function (item, index) {
         addCategoriesToSelectList(item, form);
     });
 }
@@ -173,23 +174,39 @@ function setupDomEvents() {
 function saveExpense(e) {
     const createExpenseForm = document.querySelector(SELECTORS.createExpenseForm);
     if (!createExpenseForm) {
-        return;
-    }
-    // make sure the required fields are fulfilled
-    if (!createExpenseForm.checkValidity()) {
-        createExpenseForm.classList.add(DATA.bootstrapFormValidated);
+        console.error("Create expense form not found.");
+        Utils.showNotificationMessage("Error: Unable to find the expense form.", "error");
         return;
     }
 
-    // JSON sent to the API
+    // Validate form inputs
+    if (!createExpenseForm.checkValidity()) {
+        createExpenseForm.classList.add(DATA.bootstrapFormValidated);
+        Utils.showNotificationMessage("Please fill out all required fields correctly.", "error");
+        console.warn("Form validation failed.");
+        return;
+    }
+
+    // Prepare expense data
     const expenseData = {
         categories: getCategoriesArrayFromSelectList(createExpenseForm),
         invoice_date_time: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseDate).value,
         price: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseValue).value,
+        currency: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseCurrency).value,
         note: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseNote).value,
         invoice_issuer: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseIssuer).value
     };
 
+    console.log("Expense data prepared:", expenseData);
+
+    // Validate expense data fields
+    Object.keys(expenseData).forEach(field => {
+        if (!expenseData[field]) {
+            console.warn(`Missing data for field: ${field}`);
+        }
+    });
+
+    // Send data to the API
     fetch('/api/v1/expenses/', {
         method: 'POST',
         headers: {
@@ -200,26 +217,36 @@ function saveExpense(e) {
     })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Failed to create expense ' + response.statusText);
+                console.error("Failed to create expense. Response status:", response.status);
+                throw new Error(`Failed to create expense: ${response.statusText}`);
             }
-
             return response.json();
         })
         .then(data => {
+            console.log("Expense created successfully:", data);
 
             Utils.closeModal(SELECTORS.createExpenseModal);
-
             addExpenseToTable(data);
             addExpenseToSessionStorage(data);
-
             Utils.toggleElementVisibility(SELECTORS.noExpensesCard, false);
 
-            Utils.showNotificationMessage('Expense added successfully', "success");
-
+            Utils.showNotificationMessage(
+                `Expense added successfully: ${data.price} ${data.currency}`,
+                "success"
+            );
         })
-        .catch(error => {
-            console.error('Error creating expense:', error);
-            Utils.showNotificationMessage('Unable to create the expense. Please ensure all fields are filled out correctly.', "error");
+        .catch(async error => {
+            let errorMessage = "Unable to create the expense.";
+            if (error.response) {
+                try {
+                    const errorDetails = await error.response.json();
+                    errorMessage += ` Details: ${errorDetails.message || error.response.statusText}`;
+                } catch (e) {
+                    console.error("Failed to parse error response:", e);
+                }
+            }
+            console.error("Error creating expense:", error);
+            Utils.showNotificationMessage(errorMessage, "error");
         });
 }
 
@@ -291,7 +318,7 @@ function saveOCRExpense(e) {
         });
 }
 
-function toggleSaveOCRExpenseButtonState(disable=false) {
+function toggleSaveOCRExpenseButtonState(disable = false) {
     const button = document.querySelector(SELECTORS.saveOCRExpenseButton);
     if (button) {
         button.disabled = disable;
@@ -499,6 +526,7 @@ function updateExpense(expenseId, editExpenseForm) {
         categories: getCategoriesArrayFromSelectList(editExpenseForm),
         invoice_date_time: editExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseDate).value,
         price: editExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseValue).value,
+        currency: editExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseCurrency).value,
         note: editExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseNote).value,
         invoice_issuer: editExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseIssuer).value
     };
@@ -590,6 +618,7 @@ function addExpenseToTable(expense, table = document.querySelector(SELECTORS.exp
     const newData = [{
         "Date": Utils.stringToFormattedDate(expense.invoice_date_time),
         "Spent": expense.price,
+        "Currency": expense.currency,
         "Note": expense.note,
         "Issuer": expense.invoice_issuer,
         "Category": categories,
@@ -597,6 +626,7 @@ function addExpenseToTable(expense, table = document.querySelector(SELECTORS.exp
     }];
 
     // Use the DataTable's insert method to add the data
+    console.log('Data being added to DataTable:', newData); // <-- Add this
     if (DATA.vanillaDataTableInstance) {
         DATA.vanillaDataTableInstance.insert(newData);
     }
@@ -616,10 +646,19 @@ function getCsrfTokenFromForm(form) {
 }
 
 function reinitializeVanillaDataTable() {
+    const tableElement = document.querySelector(SELECTORS.expenseTable);
+    if (!tableElement) {
+        console.error('Expense table element not found.');
+        return;
+    }
+
     if (DATA.vanillaDataTableInstance) {
         DATA.vanillaDataTableInstance.refresh();
     } else {
         DATA.vanillaDataTableInstance = Utils.initializeVanillaDataTable(SELECTORS.expenseTable);
+        if (!DATA.vanillaDataTableInstance) {
+            console.error('Failed to initialize Vanilla DataTable.');
+        }
     }
 }
 
@@ -676,7 +715,37 @@ function getCategoriesArrayFromSelectList(form) {
     const selectedCategoriesOptions
         = form.querySelector(SELECTORS.createEditFormFields.expenseCategories).selectedOptions;
 
-    return Array.from(selectedCategoriesOptions).map(({ value }) => ({
+    return Array.from(selectedCategoriesOptions).map(({value}) => ({
         name: value
     }));
 }
+
+function populateCurrencyDropdown(form) {
+    const currencyDropdown = form.querySelector(SELECTORS.createEditFormFields.expenseCurrency);
+    if (!currencyDropdown) {
+        console.error("Currency dropdown not found.");
+        return;
+    }
+
+    const validCurrencies = [
+        {code: "USD", name: "US Dollar"},
+        {code: "EUR", name: "Euro"},
+        {code: "GBP", name: "British Pound"},
+        {code: "JPY", name: "Japanese Yen"},
+        {code: "TRY", name: "Turkish Lira"},
+        {code: "RON", name: "Romanian Leu"},
+
+
+        // Add more currencies here
+    ];
+
+    validCurrencies.forEach(currency => {
+        const option = document.createElement("option");
+        option.value = currency.code;
+        option.textContent = `${currency.code} - ${currency.name}`;
+        currencyDropdown.appendChild(option);
+    });
+}
+
+// Call this function where applicable:
+populateCurrencyDropdown(createExpenseForm);
