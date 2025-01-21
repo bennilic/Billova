@@ -1,4 +1,3 @@
-// keeps track of which "page" of the paginated API results the user is currently requesting
 import {ElementBuilder, ButtonBuilder} from "./builder/builder.js";
 import * as Utils from './utils/utils.js';
 

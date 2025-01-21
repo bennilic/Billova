@@ -462,7 +462,7 @@ function populateExpensesTable() {
  * with the received data.
  */
 async function fetchAllExpenses(url = '/api/v1/expenses/') {
-    const expenses = [];
+    let expenses = [];
 
     // Iterate over all the available result pages and create a new request for each of them
     while (url) {
