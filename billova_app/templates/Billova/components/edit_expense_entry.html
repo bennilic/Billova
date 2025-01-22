@@ -25,11 +25,18 @@
                         <input type="number" id="expenseValue" class="form-control" name="expenseValue" step="any"
                                required/>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="expenseCurrency" class="form-label">Currency</label>
-                        <input type="number" id="expenseCurrency" class="form-control" name="expenseCurrency" step="any"
-                               required/>
+                        <select id="expenseCurrency" class="form-select" name="expenseCurrency" required>
+                            {% for currency in currencies %}
+                                <option value="{{ currency.code }}"
+                                        {% if user_settings and user_settings.currency == currency.code %}selected{% endif %}>
+                                    {{ currency.code }} - {{ currency.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+
                     </div>
 
                     <div class="mb-3">

@@ -67,7 +67,6 @@ class ExpensesOverview(TemplateView):
 
         return context
 
-
 class MonthlyExpenses(TemplateView):
     template_name = "Billova/monthly_expenses.html"
 
