@@ -68,7 +68,7 @@ class CustomLoginView(LoginView):
     template_name = 'login.html'
     authentication_form = CustomLoginForm
     redirect_authenticated_user = True
-    next_page = '/'  # Redirect after successful login
+    next_page = '/expensesOverview'  # Redirect after successful login
 
     def form_invalid(self, form):
         """Log errors when login fails."""

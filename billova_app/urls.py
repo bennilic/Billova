@@ -2,21 +2,16 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from billova_app import api_views
-from .views import homepage, settings, signup
+from .views import homepage, signup
 from .views.account.account_deletion import AccountDeletionView
 from .views.account.account_overview import AccountOverviewView
 from .views.account.account_settings import AccountSettingsView, UpdateUserSettingsView, UpdatePersonalInfoView, \
     UpdateProfilePictureView, UpdateEmailView
 from .views.categories import CategoriesView
-from .views.expenses import ExpensesOverview
+from .views.expenses import ExpensesOverview, MonthlyExpenses
 from .views.login import CustomLoginView
 from .views.logout import CustomLogoutView
 from .views.password_reset import PwResetView
-from .views.expenses import ExpensesOverview, MonthlyExpenses
-
-from billova_app import api_views
-from .views import homepage, settings, login, signup
-
 
 router = DefaultRouter()
 router.register(r'expenses', api_views.ExpenseViewSet, basename='expense')
@@ -29,6 +24,7 @@ urlpatterns = [
     # API
     path('api/v1/', include(router.urls), ),
     path('api/auth/', include('rest_framework.urls')),
+    path("api/v1/logs/", api_views.FrontendLogView.as_view(), name="log_frontend"),
 
     # Home
     path('', homepage.HomePageView.as_view(), name='index'),
@@ -56,8 +52,8 @@ urlpatterns = [
 
     # other urls
     path('categories/', CategoriesView.as_view(), name='categories'),
-    path('settings', settings.SettingsView.as_view(), name='settings'),
 
+    # Expenses
     path('expensesOverview', ExpensesOverview.as_view(), name='expensesOverview'),
     path('monthlyExpenses', MonthlyExpenses.as_view(), name='monthlyExpenses')
 
