@@ -228,8 +228,7 @@ function saveExpense(e) {
     // Validate form inputs
     if (!createExpenseForm.checkValidity()) {
         createExpenseForm.classList.add(DATA.bootstrapFormValidated);
-        Utils.showNotificationMessage("Please fill out all required fields correctly.", "error");
-        logger.warn("Form validation failed.");
+        logger.debug("Form validation failed.");
         return;
     }
 
@@ -294,7 +293,7 @@ function saveExpense(e) {
                         logger.error("Failed to parse error response:", e);
                     }
                 }
-                Utils.showNotificationMessage(errorMessage, "error");
+                Utils.showNotificationMessage("Unable to create the expense.", "error");
             });
     } catch (error) {
         logger.error("Unexpected error during saveExpense execution:", error);
@@ -306,12 +305,12 @@ function saveExpense(e) {
 }
 
 function saveOCRExpense(e) {
-    logge.log('Starting OCR Expense creation.');
+    logger.debug('Starting OCR Expense creation.');
     const createOCRExpenseForm = document.querySelector(SELECTORS.createOCRExpenseForm);
 
     if (!createOCRExpenseForm) {
         logger.error('OCR expense form not found.');
-        Utils.showNotificationMessage('Error: Unable to find the OCR expense form.', "error");
+        Utils.showNotificationMessage('Error, please try again.', "error");
         return;
     }
 
@@ -326,7 +325,7 @@ function saveOCRExpense(e) {
     const ocrFileUploadInput = createOCRExpenseForm.querySelector(SELECTORS.createOCRFormFields.ocrFileUpload);
     if (!ocrFileUploadInput) {
         logger.error('File upload input not found in OCR form.');
-        Utils.showNotificationMessage('Error: File upload input is missing.', "error");
+        Utils.showNotificationMessage('File upload input is missing.', "error");
         return;
     }
 
@@ -367,7 +366,7 @@ function saveOCRExpense(e) {
 
                 addExpenseToTable(data);
                 Utils.toggleElementVisibility(SELECTORS.noExpensesCard, false);
-                Utils.showNotificationMessage('OCR Expense added successfully.', "success");
+                Utils.showNotificationMessage('Expense added successfully.', "success");
 
                 // Reset the input field
                 ocrFileUploadInput.value = '';
@@ -390,7 +389,7 @@ function saveOCRExpense(e) {
     } catch (error) {
         logger.error('Unexpected error during OCR expense creation:', error);
         Utils.showNotificationMessage(
-            'An unexpected error occurred while processing the OCR expense. Please try again later.',
+            'An unexpected error occurred while processing the expense. Please try again later.',
             "error"
         );
 
