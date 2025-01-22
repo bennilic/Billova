@@ -2,7 +2,6 @@ import * as Utils from './utils/utils.js';
 import {getCsrfTokenFromForm} from './utils/utils.js';
 import {ButtonBuilder, ElementBuilder} from "./builder/builder.js";
 
-const log_level = LogLevel.ERROR
 
 const LogLevel = {
     DEBUG: 4,
@@ -11,6 +10,8 @@ const LogLevel = {
     ERROR: 1,
     OFF: 0,
 };
+
+const log_level = LogLevel.ERROR
 
 class Logger {
     constructor(level = log_level, logEndpoint = "/api/v1/logs/") {
