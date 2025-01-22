@@ -1,6 +1,7 @@
 import logging
 
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LogoutView
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
@@ -9,7 +10,7 @@ from django.urls import reverse_lazy
 logger = logging.getLogger(__name__)
 
 
-class CustomLogoutView(LogoutView):
+class CustomLogoutView(LoginRequiredMixin, LogoutView):
     """Custom logout view with logging, exception handling, and redirection."""
     next_page = reverse_lazy('home')  # Redirect to home page after logout
 
