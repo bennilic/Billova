@@ -662,28 +662,22 @@ function addExpensesListToTable(expenses) {
         if (!expenses || !Array.isArray(expenses)) {
             logger.warn("No valid expenses list provided.");
             Utils.toggleElementVisibility(SELECTORS.noExpensesCard, true);
-            Utils.showNotificationMessage("Error: No expenses data available.", "error");
             throw new Error("List of expenses is not provided or invalid.");
         }
 
         if (!expenses.length) {
             logger.warn("No expenses to display.");
             Utils.toggleElementVisibility(SELECTORS.noExpensesCard, true);
-            Utils.showNotificationMessage("No expenses to display.", "info");
             return;
         }
 
-        logger.info(`Adding ${expenses.length} expenses to the table.`);
+        logger.debug(`Adding ${expenses.length} expenses to the table.`);
         expenses.forEach(expense => {
             try {
-                logger.info(`Adding expense with ID: ${expense.id}`);
+                logger.debug(`Adding expense with ID: ${expense.id}`);
                 addExpenseToTable(expense);
             } catch (expenseError) {
                 logger.error(`Error adding expense with ID: ${expense.id}`, expenseError);
-                Utils.showNotificationMessage(
-                    `Failed to add expense with ID: ${expense.id}. Please try again.`,
-                    "error"
-                );
             }
         });
 
