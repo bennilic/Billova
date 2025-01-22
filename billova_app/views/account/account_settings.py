@@ -27,10 +27,10 @@ class AccountSettingsView(LoginRequiredMixin, TemplateView):
             user_settings, created = UserSettings.objects.get_or_create(
                 owner=self.request.user,
                 defaults={
-                    "timezone": "UTC",
+                    "timezone": "Europe/Vienna",
                     "language": "en",
-                    "numeric_format": "US",
-                    "currency": "USD",
+                    "numeric_format": "Austrian",
+                    "currency": "EUR",
                 }
             )
 

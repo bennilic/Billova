@@ -47,7 +47,12 @@ function loadMonthlyExpenses(page) {
             renderMonthlyExpenses(data.results);
 
             if (isFirstApiRequest()) {
-                collapseFirstAccordionItem();
+                if (data.count > 0) {
+                    collapseFirstAccordionItem();
+                } else {
+                    Utils.toggleElementVisibility(SELECTORS.noMoreItemsLeft, false);
+                    return;
+                }
                 totalMonthsCount = data.count;
             }
 
@@ -56,7 +61,7 @@ function loadMonthlyExpenses(page) {
             countOfMonthsDisplayed += data.results.length;
 
             // display the show more button if there are more expenses which can be loaded
-            let showButton = totalMonthsCount - countOfMonthsDisplayed >= PAGE_SIZE_NUMBER;
+            let showButton = totalMonthsCount - countOfMonthsDisplayed > 0;
             Utils.toggleElementVisibility(SELECTORS.showMoreButton, showButton);
             Utils.toggleElementVisibility(SELECTORS.noMoreItemsLeft, !showButton);
 
