@@ -97,7 +97,9 @@ function fetchAndUpdateCategoriesList(form, callback = undefined) {
         })
         .catch(error => {
             console.error(error.message);
-            Utils.showNotificationMessage('We were unable to load your categories list. Please try again later.', "error");
+            Utils.showNotificationMessage(
+                'We were unable to load your categories list. Please try again later.',
+                "error");
         });
 }
 
@@ -259,6 +261,7 @@ function saveExpense(e) {
             "error"
         );
     }
+
 }
 
 function saveOCRExpense(e) {
@@ -296,6 +299,7 @@ function saveOCRExpense(e) {
     try {
         // Disable the button to prevent multiple submissions
         toggleSaveOCRExpenseButtonState(true);
+
 
         // Prepare the form data
         const formData = new FormData();
@@ -350,6 +354,7 @@ function saveOCRExpense(e) {
             "error"
         );
 
+
         // Re-enable the button to allow retry
         toggleSaveOCRExpenseButtonState(false);
     }
@@ -378,7 +383,7 @@ function onDeleteModalShown(e) {
 function onEditExpenseModalShown(e, formSelector) {
     const editForm = document.querySelector(formSelector);
     if (!editForm) {
-        console.log("The given edit form was not found " + editForm);
+        console.log("The given edit form was not found " + formSelector);
         return;
     }
 
@@ -415,9 +420,10 @@ function onEditExpenseModalShown(e, formSelector) {
 
     const editModal = editForm.closest(SELECTORS.editExpenseEntryModal);
     if (editModal) {
-        editModal.querySelector(SELECTORS.createEditFormFields.updateExpenseButton).addEventListener("click", (e) => {
-            updateExpense(editedExpenseId, editForm);
-        });
+        editModal.querySelector(SELECTORS.createEditFormFields.updateExpenseButton)
+            .addEventListener("click", (e) => {
+                updateExpense(editedExpenseId, editForm);
+            });
     }
 }
 
@@ -481,7 +487,7 @@ function deleteExpense(e) {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfTokenFromForm(deleteForm)
+            'X-CSRFToken': Utils.getCsrfTokenFromForm(deleteForm)
         },
     })
         .then(response => {
@@ -515,7 +521,9 @@ function populateExpensesTable() {
         })
         .catch(error => {
             console.error(error.message);
-            Utils.showNotificationMessage('We were unable to load your expense list. Please try again later.', "error");
+            Utils.showNotificationMessage(
+                'We were unable to load your expense list. Please try again later.',
+                "error");
         });
 }
 
@@ -526,7 +534,7 @@ function populateExpensesTable() {
  * with the received data.
  */
 async function fetchAllExpenses(url = '/api/v1/expenses/') {
-    const expenses = [];
+    let expenses = [];
 
     // Iterate over all the available result pages and create a new request for each of them
     while (url) {
@@ -572,7 +580,7 @@ function updateExpense(expenseId, editExpenseForm) {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfTokenFromForm(editExpenseForm)
+            'X-CSRFToken': Utils.getCsrfTokenFromForm(editExpenseForm)
         },
         body: JSON.stringify(expenseData)
     })
@@ -595,7 +603,9 @@ function updateExpense(expenseId, editExpenseForm) {
         })
         .catch(error => {
             console.error('Error creating expense:', error);
-            Utils.showNotificationMessage('Unable to update the expense. Please ensure all fields are filled out correctly.', "error");
+            Utils.showNotificationMessage(
+                'Unable to update the expense. Please ensure all fields are filled out correctly.',
+                "error");
         });
 }
 
@@ -696,19 +706,6 @@ function addExpenseToTable(expense, table = document.querySelector(SELECTORS.exp
     if (DATA.vanillaDataTableInstance) {
         DATA.vanillaDataTableInstance.insert(newData);
     }
-}
-
-function getCsrfTokenFromForm(form) {
-    if (!form) {
-        return '';
-    }
-
-    let token = form.querySelector(SELECTORS.csrfToken);
-    if (token) {
-        return token.value;
-    }
-
-    return '';
 }
 
 function reinitializeVanillaDataTable() {

@@ -95,3 +95,16 @@ export function showBootstrapModal(modalSelector) {
 
     bsModal.show();
 }
+
+export function getCsrfTokenFromForm(form) {
+    if (!form) {
+        return '';
+    }
+
+    let token = form.querySelector("[name=csrfmiddlewaretoken]");
+    if (token) {
+        return token.value;
+    }
+
+    return '';
+}

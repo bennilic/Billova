@@ -1,4 +1,3 @@
-// keeps track of which "page" of the paginated API results the user is currently requesting
 import {ElementBuilder, ButtonBuilder} from "./builder/builder.js";
 import * as Utils from './utils/utils.js';
 
@@ -69,7 +68,9 @@ function loadMonthlyExpenses(page) {
                 Utils.toggleElementVisibility(SELECTORS.noExpensesCard, true);
             }
 
-            Utils.showNotificationMessage('We were unable to load your monthly expenses. Please try again later.', "error");
+            Utils.showNotificationMessage(
+                'We were unable to load your monthly expenses. Please try again later.',
+                "error");
             console.error('Error fetching monthly expenses:', error);
         });
 }
