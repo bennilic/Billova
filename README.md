@@ -55,6 +55,24 @@ Billova is a personal finance tracking application designed to help users manage
    - Provides an intuitive and responsive user interface.
    - Allows users to scan receipts, manage expenses, and view spending summaries.
 
+## Project Setup locally
+
+### Prerequisites 
+
+A Python version of >3.9 installed.
+
+### Install requirements 
+
+```bash
+pip install -r requirements.txt
+```
+
+### run project
+
+```python
+python manage.py runserver
+```
+
 ## **Usage**
 
 1. **Register an Account**
