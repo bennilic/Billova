@@ -1,0 +1,23 @@
+<div class="modal fade" id="deleteCategoryModal" tabindex="-1" aria-labelledby="deleteCategoryModalTitle">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="deleteCategoryForm" method="post">
+                {% csrf_token %}
+
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteCategoryModalTitle">Delete Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-body-message">Are you sure you want to delete this category?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger confirm-delete-category-btn">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
