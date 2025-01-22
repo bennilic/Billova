@@ -189,135 +189,170 @@ function saveExpense(e) {
         return;
     }
 
-    // Prepare expense data
-    const expenseData = {
-        categories: getCategoriesArrayFromSelectList(createExpenseForm),
-        invoice_date_time: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseDate).value,
-        price: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseValue).value,
-        currency: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseCurrency).value,
-        note: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseNote).value,
-        invoice_issuer: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseIssuer).value
-    };
+    try {
+        // Prepare expense data
+        const expenseData = {
+            categories: getCategoriesArrayFromSelectList(createExpenseForm),
+            invoice_date_time: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseDate).value,
+            price: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseValue).value,
+            currency: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseCurrency).value,
+            note: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseNote).value,
+            invoice_issuer: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseIssuer).value,
+        };
 
-    console.log("Expense data prepared:", expenseData);
+        console.log("Expense data prepared:", expenseData);
 
-    // Validate expense data fields
-    Object.keys(expenseData).forEach(field => {
-        if (!expenseData[field]) {
-            console.warn(`Missing data for field: ${field}`);
-        }
-    });
-
-    // Send data to the API
-    fetch('/api/v1/expenses/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': getCsrfTokenFromForm(createExpenseForm)
-        },
-        body: JSON.stringify(expenseData)
-    })
-        .then(response => {
-            if (!response.ok) {
-                console.error("Failed to create expense. Response status:", response.status);
-                throw new Error(`Failed to create expense: ${response.statusText}`);
+        // Validate expense data fields
+        Object.keys(expenseData).forEach(field => {
+            if (!expenseData[field]) {
+                console.warn(`Missing data for field: ${field}`);
             }
-            return response.json();
-        })
-        .then(data => {
-            console.log("Expense created successfully:", data);
-
-            Utils.closeModal(SELECTORS.createExpenseModal);
-            addExpenseToTable(data);
-            addExpenseToSessionStorage(data);
-            Utils.toggleElementVisibility(SELECTORS.noExpensesCard, false);
-
-            Utils.showNotificationMessage(
-                `Expense added successfully: ${data.price} ${data.currency}`,
-                "success"
-            );
-        })
-        .catch(async error => {
-            let errorMessage = "Unable to create the expense.";
-            if (error.response) {
-                try {
-                    const errorDetails = await error.response.json();
-                    errorMessage += ` Details: ${errorDetails.message || error.response.statusText}`;
-                } catch (e) {
-                    console.error("Failed to parse error response:", e);
-                }
-            }
-            console.error("Error creating expense:", error);
-            Utils.showNotificationMessage(errorMessage, "error");
         });
+
+        // Send data to the API
+        fetch('/api/v1/expenses/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCsrfTokenFromForm(createExpenseForm),
+            },
+            body: JSON.stringify(expenseData),
+        })
+            .then(response => {
+                if (!response.ok) {
+                    console.error("Failed to create expense. Response status:", response.status);
+                    throw new Error(`Failed to create expense: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Expense created successfully:", data);
+
+                Utils.closeModal(SELECTORS.createExpenseModal);
+                addExpenseToTable(data);
+                addExpenseToSessionStorage(data);
+                Utils.toggleElementVisibility(SELECTORS.noExpensesCard, false);
+
+                Utils.showNotificationMessage(
+                    `Expense added successfully: ${data.price} ${data.currency}`,
+                    "success"
+                );
+            })
+            .catch(async error => {
+                let errorMessage = "Unable to create the expense.";
+                console.error("Error occurred during expense creation:", error);
+
+                if (error.response) {
+                    try {
+                        const errorDetails = await error.response.json();
+                        errorMessage += ` Details: ${errorDetails.message || error.response.statusText}`;
+                    } catch (e) {
+                        console.error("Failed to parse error response:", e);
+                    }
+                }
+                Utils.showNotificationMessage(errorMessage, "error");
+            });
+    } catch (error) {
+        console.error("Unexpected error during saveExpense execution:", error);
+        Utils.showNotificationMessage(
+            "An unexpected error occurred while creating the expense. Please try again later.",
+            "error"
+        );
+    }
 }
 
 function saveOCRExpense(e) {
-    console.log('OCR Expense');
+    console.log('Starting OCR Expense creation.');
     const createOCRExpenseForm = document.querySelector(SELECTORS.createOCRExpenseForm);
-    // make sure the required fields are fulfilled
-    if (!createOCRExpenseForm || !createOCRExpenseForm.checkValidity()) {
+
+    if (!createOCRExpenseForm) {
+        console.error('OCR expense form not found.');
+        Utils.showNotificationMessage('Error: Unable to find the OCR expense form.', "error");
+        return;
+    }
+
+    // Validate the form
+    if (!createOCRExpenseForm.checkValidity()) {
         createOCRExpenseForm.classList.add(DATA.bootstrapFormValidated);
+        console.warn('OCR expense form validation failed.');
+        Utils.showNotificationMessage('Please fill out all required fields correctly.', "error");
         return;
     }
 
     const ocrFileUploadInput = createOCRExpenseForm.querySelector(SELECTORS.createOCRFormFields.ocrFileUpload);
     if (!ocrFileUploadInput) {
-        console.log('File upload input not found');
+        console.error('File upload input not found in OCR form.');
+        Utils.showNotificationMessage('Error: File upload input is missing.', "error");
         return;
     }
 
     const ocrFileUpload = ocrFileUploadInput.files[0];
     if (!ocrFileUpload) {
+        console.warn('No file uploaded.');
         Utils.showNotificationMessage('Please upload an image file.', "error");
         return;
     }
 
-    // disable the button to not allow the user to upload the same file again
-    // while the current one is still being processed
-    toggleSaveOCRExpenseButtonState(true);
+    try {
+        // Disable the button to prevent multiple submissions
+        toggleSaveOCRExpenseButtonState(true);
 
-    // JSON sent to the API
-    const formData = new FormData();
-    formData.append('image', ocrFileUpload);
+        // Prepare the form data
+        const formData = new FormData();
+        formData.append('image', ocrFileUpload);
 
-    fetch('/api/v1/expenses/ocr/', {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': getCsrfTokenFromForm(createOCRExpenseForm)
-        },
-        body: formData
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to create expense ' + response.statusText);
-            }
+        console.log('Sending OCR expense data to the server.');
 
-            return response.json();
+        // Send data to the API
+        fetch('/api/v1/expenses/ocr/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCsrfTokenFromForm(createOCRExpenseForm)
+            },
+            body: formData
         })
-        .then(data => {
+            .then(response => {
+                if (!response.ok) {
+                    console.error(`Failed to create OCR expense. Status: ${response.status}`);
+                    throw new Error(`Failed to create OCR expense: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('OCR Expense created successfully:', data);
 
-            addExpenseToTable(data);
-            Utils.toggleElementVisibility(SELECTORS.noExpensesCard, false);
-            Utils.showNotificationMessage('Expense added successfully', "success");
+                addExpenseToTable(data);
+                Utils.toggleElementVisibility(SELECTORS.noExpensesCard, false);
+                Utils.showNotificationMessage('OCR Expense added successfully.', "success");
 
-            // re-enable the submit button
-            toggleSaveOCRExpenseButtonState(false);
+                // Reset the input field
+                ocrFileUploadInput.value = '';
+            })
+            .catch(error => {
+                console.error('Error during OCR expense creation:', error);
+                Utils.showNotificationMessage(
+                    'Unable to create the OCR expense. Please try again later or create it manually.',
+                    "error"
+                );
 
-            // reset the input field
-            ocrFileUploadInput.value = '';
+                // Show the manual expense creation modal as a fallback
+                Utils.showBootstrapModal(SELECTORS.createExpenseModal);
+            })
+            .finally(() => {
+                // Re-enable the submit button
+                toggleSaveOCRExpenseButtonState(false);
+            });
 
-        })
-        .catch(error => {
-            console.error('Error creating expense:', error);
+    } catch (error) {
+        console.error('Unexpected error during OCR expense creation:', error);
+        Utils.showNotificationMessage(
+            'An unexpected error occurred while processing the OCR expense. Please try again later.',
+            "error"
+        );
 
-            // re-enable the submit button
-            toggleSaveOCRExpenseButtonState(false);
-            Utils.showNotificationMessage('Unable to create the expense. You can create the expense manually.', "error");
-
-            // show the modal for manual creation
-            Utils.showBootstrapModal(SELECTORS.createExpenseModal);
-        });
+        // Re-enable the button to allow retry
+        toggleSaveOCRExpenseButtonState(false);
+    }
 }
 
 function toggleSaveOCRExpenseButtonState(disable = false) {
@@ -565,25 +600,54 @@ function updateExpense(expenseId, editExpenseForm) {
 }
 
 function addExpensesListToTable(expenses) {
-    const expensesTable = document.querySelector(SELECTORS.expenseTable);
-    if (!expensesTable) {
-        Utils.toggleElementVisibility(SELECTORS.noExpensesCard, true);
-        throw new Error("No expenses table found");
-    }
+    try {
+        console.log("Initializing the addition of expenses to the table.");
 
-    if (!expenses) {
-        Utils.toggleElementVisibility(SELECTORS.noExpensesCard, true);
-        throw new Error("List with expenses not provided");
-    }
+        const expensesTable = document.querySelector(SELECTORS.expenseTable);
+        if (!expensesTable) {
+            console.error("Expenses table not found.");
+            Utils.toggleElementVisibility(SELECTORS.noExpensesCard, true);
+            Utils.showNotificationMessage("Error: Unable to find the expenses table.", "error");
+            throw new Error("No expenses table found.");
+        }
 
-    if (!expenses.length) {
-        Utils.toggleElementVisibility(SELECTORS.noExpensesCard, true);
-        return;
-    }
+        if (!expenses || !Array.isArray(expenses)) {
+            console.warn("No valid expenses list provided.");
+            Utils.toggleElementVisibility(SELECTORS.noExpensesCard, true);
+            Utils.showNotificationMessage("Error: No expenses data available.", "error");
+            throw new Error("List of expenses is not provided or invalid.");
+        }
 
-    expenses.forEach(expense => {
-        addExpenseToTable(expense);
-    });
+        if (!expenses.length) {
+            console.log("No expenses to display.");
+            Utils.toggleElementVisibility(SELECTORS.noExpensesCard, true);
+            Utils.showNotificationMessage("No expenses to display.", "info");
+            return;
+        }
+
+        console.log(`Adding ${expenses.length} expenses to the table.`);
+        expenses.forEach(expense => {
+            try {
+                console.log(`Adding expense with ID: ${expense.id}`);
+                addExpenseToTable(expense);
+            } catch (expenseError) {
+                console.error(`Error adding expense with ID: ${expense.id}`, expenseError);
+                Utils.showNotificationMessage(
+                    `Failed to add expense with ID: ${expense.id}. Please try again.`,
+                    "error"
+                );
+            }
+        });
+
+        console.log("All expenses have been added to the table successfully.");
+
+    } catch (error) {
+        console.error("Error in addExpensesListToTable:", error);
+        Utils.showNotificationMessage(
+            "An unexpected error occurred while displaying expenses. Please try again later.",
+            "error"
+        );
+    }
 }
 
 function addExpenseToTable(expense, table = document.querySelector(SELECTORS.expenseTable)) {
