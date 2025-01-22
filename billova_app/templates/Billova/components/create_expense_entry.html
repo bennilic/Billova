@@ -28,14 +28,8 @@
 
                     <div class="mb-3">
                         <label for="expenseCurrency" class="form-label">Currency</label>
-                        <select id="expenseCurrency" name="expenseCurrency" class="form-select">
-                            {% for currency in currencies %}
-                                <option value="{{ currency.code }}"
-                                        {% if user_settings and user_settings.currency == currency.code %}selected{% endif %}>
-                                    {{ currency.code }} - {{ currency.name }}
-                                </option>
-                            {% endfor %}
-                        </select>
+                        <input type="text" id="expenseCurrency" class="form-control" name="expenseCurrency"
+                               value="{{ user_settings.currency }}" readonly/>
                     </div>
 
                     <div class="mb-3">
