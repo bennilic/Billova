@@ -134,7 +134,7 @@ function onCreateExpenseModalShown(formSelector) {
  * @param callback a callback to be called after successful REST request, default is undefined
  */
 function fetchAndUpdateCategoriesList(form, callback = undefined) {
-    debugger
+
     if (!form) {
         logger.error("The categories select list cannot be updated for the form " + form);
         return;
