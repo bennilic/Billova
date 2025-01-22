@@ -53,7 +53,7 @@ class ExpenseViewSet(viewsets.ModelViewSet):
             try:
                 logger.info("Starting OCR processing")
                 image = serializer.validated_data['image']
-                receipt = Receipt(image.file.getvalue())
+                receipt = Receipt(image.file.read())
                 receipt.analyze()
 
                 with transaction.atomic():
