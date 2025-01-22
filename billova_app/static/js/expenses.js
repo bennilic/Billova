@@ -183,7 +183,7 @@ function addCategoriesToSelectList(category, form) {
 }
 
 function setupDomEvents() {
-    logger.info("Setting up DOM events.");
+    logger.debug("Setting up DOM events.");
 
     const createEntryModal = document.querySelector(SELECTORS.createExpenseModal);
     if (createEntryModal) {
@@ -268,7 +268,7 @@ function saveExpense(e) {
                 return response.json();
             })
             .then(data => {
-                logger.info("Expense created successfully:", data);
+                logger.debug("Expense created successfully:", data);
 
                 Utils.closeModal(SELECTORS.createExpenseModal);
                 addExpenseToTable(data);
@@ -343,7 +343,7 @@ function saveOCRExpense(e) {
         const formData = new FormData();
         formData.append('image', ocrFileUpload);
 
-        logger.info('Sending OCR expense data to the server.');
+        logger.debug('Sending OCR expense data to the server.');
 
         // Send data to the API
         fetch('/api/v1/expenses/ocr/', {
@@ -643,7 +643,7 @@ function updateExpense(expenseId, editExpenseForm) {
 
 function addExpensesListToTable(expenses) {
     try {
-        logger.info("Initializing the addition of expenses to the table.");
+        logger.debug("Initializing the addition of expenses to the table.");
 
         const expensesTable = document.querySelector(SELECTORS.expenseTable);
         if (!expensesTable) {
@@ -681,7 +681,7 @@ function addExpensesListToTable(expenses) {
             }
         });
 
-        logger.info("All expenses have been added to the table successfully.");
+        logger.debug("All expenses have been added to the table successfully.");
 
     } catch (error) {
         logger.error("Error in addExpensesListToTable:", error);
