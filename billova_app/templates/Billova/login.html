@@ -1,10 +1,57 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Login</title>
-</head>
-<body>
+{% extends "Billova/layout.html" %}
+{% load widget_tweaks %}
 
-</body>
-</html>
+{% block title %}Login{% endblock %}
+
+{% block content %}
+    <div class="container d-flex align-items-center vh-100">
+        <div class="row justify-content-center w-100">
+            <div class="col-md-6 col-lg-4">
+                <!-- Toast Container (Above Login Title) -->
+                {% if form.errors %}
+                    <div class="toast align-items-center text-bg-danger border-0 mb-3" role="alert"
+                         aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                <ul class="mb-0">
+                                    {% for field, errors in form.errors.items %}
+                                        {% for error in errors %}
+                                            <li>{{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                                    aria-label="Close"></button>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Login Form -->
+                <h1 class="text-center mb-4">Login</h1>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group mb-3">
+                        <label for="username" class="form-label">Username | Email</label>
+                        {{ form.username|add_class:"form-control" }}
+                        {{ form.username.errors }}
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        {{ form.password|add_class:"form-control" }}
+                        {{ form.password.errors }}
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Login
+                    </button>
+                </form>
+                <p class="text-center mt-3">
+                    Don’t have an account? <a href="{% url 'signup' %}" class="text-primary">Sign up</a>
+                </p>
+                <p class="text-center mt-1">
+                    <a href="{% url 'password_reset' %}" class="text-muted">Forgot your password?</a>
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

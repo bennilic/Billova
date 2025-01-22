@@ -1,96 +1,95 @@
-{% comment %}
-user
-    Account overview
-    Account settings
-
-Expenses
-    Categories
-
-Authentication (only if user is not logged in){% endcomment %}
-
 <aside class="aside" id="sidenav-lg">
     <nav class="navbar navbar-expand-xl navbar-vertical">
         <div class="container-lg">
             <!-- Brand -->
             <a class="navbar-brand fs-5 fw-bold px-xl-3 mb-xl-4" href="{% url 'home' %}">
-                <i class="bi bi-house me-1"></i> Home
+                <i class="bi bi-house me-1"></i> Billova
             </a>
 
-            <!-- User -->
-            <div class="ms-auto d-xl-none">
-                <div class="dropdown my-n2">
-                    <a class="btn btn-link d-inline-flex align-items-center dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <span class="avatar avatar-sm avatar-status avatar-status-success me-3">
-                  <img class="avatar-img" src="./assets/img/photos/photo-6.jpg" alt="...">
-                </span>
-                        John Williams
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#">Account</a></li>
-                        <li><a class="dropdown-item" href="#">Change password</a></li>
-                        <li>
-                            <hr class="dropdown-divider">
-                        </li>
-                        <li><a class="dropdown-item" href="#">Sign out</a></li>
-                    </ul>
-                </div>
-            </div>
 
-            <!-- Toggler -->
-            <button class="navbar-toggler ms-3" type="button" data-bs-toggle="collapse" data-bs-target="#sidenavLargeCollapse" aria-controls="sidenavLargeCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <!-- Toggle Button -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#sidenavLargeCollapse" aria-controls="sidenavLargeCollapse" aria-expanded="false"
+                    aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
-            <!-- Collapse -->
+            <!-- Collapsible Content -->
             <div class="collapse navbar-collapse" id="sidenavLargeCollapse">
-                <!-- Search -->
-                <div class="input-group d-xl-none my-4 my-xl-0">
-                    <input class="form-control" id="topnavSearchInputMobile" type="search" placeholder="Search" aria-label="Search" aria-describedby="navbarSearchMobile">
-                    <span class="input-group-text" id="navbarSearchMobile">
-                <span class="material-symbols-outlined"> search </span>
-              </span>
-                </div>
-
                 <!-- Nav -->
                 <nav class="navbar-nav nav-pills mb-7">
-                    <!-- User nav item-->
-                    <div class="nav-item">
-                        <a class="nav-link active" href="#" data-bs-toggle="collapse" data-bs-target="#user" role="button" aria-expanded="false" aria-controls="user">
-                            <i class="bi bi-person me-1"></i> User
-                        </a>
-                        <div class="collapse show" id="user">
-                            <nav class="nav nav-pills">
-                                <a class="nav-link active" href="#">Account Overview</a>
-                                <a class="nav-link " href="#">Account Settings</a>
-                            </nav>
+                    {% if user.is_authenticated %}
+                        <!-- User nav item-->
+                        <div class="nav-item">
+                            <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#user" role="button"
+                               aria-expanded="false" aria-controls="user">
+                                <i class="bi bi-person me-1"></i> User: Logged in as &nbsp;
+                                <strong>{{ user.username }}</strong>
+                            </a>
+                            <div class="collapse" id="user">
+                                <nav class="nav nav-pills">
+                                    <a class="nav-link" href="{% url 'account_overview' %}">Account Overview</a>
+                                    <a class="nav-link" href="{% url 'account_settings' %}">Account Settings</a>
+                                </nav>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Expenses nav item-->
-                    <div class="nav-item">
-                        <a class="nav-link " href="#" data-bs-toggle="collapse" data-bs-target="#expenses" role="button" aria-expanded="false" aria-controls="expenses">
-                            <i class="bi bi-cash me-1"></i> Expenses
-                        </a>
-                        <div class="collapse " id="expenses">
-                            <nav class="nav nav-pills">
-                                <a class="nav-link " href="#">Categories</a>
-                            </nav>
+                        <!-- Expenses nav item-->
+                        <div class="nav-item">
+                            <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#expenses"
+                               role="button" aria-expanded="false" aria-controls="expenses">
+                                <i class="bi bi-cash me-1"></i> Expenses
+                            </a>
+                            <div class="collapse" id="expenses">
+                                <nav class="nav nav-pills">
+                                    <a class="nav-link" href="{% url 'categories' %}">Categories</a>
+                                    <a class="nav-link" href="{% url 'expensesOverview' %}">Overview</a>
+                                    <a class="nav-link" href="{% url 'monthlyExpenses' %}">Monthly Expenses</a>
+                                </nav>
+                            </div>
                         </div>
-                    </div>
+                    {% endif %}
 
-                    <!-- Authentication -->
-                    <div class="nav-item">
-                        <a class="nav-link " href="#" data-bs-toggle="collapse" data-bs-target="#authentication" role="button" aria-expanded="false" aria-controls="authentication">
+                    <!-- Logout -->
+                    {% if user.is_authenticated %}
+                        <div class="nav-item"> <!-- Ensures left alignment -->
+                            <form method="post" action="{% url 'logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger d-block w-100 text-start">
+                                    <i class="bi bi-box-arrow-left me-1"></i> Logout
+                                </button>
+                            </form>
+                        </div>
+                    {% else %}
+                        <!-- Authentication -->
+                        <div class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="collapse" data-bs-target="#authentication"
+                           role="button" aria-expanded="false" aria-controls="authentication">
                             <i class="bi bi-check-circle me-1"></i> Authentication
                         </a>
                         <div class="collapse" id="authentication">
-                            <nav class="nav nav-pills">
-                                <a class="nav-link " href="#">Sign in</a>
-                                <a class="nav-link " href="#">Sign up</a>
-                                <a class="nav-link " href="#">Password reset</a>
-                            </nav>
-                        </div>
+                        <nav class="nav nav-pills">
+
+
+
+
+                        <!-- Show Login, Signup, and Password Reset -->
+                        <a class="btn btn-outline-primary w-100 mb-2" href="{% url 'login' %}">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Login
+                        </a>
+                        <a class="btn btn-outline-success w-100 mb-2" href="{% url 'signup' %}">
+                            <i class="bi bi-person-plus me-1"></i> Signup
+                        </a>
+                        <!-- Reset Password functionality is not implemented yet
+                                    <a class="btn btn-outline-secondary w-100" href="{% url 'password_reset' %}">
+                                        <i class="bi bi-key me-1"></i> Password Reset
+                                    </a>!
+                                    -->
+                    {% endif %}
+                    </nav>
                     </div>
+                    </div>
+
                 </nav>
             </div>
         </div>

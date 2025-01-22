@@ -1,7 +1,7 @@
 #Python
 *.idea
 /env
-*/__pycache__/
+**/__pycache__
 
 #PyCharm
 /.idea/*
@@ -11,6 +11,7 @@
 
 # Log file
 *.log
+**logs/
 
 # BlueJ files
 *.ctxt
