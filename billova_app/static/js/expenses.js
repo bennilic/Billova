@@ -688,7 +688,7 @@ function addExpensesListToTable(expenses) {
         if (!expensesTable) {
             logger.error("Expenses table not found.");
             Utils.toggleElementVisibility(SELECTORS.noExpensesCard, true);
-            Utils.showNotificationMessage("Error: Unable to find the expenses table.", "error");
+            Utils.showNotificationMessage("Error loading the table.", "error");
             throw new Error("No expenses table found.");
         }
 
@@ -707,7 +707,6 @@ function addExpensesListToTable(expenses) {
         logger.debug(`Adding ${expenses.length} expenses to the table.`);
         expenses.forEach(expense => {
             try {
-                logger.debug(`Adding expense with ID: ${expense.id}`);
                 addExpenseToTable(expense);
             } catch (expenseError) {
                 logger.error(`Error adding expense with ID: ${expense.id}`, expenseError);
