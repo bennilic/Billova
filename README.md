@@ -61,7 +61,13 @@ Billova is a personal finance tracking application designed to help users manage
 
 A Python version of >3.9 installed.
 
+### Clone Project 
+
+git clone [https://github.com/bennilic/Billova/e](https://github.com/bennilic/Billova.git) and switch to main branch.
+
 ### Install requirements 
+
+Install the pip requirements for all the packages used by our project.
 
 ```bash
 pip install -r requirements.txt
