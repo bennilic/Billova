@@ -2,6 +2,8 @@ import * as Utils from './utils/utils.js';
 import {getCsrfTokenFromForm} from './utils/utils.js';
 import {ButtonBuilder, ElementBuilder} from "./builder/builder.js";
 
+const log_level = LogLevel.ERROR
+
 const LogLevel = {
     DEBUG: 4,
     INFO: 3,
@@ -11,37 +13,65 @@ const LogLevel = {
 };
 
 class Logger {
-    constructor(level = LogLevel.DEBUG) {
+    constructor(level = log_level, logEndpoint = "/api/v1/logs/") {
         this.level = level;
+        this.logEndpoint = logEndpoint;
+    }
+
+    sendLog(level, message, extra = {}) {
+        const payload = {
+            level,
+            message,
+            extra,
+        };
+
+        // Fetch the CSRF token from the meta tag
+        const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        fetch(this.logEndpoint, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                'X-CSRFToken': token,
+
+            },
+            body: JSON.stringify(payload),
+        }).catch(err => {
+            console.error("Failed to send log to server:", err);
+        });
     }
 
     debug(...args) {
         if (this.level >= LogLevel.DEBUG) {
             console.debug("[DEBUG]", ...args);
+            this.sendLog("DEBUG", args.join(" "));
         }
     }
 
     info(...args) {
         if (this.level >= LogLevel.INFO) {
             console.info("[INFO]", ...args);
+            this.sendLog("INFO", args.join(" "));
         }
     }
 
     warn(...args) {
         if (this.level >= LogLevel.WARN) {
             console.warn("[WARN]", ...args);
+            this.sendLog("WARNING", args.join(" "));
         }
     }
 
     error(...args) {
         if (this.level >= LogLevel.ERROR) {
             console.error("[ERROR]", ...args);
+            this.sendLog("ERROR", args.join(" "));
         }
     }
 }
 
 // Initialize logger with desired level
-const logger = new Logger(LogLevel.WARN);
+const logger = new Logger(log_level);
 
 const SELECTORS = {
     expenseTable: '#expensesTable',

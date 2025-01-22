@@ -24,6 +24,7 @@ urlpatterns = [
     # API
     path('api/v1/', include(router.urls), ),
     path('api/auth/', include('rest_framework.urls')),
+    path("api/v1/logs/", api_views.FrontendLogView.as_view(), name="log_frontend"),
 
     # Home
     path('', homepage.HomePageView.as_view(), name='index'),

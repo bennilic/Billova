@@ -9,6 +9,7 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from billova_app.models import Expense, Category, UserSettings
 from billova_app.ocr.receipt import Receipt
@@ -171,3 +172,39 @@ class MonthlyExpensesViewSet(viewsets.ViewSet):
             logger.error(f"Failed to fetch monthly expenses for user {user}: {e}")
             return Response({'detail': 'Failed to fetch monthly expenses'},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class FrontendLogView(APIView):
+    """
+    API view to handle logs sent from the frontend.
+    """
+
+    def post(self, request, *args, **kwargs):
+        """
+        Handle POST requests to log frontend messages.
+        """
+        try:
+            data = request.data  # Automatically parses JSON in DRF
+            level = data.get("level", "INFO").upper()
+            message = data.get("message", "No message provided")
+            extra = data.get("extra", {})
+
+            # Log the message at the appropriate level
+            if level == "DEBUG":
+                logger.debug(message, extra=extra)
+            elif level == "INFO":
+                logger.info(message, extra=extra)
+            elif level == "WARNING":
+                logger.warning(message, extra=extra)
+            elif level == "ERROR":
+                logger.error(message, extra=extra)
+            elif level == "CRITICAL":
+                logger.critical(message, extra=extra)
+            else:
+                logger.info(message, extra=extra)
+
+            return Response({"status": "success"}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            logger.error(f"Failed to log frontend message: {e}")
+            return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
