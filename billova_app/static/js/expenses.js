@@ -740,8 +740,6 @@ function addExpenseToTable(expense, table = document.querySelector(SELECTORS.exp
         "Actions": actionsContainer.build().outerHTML
     }];
 
-    // Use the DataTable's insert method to add the data
-    logger.info('Data being added to DataTable:', newData); // <-- Add this
     if (DATA.vanillaDataTableInstance) {
         DATA.vanillaDataTableInstance.insert(newData);
     }
