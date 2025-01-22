@@ -66,7 +66,7 @@ class SignupView(View):
                 login(request, user, backend=backend)
                 logger.info("User logged in successfully: %s", user.username)
 
-                return redirect('home')  # Redirect to the homepage
+                return redirect('expensesOverview')  # Redirect to the homepage
 
             except Exception as e:
                 # Log unexpected errors

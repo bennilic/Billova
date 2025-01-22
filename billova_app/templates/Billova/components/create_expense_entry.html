@@ -29,6 +29,12 @@
                     </div>
 
                     <div class="mb-3">
+                        <label for="expenseCurrency" class="form-label">Currency</label>
+                        <input type="text" id="expenseCurrency" class="form-control" name="expenseCurrency"
+                               value="{{ user_settings.currency }}" readonly/>
+                    </div>
+
+                    <div class="mb-3">
                         <label for="expenseDate" class="form-label">Date</label>
                         <input type="date" id="expenseDate" class="form-control" name="expenseDate" min="2000-01-01"
                                required/>
