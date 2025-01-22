@@ -1,5 +1,6 @@
 import logging
 
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
@@ -20,7 +21,7 @@ from billova_app.serializers import ExpenseSerializer, CategorySerializer, UserS
 logger = logging.getLogger(__name__)
 
 
-class ExpenseViewSet(viewsets.ModelViewSet):
+class ExpenseViewSet(LoginRequiredMixin, viewsets.ModelViewSet):
     """
     This ViewSet automatically provides `list`, `create`, `retrieve`, `update`, and `destroy` actions.
     """
@@ -85,7 +86,7 @@ class ExpenseViewSet(viewsets.ModelViewSet):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(LoginRequiredMixin, viewsets.ModelViewSet):
     """
     This ViewSet automatically provides `list`, `create`, `retrieve`, `update`, and `destroy` actions.
     """
@@ -112,7 +113,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
             raise e
 
 
-class UserSettingsViewSet(viewsets.ModelViewSet):
+class UserSettingsViewSet(LoginRequiredMixin, viewsets.ModelViewSet):
     """
     This ViewSet automatically provides `list`, `create`, `retrieve`, `update`, and `destroy` actions.
     """
@@ -129,7 +130,7 @@ class UserSettingsViewSet(viewsets.ModelViewSet):
             raise e
 
 
-class MonthlyExpensesViewSet(viewsets.ViewSet):
+class MonthlyExpensesViewSet(LoginRequiredMixin, viewsets.ViewSet):
     """
     A ViewSet for listing monthly expenses grouped by months.
     """
@@ -175,7 +176,7 @@ class MonthlyExpensesViewSet(viewsets.ViewSet):
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class FrontendLogView(APIView):
+class FrontendLogView(APIView, LoginRequiredMixin):
     """
     API view to handle logs sent from the frontend.
     """

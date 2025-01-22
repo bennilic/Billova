@@ -1,6 +1,7 @@
 import logging
 
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView
 
 from billova_app.models import UserSettings
@@ -8,7 +9,7 @@ from billova_app.models import UserSettings
 logger = logging.getLogger(__name__)
 
 
-class ExpensesOverview(TemplateView):
+class ExpensesOverview(LoginRequiredMixin, TemplateView):
     template_name = "Billova/expenses_overview.html"
 
     def perform_create(self, serializer):
