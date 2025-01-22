@@ -1,4 +1,5 @@
 import * as Utils from './utils/utils.js';
+import {getCsrfTokenFromForm} from './utils/utils.js';
 import {ButtonBuilder, ElementBuilder} from "./builder/builder.js";
 
 const LogLevel = {
@@ -252,12 +253,14 @@ function saveExpense(e) {
 
         logger.debug("Prepared expense data:", expenseData);
 
+        const csrfToken = getCsrfTokenFromForm(createExpenseForm);
+
         // Send data to the API
         fetch('/api/v1/expenses/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRFToken': getCsrfTokenFromForm(createExpenseForm),
+                'X-CSRFToken': csrfToken,
             },
             body: JSON.stringify(expenseData),
         })
