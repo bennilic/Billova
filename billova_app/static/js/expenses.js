@@ -103,7 +103,7 @@ function onCreateExpenseModalShown(formSelector) {
  */
 function fetchAndUpdateCategoriesList(form, callback = undefined) {
     if (!form) {
-        console.log("The categories select list cannot be updated for the form " + form);
+        logger.log("The categories select list cannot be updated for the form " + form);
         return;
     }
 
@@ -220,7 +220,7 @@ function setupDomEvents() {
 function saveExpense(e) {
     const createExpenseForm = document.querySelector(SELECTORS.createExpenseForm);
     if (!createExpenseForm) {
-        console.error("Create expense form not found.");
+        logger.error("Create expense form not found.");
         Utils.showNotificationMessage("Error: Unable to find the expense form.", "error");
         return;
     }
@@ -229,7 +229,7 @@ function saveExpense(e) {
     if (!createExpenseForm.checkValidity()) {
         createExpenseForm.classList.add(DATA.bootstrapFormValidated);
         Utils.showNotificationMessage("Please fill out all required fields correctly.", "error");
-        console.warn("Form validation failed.");
+        logger.warn("Form validation failed.");
         return;
     }
 
@@ -247,7 +247,7 @@ function saveExpense(e) {
         // Validate expense data fields
         Object.keys(expenseData).forEach(field => {
             if (!expenseData[field]) {
-                console.warn(`Missing data for field: ${field}`);
+                logger.warn(`Missing data for field: ${field}`);
             }
         });
 
@@ -546,7 +546,7 @@ function deleteExpense(e) {
 
         })
         .catch(error => {
-            console.error(error);
+            logger.error(error);
             Utils.showNotificationMessage(errorMessage, "error");
         });
 }
