@@ -28,13 +28,13 @@
 
                     <div class="mb-3">
                         <label for="expenseCurrency" class="form-label">Currency</label>
-                        <select id="expenseCurrency" class="form-select" name="expenseCurrency" required>
-                            <option value="USD">USD - US Dollar</option>
-                            <option value="EUR">EUR - Euro</option>
-                            <option value="GBP">GBP - British Pound</option>
-                            <option value="JPY">JPY - Japanese Yen</option>
-                            <option value="RON">RON - Romanian Leu</option>
-                            <option value="TRY">TRY - Turkish Lira</option>
+                        <select id="expenseCurrency" name="expenseCurrency" class="form-select">
+                            {% for currency in currencies %}
+                                <option value="{{ currency.code }}"
+                                        {% if user_settings and user_settings.currency == currency.code %}selected{% endif %}>
+                                    {{ currency.code }} - {{ currency.name }}
+                                </option>
+                            {% endfor %}
                         </select>
                     </div>
 

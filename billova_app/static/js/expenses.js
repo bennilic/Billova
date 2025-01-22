@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
     populateExpensesTable();
 });
 
+
 function onCreateExpenseModalShown(formSelector) {
     // no need to recreate the categories list if already done. This happens when the user opened the
     // modal dialog before
@@ -99,6 +100,7 @@ function fetchAndUpdateCategoriesList(form, callback = undefined) {
             Utils.showNotificationMessage('We were unable to load your categories list. Please try again later.', "error");
         });
 }
+
 
 function populateCategoriesSelectList(categories, form) {
     if (!categories) {
@@ -719,33 +721,3 @@ function getCategoriesArrayFromSelectList(form) {
         name: value
     }));
 }
-
-function populateCurrencyDropdown(form) {
-    const currencyDropdown = form.querySelector(SELECTORS.createEditFormFields.expenseCurrency);
-    if (!currencyDropdown) {
-        console.error("Currency dropdown not found.");
-        return;
-    }
-
-    const validCurrencies = [
-        {code: "USD", name: "US Dollar"},
-        {code: "EUR", name: "Euro"},
-        {code: "GBP", name: "British Pound"},
-        {code: "JPY", name: "Japanese Yen"},
-        {code: "TRY", name: "Turkish Lira"},
-        {code: "RON", name: "Romanian Leu"},
-
-
-        // Add more currencies here
-    ];
-
-    validCurrencies.forEach(currency => {
-        const option = document.createElement("option");
-        option.value = currency.code;
-        option.textContent = `${currency.code} - ${currency.name}`;
-        currencyDropdown.appendChild(option);
-    });
-}
-
-// Call this function where applicable:
-populateCurrencyDropdown(createExpenseForm);
