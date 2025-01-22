@@ -1,6 +1,46 @@
 import * as Utils from './utils/utils.js';
 import {ButtonBuilder, ElementBuilder} from "./builder/builder.js";
 
+const LogLevel = {
+    DEBUG: 4,
+    INFO: 3,
+    WARN: 2,
+    ERROR: 1,
+    OFF: 0,
+};
+
+class Logger {
+    constructor(level = LogLevel.DEBUG) {
+        this.level = level;
+    }
+
+    debug(...args) {
+        if (this.level >= LogLevel.DEBUG) {
+            console.debug("[DEBUG]", ...args);
+        }
+    }
+
+    info(...args) {
+        if (this.level >= LogLevel.INFO) {
+            console.info("[INFO]", ...args);
+        }
+    }
+
+    warn(...args) {
+        if (this.level >= LogLevel.WARN) {
+            console.warn("[WARN]", ...args);
+        }
+    }
+
+    error(...args) {
+        if (this.level >= LogLevel.ERROR) {
+            console.error("[ERROR]", ...args);
+        }
+    }
+}
+
+// Initialize logger with desired level
+const logger = new Logger(LogLevel.WARN);
 
 const SELECTORS = {
     expenseTable: '#expensesTable',
@@ -143,6 +183,8 @@ function addCategoriesToSelectList(category, form) {
 }
 
 function setupDomEvents() {
+    logger.info("Setting up DOM events.");
+
     const createEntryModal = document.querySelector(SELECTORS.createExpenseModal);
     if (createEntryModal) {
         createEntryModal.addEventListener('shown.bs.modal', (e) => {
@@ -200,14 +242,14 @@ function saveExpense(e) {
             invoice_issuer: createExpenseForm.querySelector(SELECTORS.createEditFormFields.expenseIssuer).value,
         };
 
-        console.log("Expense data prepared:", expenseData);
-
         // Validate expense data fields
         Object.keys(expenseData).forEach(field => {
             if (!expenseData[field]) {
                 console.warn(`Missing data for field: ${field}`);
             }
         });
+
+        logger.debug("Prepared expense data:", expenseData);
 
         // Send data to the API
         fetch('/api/v1/expenses/', {
@@ -220,13 +262,13 @@ function saveExpense(e) {
         })
             .then(response => {
                 if (!response.ok) {
-                    console.error("Failed to create expense. Response status:", response.status);
+                    logger.error("Failed to create expense. Status:", response.status);
                     throw new Error(`Failed to create expense: ${response.statusText}`);
                 }
                 return response.json();
             })
             .then(data => {
-                console.log("Expense created successfully:", data);
+                logger.info("Expense created successfully:", data);
 
                 Utils.closeModal(SELECTORS.createExpenseModal);
                 addExpenseToTable(data);
@@ -239,21 +281,21 @@ function saveExpense(e) {
                 );
             })
             .catch(async error => {
+                logger.error("Error occurred during expense creation:", error);
                 let errorMessage = "Unable to create the expense.";
-                console.error("Error occurred during expense creation:", error);
 
                 if (error.response) {
                     try {
                         const errorDetails = await error.response.json();
                         errorMessage += ` Details: ${errorDetails.message || error.response.statusText}`;
                     } catch (e) {
-                        console.error("Failed to parse error response:", e);
+                        logger.error("Failed to parse error response:", e);
                     }
                 }
                 Utils.showNotificationMessage(errorMessage, "error");
             });
     } catch (error) {
-        console.error("Unexpected error during saveExpense execution:", error);
+        logger.error("Unexpected error during saveExpense execution:", error);
         Utils.showNotificationMessage(
             "An unexpected error occurred while creating the expense. Please try again later.",
             "error"
@@ -262,11 +304,11 @@ function saveExpense(e) {
 }
 
 function saveOCRExpense(e) {
-    console.log('Starting OCR Expense creation.');
+    logge.log('Starting OCR Expense creation.');
     const createOCRExpenseForm = document.querySelector(SELECTORS.createOCRExpenseForm);
 
     if (!createOCRExpenseForm) {
-        console.error('OCR expense form not found.');
+        logger.error('OCR expense form not found.');
         Utils.showNotificationMessage('Error: Unable to find the OCR expense form.', "error");
         return;
     }
@@ -274,21 +316,21 @@ function saveOCRExpense(e) {
     // Validate the form
     if (!createOCRExpenseForm.checkValidity()) {
         createOCRExpenseForm.classList.add(DATA.bootstrapFormValidated);
-        console.warn('OCR expense form validation failed.');
+        logger.warn('OCR expense form validation failed.');
         Utils.showNotificationMessage('Please fill out all required fields correctly.', "error");
         return;
     }
 
     const ocrFileUploadInput = createOCRExpenseForm.querySelector(SELECTORS.createOCRFormFields.ocrFileUpload);
     if (!ocrFileUploadInput) {
-        console.error('File upload input not found in OCR form.');
+        logger.error('File upload input not found in OCR form.');
         Utils.showNotificationMessage('Error: File upload input is missing.', "error");
         return;
     }
 
     const ocrFileUpload = ocrFileUploadInput.files[0];
     if (!ocrFileUpload) {
-        console.warn('No file uploaded.');
+        logger.warn('No file uploaded.');
         Utils.showNotificationMessage('Please upload an image file.', "error");
         return;
     }
@@ -301,7 +343,7 @@ function saveOCRExpense(e) {
         const formData = new FormData();
         formData.append('image', ocrFileUpload);
 
-        console.log('Sending OCR expense data to the server.');
+        logger.info('Sending OCR expense data to the server.');
 
         // Send data to the API
         fetch('/api/v1/expenses/ocr/', {
@@ -313,13 +355,13 @@ function saveOCRExpense(e) {
         })
             .then(response => {
                 if (!response.ok) {
-                    console.error(`Failed to create OCR expense. Status: ${response.status}`);
+                    logger.error(`Failed to create OCR expense. Status: ${response.status}`);
                     throw new Error(`Failed to create OCR expense: ${response.statusText}`);
                 }
                 return response.json();
             })
             .then(data => {
-                console.log('OCR Expense created successfully:', data);
+                logger.info('OCR Expense created successfully:', data);
 
                 addExpenseToTable(data);
                 Utils.toggleElementVisibility(SELECTORS.noExpensesCard, false);
@@ -329,7 +371,7 @@ function saveOCRExpense(e) {
                 ocrFileUploadInput.value = '';
             })
             .catch(error => {
-                console.error('Error during OCR expense creation:', error);
+                logger.error('Error during OCR expense creation:', error);
                 Utils.showNotificationMessage(
                     'Unable to create the OCR expense. Please try again later or create it manually.',
                     "error"
@@ -344,7 +386,7 @@ function saveOCRExpense(e) {
             });
 
     } catch (error) {
-        console.error('Unexpected error during OCR expense creation:', error);
+        logger.error('Unexpected error during OCR expense creation:', error);
         Utils.showNotificationMessage(
             'An unexpected error occurred while processing the OCR expense. Please try again later.',
             "error"
@@ -378,7 +420,7 @@ function onDeleteModalShown(e) {
 function onEditExpenseModalShown(e, formSelector) {
     const editForm = document.querySelector(formSelector);
     if (!editForm) {
-        console.log("The given edit form was not found " + editForm);
+        logger.error("The given edit form was not found " + editForm);
         return;
     }
 
@@ -423,11 +465,11 @@ function onEditExpenseModalShown(e, formSelector) {
 
 function prefillInputFieldsOnEditAction(editedExpense, editForm) {
     if (!editedExpense) {
-        console.error("Edited expense is missing.");
+        logger.error("Edited expense is missing.");
         return;
     }
     if (!editForm) {
-        console.error("Edit form is missing.");
+        logger.error("Edit form is missing.");
         return;
     }
 
@@ -501,7 +543,7 @@ function deleteExpense(e) {
 
         })
         .catch(error => {
-            console.error(error);
+            logger.error(error);
             Utils.showNotificationMessage(errorMessage, "error");
         });
 }
@@ -514,7 +556,7 @@ function populateExpensesTable() {
             saveExpensesInSessionStorage(expenses);
         })
         .catch(error => {
-            console.error(error.message);
+            logger.error(error.message);
             Utils.showNotificationMessage('We were unable to load your expense list. Please try again later.', "error");
         });
 }
@@ -594,44 +636,44 @@ function updateExpense(expenseId, editExpenseForm) {
 
         })
         .catch(error => {
-            console.error('Error creating expense:', error);
+            logger.error('Error creating expense:', error);
             Utils.showNotificationMessage('Unable to update the expense. Please ensure all fields are filled out correctly.', "error");
         });
 }
 
 function addExpensesListToTable(expenses) {
     try {
-        console.log("Initializing the addition of expenses to the table.");
+        logger.info("Initializing the addition of expenses to the table.");
 
         const expensesTable = document.querySelector(SELECTORS.expenseTable);
         if (!expensesTable) {
-            console.error("Expenses table not found.");
+            logger.error("Expenses table not found.");
             Utils.toggleElementVisibility(SELECTORS.noExpensesCard, true);
             Utils.showNotificationMessage("Error: Unable to find the expenses table.", "error");
             throw new Error("No expenses table found.");
         }
 
         if (!expenses || !Array.isArray(expenses)) {
-            console.warn("No valid expenses list provided.");
+            logger.warn("No valid expenses list provided.");
             Utils.toggleElementVisibility(SELECTORS.noExpensesCard, true);
             Utils.showNotificationMessage("Error: No expenses data available.", "error");
             throw new Error("List of expenses is not provided or invalid.");
         }
 
         if (!expenses.length) {
-            console.log("No expenses to display.");
+            logger.warn("No expenses to display.");
             Utils.toggleElementVisibility(SELECTORS.noExpensesCard, true);
             Utils.showNotificationMessage("No expenses to display.", "info");
             return;
         }
 
-        console.log(`Adding ${expenses.length} expenses to the table.`);
+        logger.info(`Adding ${expenses.length} expenses to the table.`);
         expenses.forEach(expense => {
             try {
-                console.log(`Adding expense with ID: ${expense.id}`);
+                logger.info(`Adding expense with ID: ${expense.id}`);
                 addExpenseToTable(expense);
             } catch (expenseError) {
-                console.error(`Error adding expense with ID: ${expense.id}`, expenseError);
+                logger.error(`Error adding expense with ID: ${expense.id}`, expenseError);
                 Utils.showNotificationMessage(
                     `Failed to add expense with ID: ${expense.id}. Please try again.`,
                     "error"
@@ -639,10 +681,10 @@ function addExpensesListToTable(expenses) {
             }
         });
 
-        console.log("All expenses have been added to the table successfully.");
+        logger.info("All expenses have been added to the table successfully.");
 
     } catch (error) {
-        console.error("Error in addExpensesListToTable:", error);
+        logger.error("Error in addExpensesListToTable:", error);
         Utils.showNotificationMessage(
             "An unexpected error occurred while displaying expenses. Please try again later.",
             "error"
@@ -692,7 +734,7 @@ function addExpenseToTable(expense, table = document.querySelector(SELECTORS.exp
     }];
 
     // Use the DataTable's insert method to add the data
-    console.log('Data being added to DataTable:', newData); // <-- Add this
+    logger.info('Data being added to DataTable:', newData); // <-- Add this
     if (DATA.vanillaDataTableInstance) {
         DATA.vanillaDataTableInstance.insert(newData);
     }
@@ -714,7 +756,7 @@ function getCsrfTokenFromForm(form) {
 function reinitializeVanillaDataTable() {
     const tableElement = document.querySelector(SELECTORS.expenseTable);
     if (!tableElement) {
-        console.error('Expense table element not found.');
+        logger.error('Expense table element not found.');
         return;
     }
 
@@ -723,7 +765,7 @@ function reinitializeVanillaDataTable() {
     } else {
         DATA.vanillaDataTableInstance = Utils.initializeVanillaDataTable(SELECTORS.expenseTable);
         if (!DATA.vanillaDataTableInstance) {
-            console.error('Failed to initialize Vanilla DataTable.');
+            logger.error('Failed to initialize Vanilla DataTable.');
         }
     }
 }
@@ -735,7 +777,7 @@ function reinitializeVanillaDataTable() {
  */
 function saveExpensesInSessionStorage(expenses) {
     if (!window.sessionStorage) {
-        return console.log("Session storage not supported in your browser.");
+        return logger.warn("Session storage not supported in your browser.");
     }
     window.sessionStorage.setItem(DATA.sessionStorageKey, JSON.stringify(expenses));
 }
@@ -745,7 +787,7 @@ function saveExpensesInSessionStorage(expenses) {
  */
 function addExpenseToSessionStorage(expense) {
     if (!window.sessionStorage) {
-        return console.log("Session storage not supported in your browser.");
+        return logger.warn("Session storage not supported in your browser.");
     }
 
     let currentExpenses = window.sessionStorage.getItem(DATA.sessionStorageKey);
